@@ -4,6 +4,11 @@ This is a laravel casino app, you need to download game packs for it.
 
 You can also join our discord at https://discord.gg/HscTu67FSu and access downloads for games. Games work for both versions. (up to v9 so far).
 
+/////////////////////////////////////////
+https://promex.me/shop/discordoffers/goldsvet-version-9-complete-php-script-laravel-9-php8/
+This is a partner service that offer pre-setup environment for hosting the script you can edit after initial setup. 
+/////////////////////////////////////////
+
 Do not forget to download https://drive.google.com/file/d/1bbRD74BL-f2MOAG4LrBCKlwsYK6qteMj/view 
 And add it to your : 
 storage/app/GeoIP2-City_20201006/ folder The setup assumes regular Laravel setup, with casino folder setup outside your www ( or change index )
