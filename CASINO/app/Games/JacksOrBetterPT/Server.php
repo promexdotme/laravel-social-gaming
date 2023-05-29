@@ -12,13 +12,13 @@ namespace VanguardLTE\Games\JacksOrBetterPT
                 {
                     try
                     {
-                        $checked = new \VanguardLTE\Lib\LicenseDK();
-                        $license_notifications_array = $checked->aplVerifyLicenseDK(null, 0);
-                        if( $license_notifications_array['notification_case'] != 'notification_license_ok' ) 
-                        {
-                            $response = '{"responseEvent":"error","responseType":"error","serverResponse":"Error LicenseDK"}';
-                            exit( $response );
-                        }
+//                         $checked = new \VanguardLTE\Lib\LicenseDK();
+//                         $license_notifications_array = $checked->aplVerifyLicenseDK(null, 0);
+//                         if( $license_notifications_array['notification_case'] != 'notification_license_ok' ) 
+//                         {
+//                             $response = '{"responseEvent":"error","responseType":"error","serverResponse":"Error LicenseDK"}';
+//                             exit( $response );
+//                         }
                         $userId = \Auth::id();
                         if( $userId == null ) 
                         {
