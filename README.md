@@ -4,6 +4,8 @@
 <p><span style="color: #ff0000;"><strong>V10 november 2023 release adds Laravel 10 and PHP 8.2+ support.</strong></span></p>
 <p><span style="color: #ff0000;"><strong>ALSO NOW SUPPORTS PLUGINS LIKE&nbsp;<br />SPORTS BETTING, CRYPTO COMPETITIONS AND STOCKS COMPETITIONS<br />PLUGINS AVAILABLE IN DISCORD DOWNLOADS TOO ONLY FOR SUBSCRIBERS&nbsp;</strong></span></p>
 <p>This is a Laravel casino app. You need to download game packs for it.</p>
+<p>DEMO : <a href="HTTPS://377PLAY.COM">HTTPS://377PLAY.COM</a></p>
+<p><span style="color: #339966;">DEMO DISCLAIMER : demo always goes under updates, tests and db flushing, dont use it as a stable website.</span></p>
 <p>Join our Discord for game downloads (compatible up to v10):</p>
 <p><a href="https://discord.gg/HscTu67FSu">https://discord.gg/HscTu67FSu</a></p>
 <h2>Partner Service</h2>
