@@ -68,10 +68,10 @@ namespace VanguardLTE\Http\Controllers\Web\Backend\Auth
             {
                 $user->update(['town' => $data['city']]);
             }
-            if( $data['country'] == '' ) 
-            {
-                return redirect()->route('backend.auth.login')->withErrors(trans('app.unknown_country'));
-            }
+            // if( $data['country'] == '' ) 
+            // {
+            //     return redirect()->route('backend.auth.login')->withErrors(trans('app.unknown_country'));
+            // }
             if( \VanguardLTE\Lib\Filter::country_filtered($user, $data['country']) ) 
             {
                 return redirect()->route('backend.auth.login')->withErrors(trans('app.blocked_phone_zone'));

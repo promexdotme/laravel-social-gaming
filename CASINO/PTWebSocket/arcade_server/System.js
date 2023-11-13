@@ -1,5 +1,4 @@
-
-  function System(emitter,sessionStorage,serverStorage,utils,queue,timezone) {
+function System(emitter,sessionStorage,serverStorage,utils,queue,timezone) {
 
 var _self = this;   
 var  fs = require('fs');	
@@ -20,7 +19,11 @@ dbConfig[tcf[0]]=tcf[1];
 
 	
 }
-
+const errorMessage1 = '1111';
+const errorMessage2 = '2222';
+const errorMessage3 = '3333';
+const errorMessage4 = '4444';
+const errorMessage5 = '5555';
 /*---------------------------*/
 this.startTimeSystem=0;
 this.startTimeServer=0;
@@ -311,7 +314,7 @@ strLog +="\n";
 fs.writeFileSync('../storage/logs/'+_self.gameName+'_Internal.log', strLog);		
 	
 	
-emitter.emit('CloseSocket');
+emitter.emit('CloseSocket', errorMessage1);
 	
 }
 //End Connection
@@ -379,7 +382,7 @@ desc:'query error.',
 this.InternalErrorLog(JSON.stringify(detailError));	
 await _self.EndConnection();
 
-emitter.emit('CloseSocket');	
+emitter.emit('CloseSocket', errorMessage2);
 
 
 }
@@ -895,36 +898,76 @@ let [rows, fields] = await _self.SendQuery(queryStr);
 return utils.FixNumber(rows[0].count_balance);
 
 };
-//get balance 
- this.GetBalance = async function()
-{
-/*--------------*/
-if(conn.connection._closing){
- await _self.EndConnection();
-await _self.CreateConnection();	
+// Get balance
+
+this.GetBalance = async function() {
+  /*--------------*/
+  if (conn.connection._closing) {
+    await _self.EndConnection();
+    await _self.CreateConnection();
+  }
+  /*-------------*/
+  let queryStr = `SELECT balance FROM \`${_self.Config.prefix}users\` WHERE id=${_self.userId};`;
+///  console.log('Query:', queryStr); // Log the query string
+  
+  let queryResult;
+  
+  try {
+    queryResult = await _self.SendQuery(queryStr);
+//    console.log('Query Result:', queryResult); // Log the query result
+    
+  } catch (error) {
+    console.error("Error in GetBalance function:", error);
+    throw new Error("Error in GetBalance function: " + error.message);
+  }
+
+  if (!Array.isArray(queryResult) || queryResult.length === 0) {
+    console.error("No rows found in GetBalance function11.");
+    throw new Error("No rows found in GetBalance function11.");
+  }
+
+const balance = queryResult[0][0].balance;
+//console.log('Balance:', balance); // Log the balance value
+
+if (typeof balance === 'undefined') {
+  console.error("No balance found in GetBalance function22.");
+  throw new Error("No balance found in GetBalance function22.");
 }
-/*-------------*/
-let queryStr="SELECT balance  FROM `"+_self.Config.prefix+"users` WHERE id="+_self.userId+";  ";
-let [rows, fields] = await _self.SendQuery(queryStr);
 
-return utils.FixNumber(rows[0].balance);
+  if (balance === 0) {
+    console.error("Balance is zero in GetBalance function33.");
+    throw new Error("Balance is zero in GetBalance function33.");
+  }
 
+  return utils.FixNumber(balance);
 };
-//get balance 
- this.GetBalanceB = async function()
-{
-/*--------------*/
-if(conn.connection._closing){
- await _self.EndConnection();
-await _self.CreateConnection();	
-}
-/*-------------*/
-let queryStr="SELECT balance  FROM `"+_self.Config.prefix+"users` WHERE id="+_self.userId+"   FOR UPDATE  ;  ";
-let [rows, fields] = await _self.SendQuery(queryStr);
 
-return utils.FixNumber(rows[0].balance);
 
+
+// Get balance
+this.GetBalanceB = async function() {
+  /*--------------*/
+  if (conn.connection._closing) {
+    await _self.EndConnection();
+    await _self.CreateConnection();
+  }
+  /*-------------*/
+  let queryStr = "SELECT balance FROM `" + _self.Config.prefix + "users` WHERE id=" + _self.userId + " FOR UPDATE;";
+  let [rows, fields] = await _self.SendQuery(queryStr);
+
+  if (!rows || rows.length === 0) {
+    console.error("No rows found in GetBalanceB function.");
+    throw new Error("No rows found in GetBalanceB function.");
+  }
+
+  if (!rows[0].balance) {
+    console.error("No balance found in GetBalanceB function.");
+    throw new Error("No balance found in GetBalanceB function.");
+  }
+
+  return utils.FixNumber(rows[0].balance);
 };
+
 
 
 //get bank 
@@ -1512,17 +1555,18 @@ if(_self.transactionInProgress){
 return;	
 }
 
-var queryStr2="SELECT * FROM `"+_self.Config.prefix+"users` WHERE id="+_self.userId+"; ";
-var [rows2, fields2] = await _self.SendQuery(queryStr2);	
+var queryStr2 = `SELECT * FROM \`${_self.Config.prefix}users\` WHERE id=${_self.userId};`;
+//console.log('Query2:', queryStr2); // Log the query string
 
-var userBlocked=rows2[0].is_blocked;
-var userStatus=rows2[0].status;
+var [rows2, fields2] = await _self.SendQuery(queryStr2);
 
+var userBlocked = rows2[0].is_blocked;
+var userStatus = rows2[0].status;
 
-
-if(rows2[0]==undefined || userBlocked==1 || userStatus=='Banned'){
-emitter.emit('CloseSocket');	
-return;
+if (rows2[0] == undefined || userBlocked == 1 || userStatus == 'Banned') {
+  console.error('User blocked or banned:', rows2[0]);
+  emitter.emit('CloseSocket', errorMessage3);
+  return;
 }
 
 
@@ -1536,13 +1580,14 @@ let queryStr="SELECT active FROM `"+_self.Config.prefix+"subsessions` WHERE user
 let [rows, fields] = await _self.SendQuery(queryStr);
 
 if(rows[0]==undefined || _self.userId==-1 || shopBlocked==1){
-emitter.emit('CloseSocket');	
+emitter.emit('CloseSocket', errorMessage4);
 return;
 }
 
 let sessActive=rows[0]['active'];
 
 let queryStr0="SELECT view FROM `"+_self.Config.prefix+"games` WHERE name = '"+_self.gameName+"' AND shop_id="+_self.shopId+" ;  ";
+//console.log('Query0:', queryStr0); // Log the query string
 let [rows0, fields0] = await _self.SendQuery(queryStr0);
 
 let gameView=rows0[0]['view'];
@@ -1552,7 +1597,7 @@ let gameView=rows0[0]['view'];
 
 
 if(!sessActive || gameView!=1){
-emitter.emit('CloseSocket');	
+emitter.emit('CloseSocket', errorMessage5);	
 }
 	
 }
