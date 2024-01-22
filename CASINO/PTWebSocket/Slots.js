@@ -9,7 +9,7 @@ var serverConfig;
 var Redis = require('ioredis');
 var redis = new Redis();
 
-serverConfig = JSON.parse(fs.readFileSync('../../public_html/socket_config.json', 'utf8'));
+serverConfig = JSON.parse(fs.readFileSync('../../socket_config.json', 'utf8'));
 	
 
 /*----------------------------*/

@@ -1,5 +1,8 @@
 <?php 
-namespace VanguardLTE\Http\Controllers\Web\Backend\Auth
+namespace VanguardLTE\Http\Controllers\Web\Backend\Auth;
+use Illuminate\Support\Facades\Notification;
+use VanguardLTE\Notifications\UserRegistered;
+use Illuminate\Support\Facades\Mail;
 {
     include_once(base_path() . '/app/ShopCore.php');
     include_once(base_path() . '/app/ShopGame.php');
@@ -68,10 +71,10 @@ namespace VanguardLTE\Http\Controllers\Web\Backend\Auth
             {
                 $user->update(['town' => $data['city']]);
             }
-            // if( $data['country'] == '' ) 
-            // {
-            //     return redirect()->route('backend.auth.login')->withErrors(trans('app.unknown_country'));
-            // }
+            if( $data['country'] == '' ) 
+            {
+                return redirect()->route('backend.auth.login')->withErrors(trans('app.unknown_country'));
+            }
             if( \VanguardLTE\Lib\Filter::country_filtered($user, $data['country']) ) 
             {
                 return redirect()->route('backend.auth.login')->withErrors(trans('app.blocked_phone_zone'));
@@ -176,6 +179,18 @@ namespace VanguardLTE\Http\Controllers\Web\Backend\Auth
             $role = \jeremykenedy\LaravelRoles\Models\Role::where('name', '=', 'User')->first();
             $user->attachRole($role);
             event(new \VanguardLTE\Events\User\Registered($user));
+            // Retrieve the register_notify_email from .env, if it's not set, default to null
+$registerNotifyEmail = env('REGISTER_NOTIFY_EMAIL', null);
+
+if (!empty($registerNotifyEmail)) {
+    // Backend notification raw email about every registration
+    Mail::raw('A new user has registered: ' . $user->username, function ($message) use ($user, $registerNotifyEmail) {
+        $message->to($registerNotifyEmail)
+                ->subject('New User Registration');
+    });
+}
+
+
             return redirect('/backend/login')->with('success', trans('app.account_created_login'));
         }
     }

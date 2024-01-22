@@ -75,14 +75,14 @@
             </li>
             @endpermission
 			
-			<!-- @permission('users.manage')
+			@permission('users.manage')
             <li class="{{ Request::is('backend/terminal*') ? 'active' : ''  }}">
                 <a href="{{ url('/backend/terminal') }}">
                    <i class='fa fa-desktop' style='color:red'></i>
                     <span>@lang('app.terminal')</span>
                 </a>
             </li>
-            @endpermission -->
+            @endpermission
 
             @if (
                 auth()->user()->hasRole('admin') ||
@@ -96,32 +96,32 @@
             </li>
 			@endif
 
-            <!-- @permission('users.manage')
+            @permission('users.manage')
             <li class="{{ Request::is('backend/atm*') ? 'active' : ''  }}">
                 <a href="{{ url('/backend/atm') }}">
                     <i class="fa fa-credit-card"></i>
                     <span>@lang('app.atm')</span>
                 </a>
             </li>
-            @endpermission -->
+            @endpermission
 
-            <!-- @permission('users.tree')
+            @permission('users.tree')
             <li class="{{ Request::is('backend/tree*') ? 'active' : ''  }}">
                 <a href="{{ route('backend.user.tree') }}">
                     <i class="fa fa-tree"></i>
                     <span>{{ \VanguardLTE\Role::where('id', auth()->user()->role_id - 1)->first()->name }} @lang('app.tree')</span>
                 </a>
             </li>
-            @endpermission -->
+            @endpermission
 
-            <!-- @permission('shops.manage')
+            @permission('shops.manage')
             <li class="{{ Request::is('backend/shops*') ? 'active' : ''  }}">
                 <a href="{{ route('backend.shop.list') }}">
                     <i class="fa fa-bank"></i>
                     <span>@lang('app.shops')</span>
                 </a>
             </li>
-            @endpermission -->
+            @endpermission
 
             @permission('tournaments.manage')
             @if( !(auth()->check() && auth()->user()->shop_id == 0 ) )
@@ -229,7 +229,7 @@
                 <li class="{{ Request::is('backend/jpgame*') ? 'active' : ''  }}">
                     <a href="{{ route('backend.jpgame.list') }}">
                         <i class="fa  fa-heartbeat"></i>
-                        <span>@lang('app.jpg') :: Experimental</span>
+                        <span>@lang('app.jpg')</span>
                     </a>
                 </li>
             @endif
@@ -345,14 +345,14 @@
                 </li>
             @endif
 
-            <!-- @if( auth()->user()->hasRole('admin') )
+            @if( auth()->user()->hasRole('admin') )
                 <li  class="{{ Request::is('backend/permission*') ? 'active' : '' }}">
                     <a href="{{ route('backend.permission.index') }}">
                         <i class="fa fa-bell-slash"></i>
                         <span>@lang('app.permissions')</span>
                     </a>
                 </li>
-            @endif -->
+            @endif
 
             @permission('api.manage')
             @if( !(auth()->check() && auth()->user()->shop_id == 0 ) )
@@ -449,14 +449,14 @@
                 </li>
             @endif
 
-            <!-- @if( auth()->user()->hasRole('admin'))
+            @if( auth()->user()->hasRole('admin'))
                 <li class="{{ Request::is('backend/securities*') ? 'active' : ''  }}">
                     <a href="{{ route('backend.securities') }}">
                         <i class="fa  fa-user-secret"></i>
                         <span>@lang('app.security')</span>
                     </a>
                 </li>
-            @endif -->
+            @endif
 
             @if (
                 auth()->user()->hasRole('admin') ||

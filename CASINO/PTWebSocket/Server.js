@@ -5,7 +5,7 @@
 var fs = require('fs');
 var serverConfig;
 
-serverConfig = JSON.parse(fs.readFileSync('../../public_html/socket_config2.json', 'utf8'));
+serverConfig = JSON.parse(fs.readFileSync('../../socket_config2.json', 'utf8'));
 	
 
 /*-----------------------------------*/

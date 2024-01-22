@@ -18,7 +18,7 @@ namespace VanguardLTE
             parent::boot();
             self::saved(function($model)
             {
-                Category::where('id', $model->id)->update(['name' => Lib\Functions::remove_emoji($model->name)]);
+            //    Category::where('id', $model->id)->update(['name' => Lib\Functions::remove_emoji($model->name)]);
             });
             self::deleting(function($model)
             {

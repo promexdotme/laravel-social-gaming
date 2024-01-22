@@ -236,7 +236,9 @@ Route::prefix('backend')
         Route::get('/atm/newkey/{api_id}', 'AtmController@newApiKey');
         Route::get('/atm/delete/{id}/{api_id}', 'AtmController@deleteATM');
 
-        Route::get('netpos', ['as' => 'netpos', 'uses' => 'DashboardController@shopIndex', ]);
+Route::redirect('/netpos', '/backend/user')->name('netpos');
+
+        //Route::get('netpos', ['as' => 'netpos', 'uses' => 'DashboardController@shopIndex', ]);
         // Route::get('/new/user', [
         //     'as' => 'netpos.user.new',
         //     'uses' => 'UsersController@netposCreate',

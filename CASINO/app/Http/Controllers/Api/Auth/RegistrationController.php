@@ -45,6 +45,17 @@ namespace VanguardLTE\Http\Controllers\Api\Auth
             $role = \jeremykenedy\LaravelRoles\Models\Role::where('name', '=', 'User')->first();
             $user->attachRole($role);
             event(new \VanguardLTE\Events\User\Registered($user));
+// Retrieve the register_notify_email from .env, if it's not set, default to null
+$registerNotifyEmail = env('REGISTER_NOTIFY_EMAIL', null);
+
+if (!empty($registerNotifyEmail)) {
+    // Backend notification raw email about every registration
+    Mail::raw('A new user has registered: ' . $user->username, function ($message) use ($user, $registerNotifyEmail) {
+        $message->to($registerNotifyEmail)
+                ->subject('New User Registration');
+    });
+}
+// end notifier
             return $this->setStatusCode(201)->respondWithArray(['requires_email_confirmation' => settings('use_email')]);
         }
         public function verifyEmail($token)
