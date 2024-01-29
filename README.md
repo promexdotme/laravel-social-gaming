@@ -5,6 +5,13 @@
 <p><span style="color:#ff0000"><strong>V10 november 2023 release adds Laravel 10 and PHP 8.1+ support.</strong></span></p>
 
 <p><span style="color:#ff0000"><strong>v10.1 now supports SHOPS [aka agents/multi vendors]&nbsp;</strong></span></p>
+<p><span style="color:#ff0000"><strong>
+	Short Videos Listed on 
+https://www.youtube.com/watch?v=Wdhf8XEsabk  Open Source v10 Demo and Setup 
+----------------------------------------------------------------------------------------
+https://www.youtube.com/watch?v=EhhDy9GdvkY 377Bet backend short video 
+
+</strong></span></p>
 
 <p><span style="color:#ff0000"><strong>Multiple fixes, merged single v10 database&nbsp;</strong></span><br />
 Demo USER /Demo Play games is added and activated&nbsp;<br />
