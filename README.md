@@ -2,14 +2,14 @@
 
 <p><strong>Open source slots casino script (formerly Goldsvet) v10</strong></p>
 
-<p><span style="color:#ff0000"><strong>V10 november 2023 release adds Laravel 10 and PHP 8.1+ support.</strong></span></p>
+<p><span style="color:#ff0000"><strong>V10.1 January 2024 release adds Laravel 10 and PHP 8.1+ support and expands Shops Multi Tier Features</strong></span></p>
 
 <p><span style="color:#ff0000"><strong>v10.1 now supports SHOPS [aka agents/multi vendors]&nbsp;</strong></span></p>
 <p><span style="color:#ff0000"><strong>
 	Short Videos Listed on 
-https://www.youtube.com/watch?v=Wdhf8XEsabk  Open Source v10 Demo and Setup 
+https://www.youtube.com/watch?v=Wdhf8XEsabk  <br />Open Source v10 Demo and Setup <br />
 ----------------------------------------------------------------------------------------
-https://www.youtube.com/watch?v=EhhDy9GdvkY 377Bet backend short video 
+https://www.youtube.com/watch?v=EhhDy9GdvkY <br />377Bet backend short video <br />
 
 </strong></span></p>
 
