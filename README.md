@@ -9,7 +9,7 @@
 	Short Videos Listed on 
 https://www.youtube.com/watch?v=Wdhf8XEsabk  <br />Open Source v10 Demo and Setup <br />
 ----------------------------------------------------------------------------------------<br />
-https://www.youtube.com/watch?v=EhhDy9GdvkY <br />377Bet backend short video <br />
+https://www.youtube.com/watch?v=EhhDy9GdvkY <br />Also you are invited to watch 377Bet backend short video [closed source platform]<br />
 
 </strong></span></p>
 
