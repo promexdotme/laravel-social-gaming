@@ -4,128 +4,93 @@ namespace VanguardLTE\Games\SugarRush\PragmaticLib;
 
 class SlotArea
 {
-    public static function getSlotArea($gameSettings, $reelset, $log){
-        // распарсить из настроек reelset, указать 1 или 0 в зависимости от RTP и повышения шансов за большую ставку.
-        $reelset = explode('~', $gameSettings['reel_set'.$reelset]);
-        foreach ($reelset as &$reel) { // переводим строку в массив чтобы было удобнее работать
-            $reel = explode(',', $reel);
+    public static function getSlotArea($gameSettings, $reelset, $log)
+    {
+        $reelset = explode('~', $gameSettings['reel_set' . $reelset]);
+        $reels = self::generateReels($reelset, $gameSettings);
+
+        if ($log && ($log['State'] === 'Respin' || $log['State'] === 'FirstRespin')) {
+            $reels = self::applyRespin($reels, $log, $gameSettings);
         }
 
-        $positions = [];
-        // получить рандомно позиции катушек
-        foreach ($reelset as $key => $value) {
-            $positions[$key] = rand(0, count($reelset[$key]));
-        }
-        // заполнить игровое поле символами
-        $reels = [];
-        $symbolsAfter = [];
-        $symbolsBelow = [];
-        foreach ($positions as $key => $value) {
-            // sh - количество видимых символов в одной катушке
-            $reelsetCycled = array_merge($reelset[$key], array_slice($reelset[$key], 0, 10)); // зациклить катушки
-            $reels[$key] = array_slice($reelsetCycled, $value, $gameSettings['sh']); // Заполняем катушки
-            $symbolsAfter[$key] = implode('', array_slice($reelsetCycled, $value - 1, 1));
-            $symbolsBelow[$key] = $reels[$key][array_key_last($reels[$key])];
-        }
+        $slotArea = self::flattenReels($reels);
 
-        if ($log && ($log['State'] === 'Respin' || $log['State'] === 'FirstRespin')){
-            // Если нужен респин - то работаем с предыдущей slotArea, смещая уже выигравшие символы
-            //SlotArea переделать в reels ряды
-            ///$currentSymbolsAfter = $log['SymbolsAfter'];
-            $currentSymbolsAfter = $symbolsAfter;
-            foreach ($reels as $key => &$reel) { // добавить к катушкам символ из SymbolsAfter
-                array_push($reel, $currentSymbolsAfter[$key]);
-            }
-            $tmpSlotArea = array_chunk($log['SlotArea'], count($reels));
-            $currentSlotArea = [];
-            $k = 0;
-            while ($k < count($reels)){ // перестроить со строк на ряды
-                $i = 0;
-                while ($i < $gameSettings['sh']){
-                    $currentSlotArea[$k][] = $tmpSlotArea[$i][$k];
-                    $i++;
-                }
-                $k++;
-            }
-            // получить в массив выигрышные символы
-            $winPositions = [];
-            foreach ($log['WinLines'] as $winLine) {
-                $winPositions = array_merge($winPositions, $winLine['Positions']);
-            }
-            // удалить выигрышные символы и отсортировать массив чтобы ключи после удаления шли по порядку. Не 0,2,4 а 0,1,2
-            $sortSlotArea = [];
-            foreach ($currentSlotArea as $sortReelKey => $sortReel) {
-                $sortSlotArea[$sortReelKey] = [];
-                foreach ($sortReel as $valueKey => $value) {
-                    if (!in_array($valueKey * $gameSettings['sh'] + $sortReelKey, $winPositions)) 
-                        $sortSlotArea[$sortReelKey][] = $value; // поместить в новое игровое поле только не выигрышные символы
-                }
-            }
-            // пройтись по новому игровому полю, и там где не хватает символов в ряду - добавить в начало символы из symbolsafter и reels
-            foreach ($sortSlotArea as $reelKey => &$currentReel) {
-                $reelCount = count($currentReel);
-                if ($reelCount < $gameSettings['sh']) { // если в катушке меньше символов чем должно быть
-                    $currentReel = array_merge( array_slice($reels[$reelKey], ($reelCount - $gameSettings['sh'])), $currentReel);
-                }
-            }
-            // создать $symbolsBelow
-            $symbolsBelow = [];
-            foreach ($sortSlotArea as $item) {
-                $symbolsBelow[] = $item[array_key_last($item)];
-            }
-            $symbolsAfter = [];
-            foreach ($reels as $reelAndSymbolsAfter) {
-                $symbolsAfter[] = $reelAndSymbolsAfter[array_key_first($reelAndSymbolsAfter)];
-            }
-            $reels = $sortSlotArea;
-        }
-
-        // сложить все символы в массив чтобы вычислить количество выигрышей
-        $slotArea = [];
-        $i = 0;
-        while ($i < $gameSettings['sh']) {
-            $k = 0;
-            while ($k < count($reels)) {
-                $slotArea[] = $reels[$k][$i];
-                $k++;
-            }
-            $i++;
-        }
-
-        return ['SlotArea' => $slotArea,
-            'SymbolsAfter' => $symbolsAfter,
-            'SymbolsBelow' => $symbolsBelow
+        return [
+            'SlotArea' => $slotArea,
+            'SymbolsAfter' => array_column($reels, 0),
+            'SymbolsBelow' => array_column($reels, count($reels[0]) - 1),
         ];
-
-        // если это респин - то подгрузить из лога прошлое состояние игрового поля, удалить оттуда выигрышные символы и опустить символы вверху на низ
-        //if ($log && in_array('rs=t', $log)) $slotArea = '';
-        // если респина нет - то генерируем позиции остановки и собираем игровое поле из выпавших символов, а так же символы до и после
-
     }
 
-    public static function setMulti(&$slotArea){
-        $multiCnt = 0;
-        $rand = rand(0, 100);
-        if($rand < 1)
-            $multiCnt = rand(11, 15);
-        else if($rand < 6)
-            $multiCnt = rand(6, 10);
-        else if($rand < 20)
-            $multiCnt = rand(1, 5);
-        $slm_mp = [];
-        $slm_mv = [];
-        while($multiCnt){
-            $pos = rand(0, 48);
-            while(count(array_keys($slm_mp, $pos)))
-                $pos = rand(0, 48);
-            $slm_mp[] = $pos;
-            $slm_mv[] = 2;
-            $multiCnt --;
+    private static function generateReels($reelset, $gameSettings)
+    {
+        $reels = [];
+
+        foreach ($reelset as $key => $value) {
+            if (is_array($value)) {
+                // Cycle the reelset
+                $reelsetCycled = array_merge($value, array_slice($value, 0, 10));
+                $randomIndex = rand(0, count($reelsetCycled) - 1);
+                $reels[$key] = array_slice($reelsetCycled, $randomIndex, $gameSettings['sh']);
+            } else {
+                // Handle the case where $value is not an array
+                // You can log an error, provide a default array, or take appropriate action
+                error_log('Error: $value is not an array. Key: ' . $key);
+                // Example: Provide a default array
+                $reels[$key] = array_fill(0, $gameSettings['sh'], 'default_symbol');
+            }
         }
-        if(count($slm_mp)){
-            $slotArea['slm_mp'] = $slm_mp;
-            $slotArea['slm_mv'] = $slm_mv;
+
+        return $reels;
+    }
+
+    private static function applyRespin($reels, $log, $gameSettings)
+    {
+        $currentSymbolsAfter = array_column($reels, count($reels[0]) - 1);
+        $winPositions = array_merge(...array_column($log['WinLines'], 'Positions'));
+
+        foreach ($reels as $key => &$reel) {
+            // Check if the array key exists before accessing it
+            if (isset($currentSymbolsAfter[$key])) {
+                $reel = array_merge(
+                    array_slice($reel, count($reel) - $gameSettings['sh']),
+                    array_slice($currentSymbolsAfter, $key, 1),
+                    $reel
+                );
+            } else {
+                // Handle the case when the array key does not exist
+                // You can log an error, provide a default value, or take appropriate action
+                error_log('Error: Undefined array key ' . $key);
+                // Example: Provide a default value
+                $reel = array_merge(array_slice($reel, count($reel) - $gameSettings['sh']), ['default_symbol'], $reel);
+            }
+
+            $reel = array_values(array_diff_key($reel, array_flip($winPositions)));
+        }
+
+        return $reels;
+    }
+
+    private static function flattenReels($reels)
+{
+    $slotArea = [];
+
+    foreach ($reels as $i => $reel) {
+        foreach ($reel as $j => $symbol) {
+            // Check if the array key exists before accessing it
+            if (isset($reels[$j][$i])) {
+                $slotArea[] = $reels[$j][$i];
+            } else {
+                // Handle the case when the array key does not exist
+                // You can log an error, provide a default value, or take appropriate action
+                error_log('Error: Undefined array key at position [' . $j . '][' . $i . ']');
+                // Example: Provide a default value
+                $slotArea[] = 'default_symbol';
+            }
         }
     }
+
+    return $slotArea;
+}
 
 }

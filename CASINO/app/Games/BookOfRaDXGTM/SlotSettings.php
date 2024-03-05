@@ -241,7 +241,18 @@ namespace VanguardLTE\Games\BookOfRaDXGTM
             $this->slotFreeMpl = 1;
             $this->slotViewState = ($game->slotViewState == '' ? 'Normal' : $game->slotViewState);
             $this->hideButtons = [];
-            $this->slotSounds = scandir($_SERVER['DOCUMENT_ROOT'] . '/games/' . $this->slotId . '/source/SOUND');
+            //$this->slotSounds = scandir($_SERVER['DOCUMENT_ROOT'] . '/games/' . $this->slotId . '/source/SOUND');
+$txtFilePath = $_SERVER['DOCUMENT_ROOT'] . '/games/' . $this->slotId . '/source/SOUND/list.json';
+
+// Check if the file exists
+if (file_exists($txtFilePath)) {
+    // Read the file into an array, with each line of the file as an array element
+    $this->slotSounds = file($txtFilePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+} else {
+    // Handle the case where the list.txt does not exist for some reason
+    $this->slotSounds = []; // Assign an empty array or handle the error appropriately
+}
+//end slotsounds update
             array_shift($this->slotSounds);
             array_shift($this->slotSounds);
             $this->jpgs = \VanguardLTE\JPG::where('shop_id', $this->shop_id)->lockForUpdate()->get();

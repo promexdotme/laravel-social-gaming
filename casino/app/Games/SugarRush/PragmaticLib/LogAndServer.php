@@ -75,7 +75,7 @@ class LogAndServer
         // If there is no gain
         if ($win['TotalWin'] == 0){
                 // If the previous time was Respin or FirstRespin
-                if ($log && $log['State'] === 'Respin' || $log['State'] === 'FirstRespin'){
+                if (is_array($log) && (isset($log['State']) && ($log['State'] === 'Respin' || $log['State'] === 'FirstRespin'))) {
                     $addLog = [
                         'Respin' => $log['Respin'] + 1,
                         'RespinWin' => $log['RespinWin'],

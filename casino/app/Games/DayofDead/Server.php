@@ -1,5 +1,6 @@
 <?php 
 namespace VanguardLTE\Games\DayofDead
+
 {
 
      use VanguardLTE\Game;
@@ -11,6 +12,7 @@ namespace VanguardLTE\Games\DayofDead
     use VanguardLTE\Games\DayofDead\PragmaticLib\DoMysteryScatter;
     use VanguardLTE\Shop;
     use VanguardLTE\User;
+    
 
     set_time_limit(10);
     class Server
@@ -68,7 +70,7 @@ namespace VanguardLTE\Games\DayofDead
                 if ($action == 'doSpin'){
                     $gameSettings = new GameSettings($init);
                     $response = Spin::spinResult($user, $game, $bet, $lines, $log, $gameSettings, $index, $counter, $callbackUrl, $pur, $bank, $shop, $jpgs);
-                    exit( $response );
+                 exit( $response );
                 }
                 ///////////////////////////////////////////
                 if ($action == 'doCollect'){

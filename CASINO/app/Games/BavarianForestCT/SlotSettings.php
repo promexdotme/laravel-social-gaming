@@ -578,7 +578,8 @@ namespace VanguardLTE\Games\BavarianForestCT
                     }
                     $i++;
                 }
-                $this->jpgs[$i]->balance = $jsum[$i];
+			   if (isset($this->jpgs[$i]) && isset($jsum[$i])) {
+              // $this->jpgs[$i]->balance = $jsum[$i];
                 $this->jpgs[$i]->save();
                 if( $this->jpgs[$i]->balance < $this->jpgs[$i]->get_min('start_balance') ) 
                 {
@@ -588,6 +589,7 @@ namespace VanguardLTE\Games\BavarianForestCT
                         $this->jpgs[$i]->add_jpg('add', $summ);
                     }
                 }
+			   }
             }
             if( $payJack > 0 ) 
             {

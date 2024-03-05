@@ -298,7 +298,20 @@ namespace VanguardLTE\Games\LostBoysLootISB
                                 $bankSum = $allbet / 100 * $slotSettings->GetPercent();
                                 $slotSettings->SetBank((isset($postData['slotEvent']) ? $postData['slotEvent'] : ''), $bankSum, $postData['slotEvent']);
                                 $jackState = $slotSettings->UpdateJackpots($allbet);
-                                $slotSettings->SetGameData($slotSettings->slotId . 'JackWinID', $jackState['isJackId']);
+
+// Check if $jackState is set and is an array
+if (isset($jackState) && is_array($jackState)) {
+    // Check if 'isJackId' key exists in $jackState
+    if (array_key_exists('isJackId', $jackState)) {
+        $slotSettings->SetGameData($slotSettings->slotId . 'JackWinID', $jackState['isJackId']);
+    } else {
+        // Handle the case when 'isJackId' key is not found
+        // You may want to log an error or take appropriate action
+    }
+} else {
+    // Handle the case when $jackState is not set or not an array
+    // You may want to log an error or take appropriate action
+}
                                 $slotSettings->SetGameData($slotSettings->slotId . 'BonusWin', 0);
                                 $slotSettings->SetGameData($slotSettings->slotId . 'FreeGames', 0);
                                 $slotSettings->SetGameData($slotSettings->slotId . 'CurrentFreeGame', 0);

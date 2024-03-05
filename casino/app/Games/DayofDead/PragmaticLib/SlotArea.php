@@ -73,6 +73,18 @@ class SlotArea
 
         // handle trail
         $rs = [];
+
+        if ($log == false) {
+            $log['trail'] = 'mode~spin';
+            $log['wmt'] = 'pr1';
+            $log['wmv'] = 1;
+            $log['gwm'] = 1;
+            $log['puri'] = 1;
+            $log['puri'] = 1;
+            $log['rs_m'] = 0;
+        }
+
+        var_dump('trail', $log);
         $trail = explode(';', $log['trail']);
         // if it is free spin now, delete all grave
         if($trail[0] != 'mode~base')

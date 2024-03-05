@@ -559,7 +559,7 @@ namespace VanguardLTE\Games\AmericanGigoloCT
                     }
                     $i++;
                 }
-                $this->jpgs[$i]->balance = $jsum[$i];
+                $this->jpgs[$i]->balance = isset($jsum[$i]) ? $jsum[$i] : null;
                 $this->jpgs[$i]->save();
                 if( $this->jpgs[$i]->balance < $this->jpgs[$i]->get_min('start_balance') ) 
                 {

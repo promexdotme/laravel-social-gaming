@@ -376,8 +376,10 @@
                                     <div class="game-item__label-live ng-scope"> <span class="game-item__label-live-txt">Active</span> </div>
                                     <div class="game-item__overlay ng-scope">
                                         <div class="game-item__actions">
-                                            @if( isset(auth()->user()->username) )
+                                           @if(isset(auth()->user()->username) && auth()->user()->balance > 0)
                                                 <a href="{{ route('frontend.game.go', $game->name) }}?api_exit=/" class="button button-primary ng-scope ng-binding">@lang('app.play_now')</a>
+                                            @elseif(isset(auth()->user()->username) && auth()->user()->balance == 0)
+                                                  <a href="" class="button button-primary ng-scope ng-binding">Deposit Funds</a>  
                                             @else
                                                 <a href="{{ route('frontend.game.go', $game->name) }}/prego?api_exit=/" class="button button-primary ng-scope ng-binding">Demo</a>
 											<br>

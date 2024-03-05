@@ -257,8 +257,13 @@ namespace VanguardLTE\Games\AztecGoldMegawaysISB
                                 $slotSettings->SetBalance(-1 * $allbet, $postData['slotEvent']);
                                 $bankSum = $allbet / 100 * $slotSettings->GetPercent();
                                 $slotSettings->SetBank((isset($postData['slotEvent']) ? $postData['slotEvent'] : ''), $bankSum, $postData['slotEvent']);
-                                $jackState = $slotSettings->UpdateJackpots($allbet);
-                                $slotSettings->SetGameData($slotSettings->slotId . 'JackWinID', $jackState['isJackId']);
+// Update jackpots once and store the state
+$jackState = $slotSettings->UpdateJackpots($allbet);
+
+// Proceed only if $jackState is a non-empty array and 'isJackId' key exists
+if (is_array($jackState) && !empty($jackState) && array_key_exists('isJackId', $jackState)) {
+    $slotSettings->SetGameData($slotSettings->slotId . 'JackWinID', $jackState['isJackId']);
+}
                                 $slotSettings->SetGameData($slotSettings->slotId . 'BonusWin', 0);
                                 $slotSettings->SetGameData($slotSettings->slotId . 'FreeGames', 0);
                                 $slotSettings->SetGameData($slotSettings->slotId . 'CurrentFreeGame', 0);

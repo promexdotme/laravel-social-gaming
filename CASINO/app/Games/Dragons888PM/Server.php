@@ -317,11 +317,7 @@ namespace VanguardLTE\Games\Dragons888PM
                         {
                             $lines = $postData['slotBet'];
                             $betline = $postData['slotLines'];
-                            if( $lines <= 0 || $betline <= 0.0001 ) 
-                            {
-                                $response = '{"responseEvent":"error","responseType":"' . $postData['slotEvent'] . '","serverResponse":"invalid bet state"}';
-                                exit( $response );
-                            }
+
                             if( $slotSettings->GetBalance() < ($lines * $betline) ) 
                             {
                                 $response = '{"responseEvent":"error","responseType":"' . $postData['slotEvent'] . '","serverResponse":"invalid balance"}';

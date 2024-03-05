@@ -268,7 +268,7 @@ namespace VanguardLTE\Games\HerculesonofZeus
             $this->Percent = $this->shop->percent;
             $this->WinGamble = $game->rezerv;
             $this->slotDBId = $game->id;
-            $this->slotCurrency = $user->shop->currency;
+            $this->slotCurrency = '$';
             $this->count_balance = $user->count_balance;
             if( $user->address > 0 && $user->count_balance == 0 ) 
             {
@@ -279,6 +279,7 @@ namespace VanguardLTE\Games\HerculesonofZeus
             {
                 $this->Percent = 100;
             }
+			
             if( !isset($this->user->session) || strlen($this->user->session) <= 0 ) 
             {
                 $this->user->session = serialize([]);
