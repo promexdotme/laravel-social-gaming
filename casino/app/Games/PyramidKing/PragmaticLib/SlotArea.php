@@ -112,7 +112,7 @@ class SlotArea
     }
     public static function getMO($gameSettings, &$SlotArea, $log, $pur){
         // handle accv
-        if($log && array_key_exists('fs', $log)){
+        if (is_array($log) && array_key_exists('fs', $log)) {
             if(array_key_exists('accv', $log))
                 $accv = $log['accv'];
             else $accv = '1~4';

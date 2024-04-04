@@ -2,7 +2,6 @@
 
 namespace VanguardLTE\Lib;
 
-
 use GeoIp2\Database\Reader;
 use GeoIp2\Exception\AddressNotFoundException;
 use MaxMind\Exception\IpAddressNotFoundException;
@@ -26,9 +25,13 @@ class GeoData {
 
         if($user_agenta){
             $data = $data + ['user_agent' => substr((string) request()->header('User-Agent'), 0, 500)];
-
         }
 
+        // Return the data array directly, bypassing the GeoIP lookup
+        return $data;
+        
+        // Old GeoIP lookup code is commented out. 
+        /*
         if( UserSystemInfoHelper::get_ip() == 'UNKNOWN'){
             return $data;
         }
@@ -50,8 +53,10 @@ class GeoData {
             $data['country'] = 'Unknown';
             $data['city'] = 'Unknown';
         }
-
-        return $data;
+        */
+        
+        // This return statement is no longer reached due to the one above.
+        // return $data;
     }
 
 }

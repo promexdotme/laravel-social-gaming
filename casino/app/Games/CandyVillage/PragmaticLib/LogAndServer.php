@@ -46,7 +46,7 @@ class LogAndServer
         // Если нет выигрыша
         if ($win['TotalWin'] == 0){
                 // Если предыдущий раз был Respin или FirstRespin
-                if ($log && $log['State'] === 'Respin' || $log['State'] === 'FirstRespin'){
+                if ($log && is_array($log) && ($log['State'] === 'Respin' || $log['State'] === 'FirstRespin')) {
                     $addLog = [
                         'Respin' => $log['Respin'] + 1,
                         'RespinWin' => $log['RespinWin'],
