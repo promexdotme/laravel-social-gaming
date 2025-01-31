@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Mail;
         {
             $throttles = settings('throttle_enabled');
             $to = ($request->has('to') ? '?to=' . $request->get('to') : '');
+
             if( $throttles && $this->hasTooManyLoginAttempts($request) ) 
             {
                 return $this->sendLockoutResponse($request);
@@ -50,15 +51,20 @@ use Illuminate\Support\Facades\Mail;
                 {
                     $this->incrementLoginAttempts($request);
                 }
+               
                 return redirect()->to('backend/login' . $to)->withErrors(trans('auth.failed'));
             }
+           
             $user = \Auth::getProvider()->retrieveByCredentials($credentials);
+           
+           
             if( $request->lang ) 
             {
                 $user->update(['language' => $request->lang]);
             }
             if( !$user->hasRole('admin') && settings('siteisclosed') ) 
             {
+                
                 \Auth::logout();
                 return redirect()->route('backend.auth.login')->withErrors(trans('app.site_is_turned_off'));
             }
@@ -71,10 +77,10 @@ use Illuminate\Support\Facades\Mail;
             {
                 $user->update(['town' => $data['city']]);
             }
-            if( $data['country'] == '' ) 
-            {
-                return redirect()->route('backend.auth.login')->withErrors(trans('app.unknown_country'));
-            }
+           // if( $data['country'] == '' ) 
+           // {
+            //    return redirect()->route('backend.auth.login')->withErrors(trans('app.unknown_country'));
+            //}
             if( \VanguardLTE\Lib\Filter::country_filtered($user, $data['country']) ) 
             {
                 return redirect()->route('backend.auth.login')->withErrors(trans('app.blocked_phone_zone'));
@@ -98,6 +104,7 @@ use Illuminate\Support\Facades\Mail;
                     $sessionRepository->invalidateSession($session->id);
                 }
             }
+             
             \Auth::login($user, true);
             return $this->handleUserWasAuthenticated($request, $throttles, $user);
         }

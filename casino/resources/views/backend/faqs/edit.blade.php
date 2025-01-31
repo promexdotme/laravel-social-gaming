@@ -11,7 +11,8 @@
 
     <section class="content">
         <div class="box box-default">
-            {!! Form::open(['route' => array('backend.faq.update', $faq->id), 'files' => true, 'id' => 'user-form']) !!}
+           <form action="{{ route('backend.faq.update', $faq->id) }}" method="POST" enctype="multipart/form-data" id="user-form">
+            @csrf
             <div class="box-header with-border">
                 <h3 class="box-title">@lang('app.edit_faq')</h3>
             </div>
@@ -35,7 +36,7 @@
                     @lang('app.delete_faq')
                 </a>
             </div>
-            {!! Form::close() !!}
+            </form>
         </div>
     </section>
 

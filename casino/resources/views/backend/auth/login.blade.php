@@ -22,18 +22,19 @@
                     <strong>Go24Net, SARL</strong>
                 </div>-->
                 @include('backend.partials.messages')
-                <form name="form" method="post" class="form-validation" action="<?= route('backend.auth.login.post') ?>">
-                  <input type="hidden" value="<?= csrf_token() ?>" name="_token">
+                <form name="form" method="post" class="form-validation" action="{{ route('backend.auth.login.post') }}">
+                   <!--<input type="hidden" value="<?= csrf_token() ?>" name="_token"> -->
+                    @csrf
                   <div class="text-danger wrapper text-center" ng-show="authError">
                     </div>
                     <div class="list-group list-group-sm">
                         <div class="list-group-item">
                             <input type="text" placeholder="Username" name="username" class="form-control no-border"
-                                required="">
+                                required>
                         </div>
                         <div class="list-group-item">
                             <input type="password" placeholder="Password" name="password" class="form-control no-border"
-                                required="">
+                                required>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-lg btn-primary btn-block">Log in</button>

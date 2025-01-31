@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/woocasino/css/appef20.css">
+<link rel="stylesheet" href="/woocasino/css/appef20.css?v=1.0.3">
 
 <header class="header">
     <div class="header__mob-container">

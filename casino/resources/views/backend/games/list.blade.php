@@ -88,13 +88,21 @@
 						<div class="col-md-6">
 							<div class="form-group">
 								<label>@lang('app.status')</label>
-								{!! Form::select('view', $views, Request::get('view'), ['id' => 'view', 'class' => 'form-control']) !!}
+								<select name="view" id="view" class="form-control">
+    @foreach($views as $key => $value)
+        <option value="{{ $key }}" {{ (Request::get('view') == $key) ? 'selected' : '' }}>{{ $value }}</option>
+    @endforeach
+</select>
 							</div>
 						</div>
 						<div class="col-md-6">
 							<div class="form-group">
 								<label>@lang('app.device')</label>
-								{!! Form::select('device', $devices, Request::get('device'), ['id' => 'device', 'class' => 'form-control']) !!}
+								<select name="device" id="device" class="form-control">
+    @foreach($devices as $key => $value)
+        <option value="{{ $key }}" {{ (Request::get('device') == $key) ? 'selected' : '' }}>{{ $value }}</option>
+    @endforeach
+</select>
 							</div>
 						</div>
 						<div class="col-md-6">
@@ -118,7 +126,12 @@
 						<div class="col-md-4">
 							<div class="form-group">
 								<label>@lang('app.gamebank')</label>
-								{!! Form::select('gamebank', ['' => '---'] + $emptyGame->gamebankNames, Request::get('gamebank'), ['id' => 'gamebank', 'class' => 'form-control']) !!}
+								<select name="gamebank" id="gamebank" class="form-control">
+    <option value="">---</option>
+    @foreach ($emptyGame->gamebankNames as $key => $value)
+        <option value="{{ $key }}" {{ Request::get('gamebank') == $key ? 'selected' : '' }}>{{ $value }}</option>
+    @endforeach
+</select>
 							</div>
 						</div>
 						@endif
@@ -126,14 +139,24 @@
 						<div class="col-md-4">
 							<div class="form-group">
 								<label>@lang('app.labels')</label>
-								{!! Form::select('label', ['' => '---'] + $emptyGame->labels, Request::get('label'), ['id' => 'label', 'class' => 'form-control']) !!}
+								<select name="label" id="label" class="form-control">
+    <option value="">---</option>
+    @foreach ($emptyGame->labels as $key => $value)
+        <option value="{{ $key }}" {{ Request::get('label') == $key ? 'selected' : '' }}>{{ $value }}</option>
+    @endforeach
+</select>
 							</div>
 						</div>
 
 						<div class="col-md-4">
 							<div class="form-group">
 								<label>@lang('app.jpg')</label>
-								{!! Form::select('jpg', ['' => '---'] + $jpgs, Request::get('jpg'), ['id' => 'jpg', 'class' => 'form-control']) !!}
+								<select name="jpg" id="jpg" class="form-control">
+    <option value="">---</option>
+    @foreach ($jpgs as $key => $value)
+        <option value="{{ $key }}" {{ Request::get('jpg') == $key ? 'selected' : '' }}>{{ $value }}</option>
+    @endforeach
+</select>
 							</div>
 						</div>
 
@@ -143,14 +166,23 @@
 								@php
 									$denominations = array_combine(\VanguardLTE\Game::$values['denomination'], \VanguardLTE\Game::$values['denomination']);
 								@endphp
-								{!! Form::select('denomination', ['' => '---'] + $denominations, Request::get('denomination'), ['class' => 'form-control']) !!}
+								<select name="denomination" class="form-control">
+    <option value="">---</option>
+    @foreach ($denominations as $key => $value)
+        <option value="{{ $key }}" {{ Request::get('denomination') == $key ? 'selected' : '' }}>{{ $value }}</option>
+    @endforeach
+</select>
 							</div>
 						</div>
 
 						<div class="col-md-4">
 							<div class="form-group">
 								<label for="rezerv">@lang('app.doubling')</label>
-								{!! Form::select('rezerv', ['' => '---', '1' => __('app.yes'), '0' => __('app.no')], Request::get('rezerv'), ['class' => 'form-control']) !!}
+							<select name="rezerv" class="form-control">
+    <option value="">---</option>
+    <option value="1" {{ Request::get('rezerv') == '1' ? 'selected' : '' }}>{{ __('app.yes') }}</option>
+    <option value="0" {{ Request::get('rezerv') == '0' ? 'selected' : '' }}>{{ __('app.no') }}</option>
+</select>
 							</div>
 						</div>
 
@@ -158,7 +190,11 @@
 						<div class="col-md-4">
 							<div class="form-group">
 								<label for="rezerv">@lang('app.order')</label>
-								{!! Form::select('order', $order, Request::get('order'), ['class' => 'form-control']) !!}
+								<select name="order" class="form-control">
+    @foreach ($order as $key => $value)
+        <option value="{{ $key }}" {{ Request::get('order') == $key ? 'selected' : '' }}>{{ $value }}</option>
+    @endforeach
+</select>
 							</div>
 						</div>
 						@endif

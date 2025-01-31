@@ -652,10 +652,18 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        {!! Form::select('shop_id',
-                            (auth()->user()->hasRole(['admin','agent']) ? [0 => __('app.no_shop')] : [])
-                            +
-                            auth()->user()->shops_array(), auth()->user()->shop_id, ['class' => 'form-control select2', 'style' => 'width: 100%;']) !!}
+						<select name="shop_id" class="form-control select2" style="width: 100%;">
+							@if (auth()->user()->hasRole(['admin', 'agent']))
+								<option value="0" {{ auth()->user()->shop_id == 0 ? 'selected' : '' }}>
+									{{ __('app.no_shop') }}
+								</option>
+							@endif
+							@foreach (auth()->user()->shops_array() as $key => $value)
+								<option value="{{ $key }}" {{ auth()->user()->shop_id == $key ? 'selected' : '' }}>
+									{{ $value }}
+								</option>
+							@endforeach
+						</select>
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     </div>
                 </div>

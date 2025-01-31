@@ -5,40 +5,41 @@
 
 @section('content')
 
-    <section class="content-header">
-        @include('backend.partials.messages')
-    </section>
+<section class="content-header">
+	@include('backend.partials.messages')
+</section>
 
-    <section class="content">
+<section class="content">
 
-        {!! Form::open(['route' => 'backend.progress.store', 'files' => true, 'id' => 'user-form']) !!}
-        <div class="box box-default">
-            <div class="box-header with-border">
-                <h3 class="box-title">@lang('app.add_progress')</h3>
-            </div>
+	<form action="{{ route('backend.progress.store') }}" method="POST" enctype="multipart/form-data" id="user-form">
+		@csrf
+		<div class="box box-default">
+			<div class="box-header with-border">
+				<h3 class="box-title">@lang('app.add_progress')</h3>
+			</div>
 
-            <div class="box-body">
-                <div class="row">
-                    @include('backend.progress.partials.base', ['edit' => false, 'profile' => false])
-                </div>
-            </div>
+			<div class="box-body">
+				<div class="row">
+					@include('backend.progress.partials.base', ['edit' => false, 'profile' => false])
+				</div>
+			</div>
 
-            <div class="box-footer">
-                <button type="submit" class="btn btn-primary">
-                    @lang('app.add_progress')
-                </button>
-            </div>
-        </div>
+			<div class="box-footer">
+				<button type="submit" class="btn btn-primary">
+					@lang('app.add_progress')
+				</button>
+			</div>
+		</div>
 
-        {!! Form::close() !!}
+	</form>
 
-    </section>
+</section>
 
 @stop
 
 @section('scripts')
-    <script>
-        $(function() {
-        });
-    </script>
+<script>
+	$(function () {
+	});
+</script>
 @stop

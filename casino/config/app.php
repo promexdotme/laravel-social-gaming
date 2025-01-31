@@ -16,14 +16,14 @@ return [
     |
     */
 
-    'name' => 'Betshop IO',
+    'name' => 'Open Source 377Casino',
 
     /*
     |--------------------------------------------------------------------------
     | Vanguard Version
     |--------------------------------------------------------------------------
     */
-    'version' => '8.5',
+    'version' => '10.5',
 
     /*
     |--------------------------------------------------------------------------
@@ -62,7 +62,7 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'https://betshop.io'),
+    'url' => env('APP_URL', 'https://377casino.com'),
 
     /*
     |--------------------------------------------------------------------------
@@ -178,8 +178,7 @@ return [
          */
 
         Proengsoft\JsValidation\JsValidationServiceProvider::class,
-        VanguardLTE\Providers\HtmlServiceProvider::class,
-        Intervention\Image\ImageServiceProvider::class,
+       Intervention\Image\ImageServiceProvider::class,
         //anlutro\LaravelSettings\ServiceProvider::class,
         Jenssegers\Agent\AgentServiceProvider::class,
 
@@ -253,8 +252,6 @@ return [
 
         'JsValidator' => Proengsoft\JsValidation\Facades\JsValidatorFacade::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
-        'Form' => Collective\Html\FormFacade::class,
-        'HTML' => Collective\Html\HtmlFacade::class,
         'Image' => Intervention\Image\Facades\Image::class,
         'Settings' => anlutro\LaravelSettings\Facade::class,
         'JWTAuth' => PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth::class,

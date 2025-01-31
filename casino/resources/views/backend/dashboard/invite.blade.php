@@ -11,7 +11,8 @@
 
     <section class="content">
         @if( auth()->user()->hasPermission('invite.edit') )
-            {!! Form::open(['route' => 'backend.invites.update']) !!}
+             <form action="{{ route('backend.invites.update') }}" method="POST">
+            @csrf
         @endif
         <div class="box box-default">
             <div class="box-header with-border">
@@ -70,14 +71,22 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>@lang('app.wager')</label>
-                            {!! Form::select('wager', \VanguardLTE\Invite::$values['wager'], $invite->wager, ['class' => 'form-control']) !!}
+                            <select name="wager" class="form-control">
+                            @foreach(\VanguardLTE\Invite::$values['wager'] as $key => $value)
+                                <option value="{{ $key }}" {{ $invite->wager == $key ? 'selected' : '' }}>{{ $value }}</option>
+                            @endforeach
+                        </select>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="status">@lang('app.type')</label>
-                            {!! Form::select('type', \VanguardLTE\Invite::$values['type'], $invite->type, ['class' => 'form-control', 'id' => 'type']) !!}
+                            <select name="type" class="form-control" id="type">
+                            @foreach(\VanguardLTE\Invite::$values['type'] as $key => $value)
+                                <option value="{{ $key }}" {{ $invite->type == $key ? 'selected' : '' }}>{{ $value }}</option>
+                            @endforeach
+                        </select>
                         </div>
                     </div>
 
@@ -94,7 +103,7 @@
             @endif
         </div>
         @if( auth()->user()->hasPermission('invite.edit') )
-        {!! Form::close() !!}
+        </form>
         @endif
     </section>
 

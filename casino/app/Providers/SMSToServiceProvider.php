@@ -27,7 +27,7 @@ class SMSToServiceProvider extends BaseServiceProvider {
             __DIR__ . '/../../config/smsto.php', 'smsto'
         );
 
-        $this->loadViewsFrom(__DIR__.'/../../views', 'smsto');
+       $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'smsto');
     }
 
     /**

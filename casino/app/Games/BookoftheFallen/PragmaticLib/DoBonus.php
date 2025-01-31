@@ -12,6 +12,7 @@ class DoBonus{
                 'DB_dataPG' => config('database.connections')['pgsql'],
                 'USER' => $user->username, 'SHOP_ID' => $user->shop_id, 'GAME' => $game->name, 'BANK' => $bank];
         }
+ }
   public static function doBonus($user, $game, $bet, $lines, $log, $index, $counter, $ind, $bank, $shop, $jpgs){
     newBox:
     $bet = $log['Bet'];

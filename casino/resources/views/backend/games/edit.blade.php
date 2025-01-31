@@ -122,22 +122,28 @@
 
                     <div class="tab-content" id="nav-tabContent">
                         <div class="active tab-pane" id="details">
-                            {!! Form::open(['route' => ['backend.game.update', $game->id], 'method' => 'POST', 'id' => 'details-form']) !!}
+                          <form action="{{ route('backend.game.update', $game->id) }}" method="POST" id="details-form">
+                            @csrf
+                            @method('POST')
                             @include('backend.games.partials.base', ['profile' => false])
-                            {!! Form::close() !!}
+                        </form>
                         </div>
 
 
                         <div class="tab-pane" id="login-details">
-                            {!! Form::open(['route' => ['backend.game.update', $game->id], 'method' => 'POST', 'id' => 'login-details-form']) !!}
+                           <form action="{{ route('backend.game.update', $game->id) }}" method="POST" id="login-details-form">
+                            @csrf
+                            @method('POST')
                             @include('backend.games.partials.match')
-                            {!! Form::close() !!}
+                        </form>
                         </div>
 
                         <div class="tab-pane" id="bonus-details">
-                            {!! Form::open(['route' => ['backend.game.update', $game->id], 'method' => 'POST', 'id' => 'bonus-details-form']) !!}
+                           <form action="{{ route('backend.game.update', $game->id) }}" method="POST" id="bonus-details-form">
+                            @csrf
+                            @method('POST')
                             @include('backend.games.partials.bonus')
-                            {!! Form::close() !!}
+                        </form>
                         </div>
 
                     </div>

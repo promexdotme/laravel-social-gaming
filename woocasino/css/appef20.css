@@ -4,6 +4,54 @@
  * Copyright (c) 2014 Wes Cruver
  * License: MIT
  */
+  .game-pagination{
+         width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top:15px;
+ }
+.game-pagination .pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 5px; 
+}
+.game-pagination .pagination li {
+    display: inline-block;
+}
+
+.game-pagination .pagination li a,
+.game-pagination .pagination li span {
+    display: block;
+    padding: 8px 12px;
+    color: #131521;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: background 0.3s, color 0.3s;
+}
+
+.game-pagination .pagination li a:hover {
+    background-color: #f0f0f0;
+}
+
+
+.game-pagination .pagination .active a,
+.game-pagination .pagination .active span {
+    color: #fff !important;
+    background-color: #131521 !important;
+    border-color: #131521 !important;
+    cursor: default;
+}
+
+.game-pagination .pagination .disabled span {
+    color: #131521 !important;
+    background-color: #f9f9f9 !important;
+    border-color: #ddd !important;
+    cursor: not-allowed;
+}
 #loading-bar,#loading-bar-spinner {
     pointer-events: none;
     -webkit-pointer-events: none;
@@ -25762,7 +25810,7 @@ a:hover,a:focus {
 
 @media (min-width: 992px) {
     .carcass {
-        padding-left:230px
+        padding-left:230px;
     }
 }
 
@@ -28910,7 +28958,8 @@ a:hover,a:focus {
 .game-item__img {
     max-width: 100%;
     width: 100%;
-    transition: transform .5s ease
+    transition: transform .5s ease;
+    max-height:200px;
 }
 
 .game-item__overlay {

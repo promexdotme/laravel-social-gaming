@@ -398,6 +398,9 @@
                             @endforeach
                         @endif
                     </div>
+                    <div class="game-pagination">
+    {{ $games->links() }}
+</div>
                 </section>
                 <div type="advantages" class="ng-binding ng-isolate-scope ng-scope">
                     <div class="advantages">
@@ -417,50 +420,6 @@
                             <div class="advantages__item"> <i class="advantages__icon icon-woo-security"></i>
                                 <p class="advantages__title">@lang('app.adtitle_item4') </p>
                                 <p class="advantages__descr">@lang('app.adbody_item4')  </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- ngIf: $root.data.current_ip.country_code !== 'SE' && $root.data.user.country !== 'SE' -->
-                <div type="promo-block" class="ng-binding ng-scope ng-isolate-scope">
-                    <div class="promo-block">
-                        <h2 class="promo-block__ttl">@lang('app.best_casino_title')</h2>
-                        <div class="promo-block__video-block">
-                            <div class="promo-block__video-descr">
-                                <p>@lang('app.best_casino1') </p>
-                                <p> @lang('app.best_casino2') </p>
-                                <p>@lang('app.best_casino3') </p>
-                            </div>
-                        </div>
-                        <h2 class="promo-block__ttl">@lang('app.mobile_online_title')</h2>
-                        <div>
-                           <p>@lang('app.mobile_online1')</P>
-						   <P>@lang('app.mobile_online2')</p>
-						   <P>@lang('app.mobile_online3')</p>
-                        </div>
-                        <div class="toggle-block">
-                            <div class="toggle-block__item">
-                                <h3 class="toggle-block_header collapsed" data-toggle="collapse" data-target="#toggle-block-1">
-                                    @lang('app.whatis_best_title')
-                                </h3>
-                                <div id="toggle-block-1" class="toggle-block__body collapse in">
-                                    <div class="toggle-block__body-wrp">
-									<p>@lang('app.whatis_best1')</p>
-									<p>@lang('app.whatis_best2')</p>
-									<p>@lang('app.whatis_best3')</p>
-                                        </div>
-                                </div>
-                            </div>
-                            <div class="toggle-block__item">
-                                <h3 class="toggle-block_header collapsed" data-toggle="collapse" data-target="#toggle-block-2">
-                                    @lang('app.howto_play_casino_title')
-                                </h3>
-                                <div id="toggle-block-2" class="toggle-block__body collapse in">
-                                    <div class="toggle-block__body-wrp">
-                                        <p>@lang('app.howto_play_casino1') </p>
-										<p>@lang('app.howto_play_casino2') </p>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>

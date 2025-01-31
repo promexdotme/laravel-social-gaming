@@ -11,7 +11,8 @@
 
     <section class="content">
       <div class="box box-default">
-		{!! Form::open(['route' => 'backend.faq.store', 'files' => true, 'id' => 'user-form']) !!}
+		 <form action="{{ route('backend.faq.store') }}" method="POST" enctype="multipart/form-data" id="user-form">
+            @csrf
         <div class="box-header with-border">
           <h3 class="box-title">@lang('app.add_faq')</h3>
         </div>
@@ -27,7 +28,7 @@
             @lang('app.add_faq')
         </button>
         </div>
-		{!! Form::close() !!}
+		</form>
       </div>
     </section>
 

@@ -59,9 +59,11 @@
 
                     <div class="tab-content border-right border-left border-bottom p-3" id="nav-tabContent">
                         <div class="@if(!Request::get('date')) active @endif tab-pane" id="details">
-                            {!! Form::open(['route' => ['backend.user.update.details', $user->id], 'method' => 'PUT', 'id' => 'details-form']) !!}
+							<form action="{{ route('backend.user.update.details', $user->id) }}" method="POST" id="details-form">
+								@method('PUT')
+								@csrf
                             @include('backend.user.partials.edit')
-                            {!! Form::close() !!}
+							</form>
                         </div>
 
 
@@ -137,9 +139,9 @@
             });
         });
     </script>
-    {!! HTML::script('/back/js/as/app.js') !!}
-    {!! HTML::script('/back/js/as/btn.js') !!}
-    {!! HTML::script('/back/js/as/profile.js') !!}
+    <script src="{{ asset('/back/js/as/app.js') }}"></script>
+	<script src="{{ asset('/back/js/as/btn.js') }}"></script>
+	<script src="{{ asset('/back/js/as/profile.js') }}"></script>
     {!! JsValidator::formRequest('VanguardLTE\Http\Requests\User\UpdateDetailsRequest', '#details-form') !!}
     {!! JsValidator::formRequest('VanguardLTE\Http\Requests\User\UpdateLoginDetailsRequest', '#login-details-form') !!}
 @stop

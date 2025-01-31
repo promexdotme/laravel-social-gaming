@@ -25,7 +25,12 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label>@lang('app.type')</label>
-                            {!! Form::select('type', ['' => '---', 'user' => 'User', 'game' => 'Game', 'shop' => 'Shop'], Request::get('type'), ['class' => 'form-control']) !!}
+                           <select name="type" class="form-control">
+                                <option value="">---</option>
+                                <option value="user" {{ Request::get('type') == 'user' ? 'selected' : '' }}>@lang('app.user')</option>
+                                <option value="game" {{ Request::get('type') == 'game' ? 'selected' : '' }}>@lang('app.game')</option>
+                                <option value="shop" {{ Request::get('type') == 'shop' ? 'selected' : '' }}>@lang('app.shop')</option>
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">

@@ -24,7 +24,11 @@
 							<input type="text" class="form-control" name="search" value="{{ Request::get('search') }}" placeholder="@lang('app.search_for_users')">
 						</div>
 						<div class="col-md-6">
-							{!! Form::select('status', ['' => 'All', '0' => 'Disabled', '1' => 'Active'], Request::get('status'), ['id' => 'status', 'class' => 'form-control input-solid']) !!}
+						<select name="status" id="status" class="form-control input-solid">
+							<option value="">{{ __('All') }}</option>
+							<option value="0" {{ Request::get('status') == '0' ? 'selected' : '' }}>{{ __('Disabled') }}</option>
+							<option value="1" {{ Request::get('status') == '1' ? 'selected' : '' }}>{{ __('Active') }}</option>
+						</select>
 						</div>
 					</form>
 				</div>

@@ -19,7 +19,7 @@
                     <div class="col-md-12">
                         @if( is_array($data) )
                         <form action="{{ $data['action'] }}" method="{{ $data['method'] }}" id="internalForm">
-                            {!! Form::token() !!}
+                            @csrf
                             @foreach($data['fields'] AS $field=>$value)
                                 <input type="hidden" name="{{ $field }}" value="{{ $value }}">
                             @endforeach

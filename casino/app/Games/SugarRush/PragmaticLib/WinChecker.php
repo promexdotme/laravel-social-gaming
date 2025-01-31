@@ -48,9 +48,9 @@ class WinChecker
             }
         }
 
-        $symbolCount = count($this->paytable[$group['symbol']])0;
+        $symbolCount = count($this->paytable[$group['symbol']]);
         $posCount = count($group['pos']);
-        $paytableElement = $this->paytable[$group['symbol']][$symbolCount - $posCount] 0;
+        $paytableElement = $this->paytable[$group['symbol']][$symbolCount - $posCount] ;
         $win = round($paytableElement * $bet * $group['multi'], 2);
 
         if ($win > 0) {

@@ -517,7 +517,7 @@ namespace VanguardLTE\Http\Controllers\Web\Backend
             {
                 abort(403);
             }
-            $securities = \VanguardLTE\Security::where('securities.view', 1);
+            $securities = \VanguardLTE\Security::with(['user'])->where('securities.view', 1);
             if ($request->type != '')
             {
                 $securities = $securities->where('securities.type', 'LIKE', $request->type . '%');
@@ -529,6 +529,7 @@ namespace VanguardLTE\Http\Controllers\Web\Backend
                 $securities = $securities->where('securities.created_at', '<=', $dates[1]);
             }
             $securities = $securities->orderBy('securities.created_at', 'DESC')->paginate(25)->withQueryString();
+          
             return view('backend.dashboard.security', compact('securities'));
         }
         public function securities_delete(\Illuminate\Http\Request $request, \VanguardLTE\Security $item)
@@ -791,6 +792,7 @@ namespace VanguardLTE\Http\Controllers\Web\Backend
                 if (in_array($savedSortFiled, ['rtp']))
                 {
                     $gamebanks = \VanguardLTE\GameBank::get();
+                   
                     if ($gamebanks)
                     {
                         foreach ($gamebanks as $item)

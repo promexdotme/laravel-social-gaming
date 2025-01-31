@@ -68,7 +68,7 @@
     @if(isset ($messages) && count($messages) > 0)
         <div class="alert alert-danger">
             <h4>@lang('app.error')</h4>
-            <p>{!!  $messages[array_rand($messages)];  !!}</p>
+            <p>{!!  $messages[array_rand($messages)]  !!}</p>
         </div>
     @endif
 @endif

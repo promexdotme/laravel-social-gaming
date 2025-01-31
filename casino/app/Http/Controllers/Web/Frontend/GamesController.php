@@ -11,10 +11,10 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
             {
                 return redirect()->route('backend.dashboard');
             }
-            if( !\Illuminate\Support\Facades\Auth::check() && false ) 
+        /*    if( !\Illuminate\Support\Facades\Auth::check() && false ) 
             {
                 return redirect()->route('frontend.auth.login');
-            }
+            } */
             $categories = [];
             $game_ids = [];
             $cat1 = false;
@@ -31,14 +31,19 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
             ]);
             
             $frontend = settings('frontend');
+
+   
+
             if( $shop_id && $shop ) 
             {
-                $frontend = $shop->frontend ? $shop->frontend : 'Default';
+                $frontend = $shop->frontend ? $shop->frontend : $frontend;
             }
+            
             if( $redirect = $this->check_redirect($request, $category1) ) 
             {
                 return $redirect;
             }
+            
             \Illuminate\Support\Facades\Cookie::queue('currentCategory' . (\Illuminate\Support\Facades\Auth::check() ? auth()->user()->id : 0), $category1, 2678400);
             if( $category1 != '' ) 
             {
@@ -186,7 +191,8 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
                         break;
                 }
             }
-            $games = $games->get();
+         
+             $games = $games->paginate(20); 
             $jpgs = \VanguardLTE\JPG::where('shop_id', $shop_id)->get();
             $jpgSum = \VanguardLTE\JPG::where('shop_id', $shop_id)->sum('balance');
             $categories = false;
@@ -241,7 +247,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
                 $gamestat = \VanguardLTE\StatGame::where('user_id', auth()->user()->id)->orderByDesc('date_time')->limit(50)->get();
                 $depositlist = \VanguardLTE\Payment::where('user_id', auth()->user()->id)->orderByDesc('id')->limit(50)->get();
             }
-            
+             
             return view('frontend.' . $frontend . '.games.list', compact('games', 'category1', 'cat1', 'categories', 'currentSliderNum', 'title', 'body', 'keywords', 'description', 'jpgs', 'shop', 'devices', 'tournament', 'is_game_page', 'jpgSum', 'gamestat', 'depositlist'));
         }
         public function balanceAdd(\Illuminate\Http\Request $request)
