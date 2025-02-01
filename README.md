@@ -3,7 +3,7 @@
 <p><strong>Open source slots casino script (formerly Goldsvet) v10.5 [current version] </strong></p>
 <p><strong> I suspended online credit and paypal contribution due to scammers and fraud as of 7/25/2024 you can check discord channel and messsage for crypto donations and google drive sharing for games folders.  
 https://discordapp.com/channels/982859564795957268/1103430463357452428/1266192915563282523 </strong></p>
-
+<p>v10.5 DEMO : <a href="HTTPS:///377casino.com0">HTTPS://377CASINO.COM</a>&nbsp;<br />
 10.5 Updates include :
 1- Laravel 11 
 2- PHP 8.2+ 
