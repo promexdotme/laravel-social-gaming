@@ -241,7 +241,7 @@
                                         @for ($i = 0;$i < 5;$i++)
                                         @php
                                         $g = $games[(int)(rand(0, count($games)-1))];
-                                        $p = ['Sa****','Ro****','Ma****','Ji****','Th****','Le****','Ki****','Ma****','St****','Pi****','Je****','Go****', 'Ma****', 'Da****','Go****','Lo****','Hi****','Bf****','Sz****','We****','Ae****','Qt****','Ph****','Js****','Pl****', 'Yg****', 'Nh****', 'Su****'];
+                                        $p = ['Sa****','Ro****','Ma****','Ji****,'Th****','Le****','Ki****','Ma****','St****','Pi****','Je****','Go****', 'Ma****', 'Da****','Go****','Lo****','Hi****,'Bf****','Sz****','We****','Ae****','Qt****','Ph****','Js****','Pl****', 'Yg****', 'Nh****', 'Su****'];
                                         @endphp
                                         <li class="last-winners__item ng-scope">
                                             <button class="last-winners__img-block">

@@ -32,7 +32,6 @@
                     <th scope="col">Tickets</th>
                     <th scope="col">Balance</th>
                     <th scope="col">Rating</th>
-                    <th scope="col">TB</th>
                     <th scope="col">PB</th>
                     <th scope="col">DE</th>
                     <th scope="col">IF</th>
@@ -59,7 +58,6 @@
                     <td><a href="#" class="btn btn-xs btn-default detailsTicket" data-id="">Details</a></td>
                     <td>{{ number_format(floatval($item->balance), 2, '.', '') }}</td>
                     <td>{{$item->rating}}</td>
-                    <td>{{ number_format(floatval($item->count_tournaments), 2, '.', '') }}</td>
                     <td>{{ number_format(floatval($item->count_progress), 2, '.', '') }}</td>
                     <td>{{ number_format(floatval($item->count_daily_entries), 2, '.', '') }}</td>
                     <td>{{ number_format(floatval($item->count_invite), 2, '.', '') }}</td>
@@ -69,7 +67,7 @@
                 @endforeach
                 @else
                 <tr>
-                    <td colspan="11">
+                    <td colspan="10">
                         <div class="noData">No terminal found!</div>
                     </td>
                 </tr>

@@ -7,7 +7,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
     {
         public function __construct()
         {
-            $this->middleware('auth');
+            abort(404);
         }
         public function index(\Illuminate\Http\Request $request)
         {

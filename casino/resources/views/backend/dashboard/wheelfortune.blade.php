@@ -10,8 +10,7 @@
     </section>
 
     <section class="content">
-             <form action="{{ route('backend.wheelfortune.update') }}" method="POST">
-            @csrf
+            {!! Form::open(['route' => 'backend.wheelfortune.update']) !!}
         <div class="box box-default">
             <div class="box-header with-border">
                 <h3 class="box-title">{{ trans('app.wheelfortune') }}</h3>
@@ -39,11 +38,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>@lang('app.wh')1 {{ $i }}</label>
-                                 <select name="wh1_{{ $i }}" class="form-control">
-                                        @foreach(\VanguardLTE\WheelFortune::$values['wh1'] as $value)
-                                            <option value="{{ $value }}" {{ $wheelfortune->{'wh1_' . $i} == $value ? 'selected' : '' }}>{{ $value }}</option>
-                                        @endforeach
-                                    </select>
+                                {!! Form::select('wh1_'.$i, \VanguardLTE\WheelFortune::$values['wh1'], $wheelfortune->{'wh1_'.$i}, ['class' => 'form-control']) !!}
                             </div>
                         </div>
                     @endfor
@@ -56,11 +51,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>@lang('app.wh')2 {{ $i }}</label>
-                               <select name="wh2_{{ $i }}" class="form-control">
-                                        @foreach(\VanguardLTE\WheelFortune::$values['wh1'] as $value)
-                                            <option value="{{ $value }}" {{ $wheelfortune->{'wh2_' . $i} == $value ? 'selected' : '' }}>{{ $value }}</option>
-                                        @endforeach
-                                    </select>
+                                {!! Form::select('wh2_'.$i, \VanguardLTE\WheelFortune::$values['wh1'], $wheelfortune->{'wh2_'.$i} , ['class' => 'form-control']) !!}
                             </div>
                         </div>
                     @endfor
@@ -73,11 +64,7 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>@lang('app.wh')3 {{ $i }}</label>
-                                 <select name="wh3_{{ $i }}" class="form-control">
-                                        @foreach(\VanguardLTE\WheelFortune::$values['wh2'] as $value)
-                                            <option value="{{ $value }}" {{ $wheelfortune->{'wh3_' . $i} == $value ? 'selected' : '' }}>{{ $value }}</option>
-                                        @endforeach
-                                    </select>
+                                {!! Form::select('wh3_'.$i, \VanguardLTE\WheelFortune::$values['wh2'], $wheelfortune->{'wh3_'.$i}, ['class' => 'form-control']) !!}
                             </div>
                         </div>
                     @endfor
@@ -89,20 +76,13 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>@lang('app.wager')</label>
-                             <select name="wager" class="form-control">
-                                    @foreach(\VanguardLTE\WheelFortune::$values['wager'] as $value)
-                                        <option value="{{ $value }}" {{ $wheelfortune->wager == $value ? 'selected' : '' }}>{{ $value }}</option>
-                                    @endforeach
-                                </select>
+                            {!! Form::select('wager', \VanguardLTE\WheelFortune::$values['wager'], $wheelfortune->wager, ['class' => 'form-control']) !!}
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="status">@lang('app.status')</label>
-                             <select name="status" id="status" class="form-control">
-                                    <option value="0" {{ $wheelfortune->status == 0 ? 'selected' : '' }}>@lang('app.disabled')</option>
-                                    <option value="1" {{ $wheelfortune->status == 1 ? 'selected' : '' }}>@lang('app.active')</option>
-                                </select>
+                            {!! Form::select('status', [__('app.disabled'), __('app.active')], $wheelfortune->status, ['class' => 'form-control', 'id' => 'status']) !!}
                         </div>
                     </div>
                 </div>
@@ -115,7 +95,7 @@
                 </button>
             </div>
         </div>
-        </form>
+        {!! Form::close() !!}
     </section>
 
 @stop

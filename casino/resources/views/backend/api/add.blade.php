@@ -10,8 +10,7 @@
 </section>
 
     <section class="content">
-   <form action="{{ route('backend.api.store') }}" method="POST" enctype="multipart/form-data" id="api-form">
-		@csrf
+    {!! Form::open(['route' => 'backend.api.store', 'files' => true, 'id' => 'api-form']) !!}
       <div class="box box-default">
         <div class="box-header with-border">
           <h3 class="box-title">@lang('app.add_api')</h3>
@@ -31,7 +30,7 @@
             </button>
         </div>
       </div>
-    </form>
+    {!! Form::close() !!}
     </section>
 
 @stop

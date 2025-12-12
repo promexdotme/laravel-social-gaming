@@ -39,16 +39,7 @@ Route::group(['middleware' => ['ipcheck']], function () {
     Route::put('users/{user}/balance/{type}', 'Users\BalanceController@balance');
 
 
-    Route::get('shops', ['uses' => 'ShopController@index']);
-    Route::get('shops/currency', ['uses' => 'ShopController@currency']);
-    Route::put('shops/{shop}/balance/{type}', ['uses' => 'ShopController@balance']);
-    Route::put('shops/block', ['uses' => 'ShopController@shop_block', 'middleware' => 'permission_api:shops.block']);
-    Route::put('shops/unblock', ['uses' => 'ShopController@shop_unblock', 'middleware' => 'permission_api:shops.unblock']);
-    Route::get('shops/{id}/view', ['uses' => 'ShopController@view']);
-    Route::post('shops/create', ['uses' => 'ShopController@store']);
-    Route::put('shops/{shop}/update', ['uses' => 'ShopController@update']);
-    Route::post('shops/admin', ['uses' => 'ShopController@admin']);
-    Route::delete('shops/{id}/destroy', ['uses' => 'ShopController@destroy']);
+    // shop endpoints removed
 
     Route::get('pincodes', 'PincodessController@index');
     Route::post('pincodes/store', 'PincodessController@store');

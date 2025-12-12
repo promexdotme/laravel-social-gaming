@@ -18,11 +18,9 @@
             <div class="box-body">
                 <div class="row">
                     <div class="col-md-12" >
-                       	<form action="{{ route('backend.jpgame.update') }}" method="POST">
-						@csrf
-						@method('POST')
-						@include('backend.games.partials.jackpot')
-					</form>
+                        {!! Form::open(['route' => ['backend.jpgame.update'], 'method' => 'POST']) !!}
+                        @include('backend.games.partials.jackpot')
+                        {!! Form::close() !!}
                     </div>
                 </div>
             </div>

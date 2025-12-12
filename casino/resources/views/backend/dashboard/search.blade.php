@@ -36,14 +36,13 @@
                             <th>@lang('app.balance')</th>
 
                             <th>@lang('app.rating')</th>
-                            <th>@lang('app.tb')</th>
                             <th>@lang('app.pb')</th>
                             <th>@lang('app.de')</th>
                             <th>@lang('app.if')</th>
                             <th>@lang('app.hh')</th>
-                            <th>@lang('app.refund')</th>
                             <th>@lang('app.wb')</th>
                             <th>@lang('app.sb')</th>
+                            <th>@lang('app.refund')</th>
 
                             <th>@lang('app.pay_in')</th>
                             <th>@lang('app.pay_out')</th>
@@ -57,7 +56,7 @@
                                 @include('backend.user.partials.row', ['show_shop' => true])
                             @endforeach
                         @else
-                            <tr><td colspan="15">@lang('app.no_data')</td></tr>
+                            <tr><td colspan="{{ auth()->user()->hasRole('admin') ? 14 : 13 }}">@lang('app.no_data')</td></tr>
                         @endif
                         </tbody>
                         <thead>
@@ -70,14 +69,13 @@
                             <th>@lang('app.balance')</th>
 
                             <th>@lang('app.rating')</th>
-                            <th>@lang('app.tb')</th>
                             <th>@lang('app.pb')</th>
                             <th>@lang('app.de')</th>
                             <th>@lang('app.if')</th>
                             <th>@lang('app.hh')</th>
-                            <th>@lang('app.refund')</th>
                             <th>@lang('app.wb')</th>
                             <th>@lang('app.sb')</th>
+                            <th>@lang('app.refund')</th>
 
                             <th>@lang('app.pay_in')</th>
                             <th>@lang('app.pay_out')</th>

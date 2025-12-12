@@ -55,9 +55,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     Route::get('license-error', ['as' => 'frontend.page.error_license', 'uses' => 'PagesController@error_license']);
 
-    Route::get('jpstv/{id?}', ['as' => 'frontend.jpstv', 'uses' => 'PagesController@jpstv']);
-
-    Route::get('jpstv.json', ['as' => 'frontend.jpstv_json', 'uses' => 'PagesController@jpstv_json']);
+    // jpstv removed
 
     /**
      * Dashboard
@@ -151,9 +149,6 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     Route::get('/game_stat', ['as' => 'frontend.game_stat', 'uses' => 'GamesController@game_stat', ]);
 
-    Route::get('/tournaments', ['as' => 'frontend.tournaments', 'uses' => 'TournamentsController@index', ]);
-    Route::get('/tournaments/{tournament}', ['as' => 'frontend.tournaments.view', 'uses' => 'TournamentsController@view', ]);
-
     Route::prefix('payment')->group(function ()
     {
         Route::post('/interkassa/result', ['as' => 'payment.interkassa.result', 'uses' => 'Payment\InterkassaController@index']);
@@ -172,9 +167,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     Route::post('/sms/callback', ['as' => 'sms.callback', 'uses' => 'SMSController@index']);
 
-    Route::post('/coin-payment/create', "Payment\CoinPaymentController@store")
-        ->name('coin-payment.create');
-    Route::get('/coin-payment/show/{transaction_id}', "Payment\CoinPaymentController@show");
+    // Removed legacy CoinPayment integration (controller missing)
 
 });
 
@@ -218,23 +211,6 @@ Route::prefix('backend')
         /**
          * Dashboard
          */
-
-        // TERMINAL
-        Route::get('/terminal', 'TerminalController@index');
-        Route::post('/terminal/create', 'TerminalController@craeteTerminal');
-        Route::get('/terminal/details/{id}', 'TerminalController@detailsTerminal');
-        Route::post('/terminal/details/{id}', 'TerminalController@terminalUpdate');
-        Route::post('/terminal/balance/add', 'TerminalController@balanceAdd');
-        Route::post('/terminal/balance/out', 'TerminalController@balanceOut');
-        Route::post('/terminal/ajax/pay-tickets', 'TerminalController@ajaxPayTickets');
-
-        // ATM
-        Route::get('/atm', 'AtmController@index');
-        Route::get('/atm/create', 'AtmController@createNewAtm');
-        Route::get('/atm/reset', 'AtmController@resetAtm');
-        Route::get('/atm/status/{status}', 'AtmController@statusUpdate');
-        Route::get('/atm/newkey/{api_id}', 'AtmController@newApiKey');
-        Route::get('/atm/delete/{id}/{api_id}', 'AtmController@deleteATM');
 
 Route::redirect('/netpos', '/backend/user')->name('netpos');
 
@@ -283,29 +259,7 @@ Route::redirect('/netpos', '/backend/user')->name('netpos');
         ]);
         Route::get('/game_stat', ['as' => 'backend.game_stat', 'uses' => 'DashboardController@game_stat', 'middleware' => 'permission:stats.game', ]);
 
-        Route::get('/shift_stat', ['as' => 'backend.shift_stat', 'uses' => 'DashboardController@shift_stat', 'middleware' => 'permission:stats.shift', ]);
-
         Route::get('/transactions', ['as' => 'backend.transactions', 'uses' => 'DashboardController@transactions', 'middleware' => 'permission:stats.pay', ]);
-
-        Route::get('/start_shift', ['as' => 'backend.start_shift', 'uses' => 'DashboardController@start_shift']);
-
-        Route::get('/start_shift/print', ['as' => 'backend.start_shift.print', 'uses' => 'DashboardController@start_shift_print']);
-
-        Route::get('/invite', ['as' => 'backend.invites', 'uses' => 'DashboardController@invites', 'middleware' => ['permission:invite.manage', 'shopzero'], ]);
-        Route::get('invite/status/{status}', ['as' => 'backend.invite.status', 'uses' => 'DashboardController@invite_status', 'middleware' => ['permission:invite.edit', 'shopzero'], ]);
-
-        Route::post('/invite', ['as' => 'backend.invites.update', 'uses' => 'DashboardController@invite_update', 'middleware' => ['permission:invite.edit', 'shopzero'], ]);
-
-        Route::get('/wheelfortune', ['as' => 'backend.wheelfortune', 'uses' => 'DashboardController@wheelfortune', 'middleware' => ['permission:wheelfortune.manage', 'shopzero'], ]);
-        Route::get('wheelfortune/status/{status}', ['as' => 'backend.wheelfortune.status', 'uses' => 'DashboardController@wheelfortune_status', 'middleware' => ['permission:wheelfortune.manage', 'shopzero'], ]);
-
-        Route::post('/wheelfortune', ['as' => 'backend.wheelfortune.update', 'uses' => 'DashboardController@wheelfortune_update', 'middleware' => ['permission:wheelfortune.manage', 'shopzero'], ]);
-
-        Route::get('/banks', ['as' => 'backend.banks', 'uses' => 'DashboardController@banks', 'middleware' => ['shopzero', 'only_for_admin'], ]);
-
-        Route::post('/banks', ['as' => 'backend.banks.update', 'uses' => 'DashboardController@banks_update', 'middleware' => 'only_for_admin']);
-
-        Route::post('/banks/update', ['as' => 'backend.banks.update.do', 'uses' => 'DashboardController@do_banks_update', 'middleware' => 'only_for_admin']);
 
         /**
          * User Profile
@@ -323,15 +277,14 @@ Route::redirect('/netpos', '/backend/user')->name('netpos');
         Route::post('profile/two-factor/disable', ['as' => 'backend.profile.two-factor.disable', 'uses' => 'ProfileController@disableTwoFactorAuth']);
         Route::get('profile/sessions', ['as' => 'backend.profile.sessions', 'uses' => 'ProfileController@sessions']);
         Route::delete('profile/sessions/{session}/invalidate', ['as' => 'backend.profile.sessions.invalidate', 'uses' => 'ProfileController@invalidateSession']);
-        Route::match(['get', 'post'], 'profile/setshop', ['as' => 'backend.profile.setshop', 'uses' => 'ProfileController@setshop']);
+        // shop selection removed
 
         /**
          * User Management
          */
 
-        Route::get('user', ['as' => 'backend.user.list', 'uses' => 'UsersController@index', 'middleware' => 'permission:users.manage']);
+        Route::get('user', ['as' => 'backend.user.list', 'uses' => 'UsersController@index']);
 
-        Route::get('tree', ['as' => 'backend.user.tree', 'uses' => 'UsersController@tree', 'middleware' => 'permission:users.tree']);
         /*
         Route::get('statistics', [
             'as' => 'backend.statistics',
@@ -343,20 +296,20 @@ Route::redirect('/netpos', '/backend/user')->name('netpos');
 
         Route::post('profile/balance/update', ['uses' => 'UsersController@updateBalance', 'as' => 'backend.user.balance.update', ]);
         Route::post('profile/limit/update', ['uses' => 'UsersController@updateLimit', 'as' => 'backend.user.limit.update', ]);
-        Route::get('user/create', ['as' => 'backend.user.create', 'uses' => 'UsersController@create', 'middleware' => 'permission:users.add']);
-        Route::post('user/create', ['as' => 'backend.user.store', 'uses' => 'UsersController@store', 'middleware' => 'permission:users.add']);
+        Route::get('user/create', ['as' => 'backend.user.create', 'uses' => 'UsersController@create']);
+        Route::post('user/create', ['as' => 'backend.user.store', 'uses' => 'UsersController@store']);
         Route::get('user/{user}/stat', ['as' => 'backend.user.stat', 'uses' => 'UsersController@statistics']);
         Route::get('/user/{user}/specauth', ['as' => 'backend.user.specauth', 'uses' => 'UsersController@specauth', ]);
         Route::get('/user/back_login', ['as' => 'backend.user.back_login', 'uses' => 'UsersController@back_login', ]);
         Route::get('/user/send_phone_code', ['as' => 'backend.profile.send_phone_code', 'uses' => 'UsersController@send_phone_code', ]);
 
-        Route::post('user/mass', ['as' => 'backend.user.massadd', 'uses' => 'UsersController@massadd', 'middleware' => 'permission:users.add']);
+        Route::post('user/mass', ['as' => 'backend.user.massadd', 'uses' => 'UsersController@massadd']);
         Route::get('user/{user}/show', ['as' => 'backend.user.show', 'uses' => 'UsersController@view']);
-        Route::get('user/{user}/profile', ['as' => 'backend.user.edit', 'uses' => 'UsersController@edit', 'middleware' => 'permission:users.edit']);
-        Route::put('user/{user}/update/details', ['as' => 'backend.user.update.details', 'uses' => 'UsersController@updateDetails', 'middleware' => 'permission:users.edit']);
-        Route::put('user/{user}/update/login-details', ['as' => 'backend.user.update.login-details', 'uses' => 'UsersController@updateLoginDetails', 'middleware' => 'permission:users.edit']);
-        Route::delete('user/{user}/delete', ['as' => 'backend.user.delete', 'uses' => 'UsersController@delete', 'middleware' => 'permission:users.delete']);
-        Route::delete('user/{user}/hard_delete', ['as' => 'backend.user.hard_delete', 'uses' => 'UsersController@hard_delete', 'middleware' => 'permission:users.delete']);
+        Route::get('user/{user}/profile', ['as' => 'backend.user.edit', 'uses' => 'UsersController@edit']);
+        Route::put('user/{user}/update/details', ['as' => 'backend.user.update.details', 'uses' => 'UsersController@updateDetails']);
+        Route::put('user/{user}/update/login-details', ['as' => 'backend.user.update.login-details', 'uses' => 'UsersController@updateLoginDetails']);
+        Route::delete('user/{user}/delete', ['as' => 'backend.user.delete', 'uses' => 'UsersController@delete']);
+        Route::delete('user/{user}/hard_delete', ['as' => 'backend.user.hard_delete', 'uses' => 'UsersController@hard_delete']);
         Route::post('user/{user}/update/avatar', ['as' => 'backend.user.update.avatar', 'uses' => 'UsersController@updateAvatar']);
         Route::post('user/{user}/update/avatar/external', ['as' => 'backend.user.update.avatar.external', 'uses' => 'UsersController@updateAvatarExternal']);
         Route::get('user/{user}/sessions', ['as' => 'backend.user.sessions', 'uses' => 'UsersController@sessions']);
@@ -395,27 +348,6 @@ Route::redirect('/netpos', '/backend/user')->name('netpos');
         Route::get('category/{category}/edit', ['as' => 'backend.category.edit', 'uses' => 'CategoriesController@edit', 'middleware' => 'only_for_admin']);
         Route::post('category/{category}/update', ['as' => 'backend.category.update', 'uses' => 'CategoriesController@update', 'middleware' => 'only_for_admin']);
         Route::delete('category/{category}/delete', ['as' => 'backend.category.delete', 'uses' => 'CategoriesController@delete', 'middleware' => 'only_for_admin']);
-
-        /**
-         * Categories routes
-         */
-
-        Route::get('shops', ['as' => 'backend.shop.list', 'uses' => 'ShopsController@index', 'middleware' => 'permission:shops.manage']);
-        Route::get('shops/create', ['as' => 'backend.shop.create', 'uses' => 'ShopsController@create', 'middleware' => 'permission:shops.add']);
-        Route::post('shops/create', ['as' => 'backend.shop.store', 'uses' => 'ShopsController@store', 'middleware' => 'permission:shops.add']);
-
-        Route::get('shops/admin/create', ['as' => 'backend.shop.admin_create', 'uses' => 'ShopsController@admin_create', 'middleware' => 'permission:shops.manage']);
-        Route::post('shops/admin/create', ['as' => 'backend.shop.admin_store', 'uses' => 'ShopsController@admin_store', 'middleware' => 'permission:shops.manage']);
-        Route::get('shops/get_demo', ['as' => 'backend.shop.get_demo', 'uses' => 'ShopsController@get_demo', 'middleware' => 'permission:shops.free_demo']);
-
-        Route::get('shops/fast_shop', ['as' => 'backend.shop.fast_shop', 'uses' => 'ShopsController@fast_shop', 'middleware' => 'permission:shops.manage']);
-
-        Route::get('shops/{shop}/edit', ['as' => 'backend.shop.edit', 'uses' => 'ShopsController@edit', 'middleware' => 'permission:shops.manage']);
-        Route::post('shops/{shop}/update', ['as' => 'backend.shop.update', 'uses' => 'ShopsController@update', 'middleware' => 'permission:shops.manage']);
-        Route::post('shops/balance', ['as' => 'backend.shop.balance', 'uses' => 'ShopsController@balance', 'middleware' => 'permission:shops.manage']);
-        Route::delete('shops/{shop}/delete', ['as' => 'backend.shop.delete', 'uses' => 'ShopsController@delete', 'middleware' => 'permission:shops.delete']);
-        Route::delete('shops/{shop}/hard_delete', ['as' => 'backend.shop.hard_delete', 'uses' => 'ShopsController@hard_delete', 'middleware' => 'permission:shops.hard_delete']);
-        Route::delete('shops/{shop}/action/{action}', ['as' => 'backend.shop.action', 'uses' => 'ShopsController@action', 'middleware' => 'permission:shops.manage']);
 
         /**
          * Pincodes routes
@@ -492,18 +424,6 @@ Route::redirect('/netpos', '/backend/user')->name('netpos');
         Route::post('api/{api}/update', ['as' => 'backend.api.update', 'uses' => 'ApiController@update', 'middleware' => 'permission:api.edit']);
         Route::post('api/balance', ['as' => 'backend.api.balance', 'uses' => 'ApiController@balance', ]);
         Route::delete('api/{api}/delete', ['as' => 'backend.api.delete', 'uses' => 'ApiController@delete', 'middleware' => 'permission:api.delete', ]);
-
-        /**
-         * Info routes
-         */
-
-        Route::get('tournaments', ['as' => 'backend.tournament.list', 'uses' => 'TournamentController@index', 'middleware' => 'permission:tournaments.manage']);
-        Route::get('tournaments/create', ['as' => 'backend.tournament.create', 'uses' => 'TournamentController@create', 'middleware' => 'permission:tournaments.add']);
-        Route::post('tournaments/create', ['as' => 'backend.tournament.store', 'uses' => 'TournamentController@store', 'middleware' => 'permission:tournaments.add']);
-        Route::get('tournaments/{tournament}/edit', ['as' => 'backend.tournament.edit', 'uses' => 'TournamentController@edit', 'middleware' => 'permission:tournaments.edit']);
-        Route::post('tournaments/{tournament}/update', ['as' => 'backend.tournament.update', 'uses' => 'TournamentController@update', 'middleware' => 'permission:tournaments.edit']);
-        Route::delete('tournaments/{tournament}/delete', ['as' => 'backend.tournament.delete', 'uses' => 'TournamentController@delete', 'middleware' => 'permission:tournaments.delete']);
-        Route::get('tournaments/games.json', ['as' => 'backend.tournament.games', 'uses' => 'TournamentController@games', 'middleware' => 'permission:tournaments.manage']);
 
         /**
          * Info routes
@@ -603,8 +523,8 @@ Route::redirect('/netpos', '/backend/user')->name('netpos');
         Route::delete('securities/{item}/delete', ['as' => 'backend.securities.delete', 'uses' => 'DashboardController@securities_delete', 'middleware' => 'only_for_admin']);
         Route::get('generator', ['as' => 'backend.settings.generator', 'uses' => 'DashboardController@generator', ]);
         Route::post('generator', ['as' => 'backend.settings.generator.post', 'uses' => 'DashboardController@generator', ]);
-        Route::put('shops/block', ['as' => 'backend.settings.shop_block', 'uses' => 'SettingsController@shop_block', 'middleware' => 'permission:shops.block']);
-        Route::put('shops/unblock', ['as' => 'backend.settings.shop_unblock', 'uses' => 'SettingsController@shop_unblock', 'middleware' => 'permission:shops.unblock']);
+        
+        
         Route::put('settings/sync', ['as' => 'backend.settings.sync', 'uses' => 'SettingsController@sync']);
 
         Route::put('settings/delete/stat/game', ['as' => 'backend.settings.gelete_stat', 'uses' => 'SettingsController@gelete_stat', 'middleware' => 'only_for_admin']);
@@ -648,4 +568,5 @@ Route::redirect('/netpos', '/backend/user')->name('netpos');
 
     });
 });
+
 

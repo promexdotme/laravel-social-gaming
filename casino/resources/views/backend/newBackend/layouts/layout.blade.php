@@ -583,6 +583,15 @@
             margin-right: 10px;
         }
 
+        @supports (-ms-accelerator: true) {
+            .swal2-range input {
+                width: 100% !important;
+            }
+
+            .swal2-range output {
+                display: none;
+            }
+        }
 
         @media all and (-ms-high-contrast: none),
         (-ms-high-contrast: active) {

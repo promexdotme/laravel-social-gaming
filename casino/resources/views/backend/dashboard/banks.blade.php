@@ -30,12 +30,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>@lang('app.percent')</label>
-                                   <select name="percent" class="form-control">
-								<option value="">---</option>
-								@foreach (\VanguardLTE\Shop::$values['percent_labels'] as $key => $value)
-									<option value="{{ $key }}" {{ Request::get('percent') == $key ? 'selected' : '' }}>{{ $value }}</option>
-								@endforeach
-							</select>
+                                    {!! Form::select('percent', ['' => '---'] + \VanguardLTE\Shop::$values['percent_labels'], Request::get('percent'), ['class' => 'form-control']) !!}
                                 </div>
                             </div>
 
@@ -121,28 +116,26 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>@lang('app.order')</label>
-                                   <select name="sort_order" class="form-control">
-    <option value="">---</option>
-    <option value="asc" {{ $savedSortOrder == 'asc' ? 'selected' : '' }}>Low</option>
-    <option value="desc" {{ $savedSortOrder == 'desc' ? 'selected' : '' }}>High</option>
-</select>
+                                    {!! Form::select('sort_order', ['' => '---', 'asc' => 'Low', 'desc' => 'High'], $savedSortOrder, ['class' => 'form-control']) !!}
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>@lang('app.order')</label>
-                                   <select name="sort_field" class="form-control">
-    <option value="">---</option>
-    <option value="percent" {{ $savedSortFiled == 'percent' ? 'selected' : '' }}>Percent</option>
-    <option value="rtp" {{ $savedSortFiled == 'rtp' ? 'selected' : '' }}>RTP</option>
-    <option value="slots" {{ $savedSortFiled == 'slots' ? 'selected' : '' }}>Slots</option>
-    <option value="little" {{ $savedSortFiled == 'little' ? 'selected' : '' }}>Little</option>
-    <option value="table_bank" {{ $savedSortFiled == 'table_bank' ? 'selected' : '' }}>Table</option>
-    <option value="fish" {{ $savedSortFiled == 'fish' ? 'selected' : '' }}>Fish</option>
-    <option value="bonus" {{ $savedSortFiled == 'bonus' ? 'selected' : '' }}>Bonus</option>
-    <option value="total" {{ $savedSortFiled == 'total' ? 'selected' : '' }}>Total</option>
-</select>
+                                    {!! Form::select('sort_field',
+                                        [
+                                            '' => '---',
+                                            'percent' => 'Percent',
+                                            'rtp' => 'RTP',
+                                            'slots' => 'Slots',
+                                            'little' => 'Little',
+                                            'table_bank' => 'Table',
+                                            'fish' => 'Fish',
+                                            'bonus' => 'Bonus',
+                                            'total' => 'Total',
+                                        ],
+                                    $savedSortFiled, ['class' => 'form-control']) !!}
                                 </div>
                             </div>
 

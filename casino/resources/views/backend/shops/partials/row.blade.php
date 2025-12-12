@@ -10,7 +10,7 @@
 		<a href="{{ route('backend.user.edit', $shop->creator->id) }}" >{{ $shop->creator->username }}</a>
 		@endif
 	</td>
-	<td><a href="{{ route('frontend.jpstv', $shop->shop_id) }}" target="_blank">{{ $shop->shop_id }}</a></td>
+	<td>{{ $shop->shop_id }}</td>
     <td>{{ $shop->balance }}</td>
 	<td>{{ $shop->get_percent_label($shop->percent) }}</td>
 	<td>{{ $shop->max_win }}</td>

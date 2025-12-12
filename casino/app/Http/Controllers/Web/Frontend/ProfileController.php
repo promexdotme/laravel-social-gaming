@@ -730,10 +730,6 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
                     'rating' => $user->badge()
                 ];
                 $bonus_tooltip = '';
-                if( auth()->user()->tournaments > 0 ) 
-                {
-                    $bonus_tooltip .= ('<p>Tournaments = ' . number_format(auth()->user()->tournaments, 2, '.', '') . '</p>');
-                }
                 if( auth()->user()->happyhours > 0 ) 
                 {
                     $bonus_tooltip .= ('<p>Happy Hours = ' . number_format(auth()->user()->happyhours, 2, '.', '') . '</p>');
@@ -767,15 +763,11 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
                     $bonus_tooltip .= ('<p>Wheel Fortune = ' . number_format(auth()->user()->wheelfortune, 2, '.', '') . '</p>');
                 }
                 $data['profile']['bonus'] = [
-                    'available' => (auth()->user()->tournaments > 0 || auth()->user()->happyhours > 0 || auth()->user()->refunds > 0 || auth()->user()->progress > 0 || auth()->user()->daily_entries > 0 || auth()->user()->invite > 0 || auth()->user()->welcomebonus > 0 || auth()->user()->smsbonus > 0 || auth()->user()->wheelfortune > 0 ? true : false), 
-                    'balance' => number_format(auth()->user()->tournaments + auth()->user()->happyhours + auth()->user()->refunds + auth()->user()->progress + auth()->user()->daily_entries + auth()->user()->invite + auth()->user()->welcomebonus + auth()->user()->smsbonus + auth()->user()->wheelfortune, 2, '.', ''), 
+                    'available' => (auth()->user()->happyhours > 0 || auth()->user()->refunds > 0 || auth()->user()->progress > 0 || auth()->user()->daily_entries > 0 || auth()->user()->invite > 0 || auth()->user()->welcomebonus > 0 || auth()->user()->smsbonus > 0 || auth()->user()->wheelfortune > 0 ? true : false), 
+                    'balance' => number_format(auth()->user()->happyhours + auth()->user()->refunds + auth()->user()->progress + auth()->user()->daily_entries + auth()->user()->invite + auth()->user()->welcomebonus + auth()->user()->smsbonus + auth()->user()->wheelfortune, 2, '.', ''), 
                     'tooltip' => $bonus_tooltip
                 ];
                 $wager_tooltip = '';
-                if( auth()->user()->count_tournaments > 0 ) 
-                {
-                    $wager_tooltip .= ('<p>Tournaments = ' . number_format(auth()->user()->count_tournaments, 2, '.', '') . '</p>');
-                }
                 if( auth()->user()->count_happyhours > 0 ) 
                 {
                     $wager_tooltip .= ('<p>Happy Hours = ' . number_format(auth()->user()->count_happyhours, 2, '.', '') . '</p>');
@@ -809,8 +801,8 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
                     $wager_tooltip .= ('<p>Wheel Fortune = ' . number_format(auth()->user()->count_wheelfortune, 2, '.', '') . '</p>');
                 }
                 $data['profile']['wager'] = [
-                    'available' => (auth()->user()->count_tournaments > 0 || auth()->user()->count_happyhours > 0 || auth()->user()->count_refunds > 0 || auth()->user()->count_progress > 0 || auth()->user()->count_daily_entries > 0 || auth()->user()->count_invite > 0 || auth()->user()->count_welcomebonus > 0 || auth()->user()->count_smsbonus > 0 || auth()->user()->count_wheelfortune > 0 ? true : false), 
-                    'balance' => number_format(auth()->user()->count_tournaments + auth()->user()->count_happyhours + auth()->user()->count_refunds + auth()->user()->count_progress + auth()->user()->count_daily_entries + auth()->user()->count_invite + auth()->user()->count_welcomebonus + auth()->user()->count_smsbonus + auth()->user()->count_wheelfortune, 2, '.', ''), 
+                    'available' => (auth()->user()->count_happyhours > 0 || auth()->user()->count_refunds > 0 || auth()->user()->count_progress > 0 || auth()->user()->count_daily_entries > 0 || auth()->user()->count_invite > 0 || auth()->user()->count_welcomebonus > 0 || auth()->user()->count_smsbonus > 0 || auth()->user()->count_wheelfortune > 0 ? true : false), 
+                    'balance' => number_format(auth()->user()->count_happyhours + auth()->user()->count_refunds + auth()->user()->count_progress + auth()->user()->count_daily_entries + auth()->user()->count_invite + auth()->user()->count_welcomebonus + auth()->user()->count_smsbonus + auth()->user()->count_wheelfortune, 2, '.', ''), 
                     'tooltip' => $wager_tooltip
                 ];
                 $data['profile']['refunds'] = [
@@ -841,30 +833,6 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
                 $data['jackpots'] = $jackpots->toArray();
             }
             $data['jackpotSum'] = \VanguardLTE\JPG::where('shop_id', auth()->user()->shop_id)->sum('balance');
-            $tournaments = \VanguardLTE\Tournament::where('shop_id', auth()->user()->shop_id)->where('start', '<=', \Carbon\Carbon::now())->where('end', '>=', \Carbon\Carbon::now()->subMinutes(3))->get();
-            if( $tournaments ) 
-            {
-                $data['tournaments'] = [];
-                foreach( $tournaments as $tournament ) 
-                {
-                    $data['tournaments'][$tournament->id] = [
-                        'my_place' => ($tournament->my_place() ?: '---'), 
-                        'data'
-                    ];
-                    if( $tournament->stats ) 
-                    {
-                        foreach( $tournament->get_stats(0, 10, true) as $index => $stat ) 
-                        {
-                            $data['tournaments'][$tournament->id]['data'][] = [
-                                'index' => $index, 
-                                'username' => $stat['username'], 
-                                'points' => $stat['points'], 
-                                'prize' => $stat['prize']
-                            ];
-                        }
-                    }
-                }
-            }
             return json_encode($data);
         }
         public function message(\Illuminate\Http\Request $request)

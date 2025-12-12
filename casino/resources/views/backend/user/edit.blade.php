@@ -10,9 +10,7 @@
     </section>
 
     <section class="content">
-		<form action="{{ route('backend.user.update.details', $user->id) }}" method="POST" id="details-form">
-			@method('PUT')
-			@csrf
+        {!! Form::open(['route' => ['backend.user.update.details', $user->id], 'method' => 'PUT', 'id' => 'details-form']) !!}
 
         <div class="row">
             @include('backend.user.partials.info')
@@ -112,7 +110,7 @@
                 </div>
             </div>
         </div>
-		</form>
+        {!! Form::close() !!}
 
 
         @if(!$user->hasRole('admin'))
@@ -139,9 +137,9 @@
             $('form#outForm').submit();
         });
     </script>
-   <script src="{{ asset('/back/js/as/app.js') }}"></script>
-   <script src="{{ asset('/back/js/as/btn.js') }}"></script>
-   <script src="{{ asset('/back/js/as/profile.js') }}"></script>
+    {!! HTML::script('/back/js/as/app.js') !!}
+    {!! HTML::script('/back/js/as/btn.js') !!}
+    {!! HTML::script('/back/js/as/profile.js') !!}
     {!! JsValidator::formRequest('VanguardLTE\Http\Requests\User\UpdateDetailsRequest', '#details-form') !!}
     {!! JsValidator::formRequest('VanguardLTE\Http\Requests\User\UpdateLoginDetailsRequest', '#login-details-form') !!}
 @stop

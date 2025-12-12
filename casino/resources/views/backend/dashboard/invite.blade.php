@@ -11,8 +11,7 @@
 
     <section class="content">
         @if( auth()->user()->hasPermission('invite.edit') )
-             <form action="{{ route('backend.invites.update') }}" method="POST">
-            @csrf
+            {!! Form::open(['route' => 'backend.invites.update']) !!}
         @endif
         <div class="box box-default">
             <div class="box-header with-border">
@@ -71,22 +70,14 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <label>@lang('app.wager')</label>
-                            <select name="wager" class="form-control">
-                            @foreach(\VanguardLTE\Invite::$values['wager'] as $key => $value)
-                                <option value="{{ $key }}" {{ $invite->wager == $key ? 'selected' : '' }}>{{ $value }}</option>
-                            @endforeach
-                        </select>
+                            {!! Form::select('wager', \VanguardLTE\Invite::$values['wager'], $invite->wager, ['class' => 'form-control']) !!}
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="form-group">
                             <label for="status">@lang('app.type')</label>
-                            <select name="type" class="form-control" id="type">
-                            @foreach(\VanguardLTE\Invite::$values['type'] as $key => $value)
-                                <option value="{{ $key }}" {{ $invite->type == $key ? 'selected' : '' }}>{{ $value }}</option>
-                            @endforeach
-                        </select>
+                            {!! Form::select('type', \VanguardLTE\Invite::$values['type'], $invite->type, ['class' => 'form-control', 'id' => 'type']) !!}
                         </div>
                     </div>
 
@@ -103,7 +94,7 @@
             @endif
         </div>
         @if( auth()->user()->hasPermission('invite.edit') )
-        </form>
+        {!! Form::close() !!}
         @endif
     </section>
 

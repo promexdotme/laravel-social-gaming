@@ -32,7 +32,7 @@
                         It is forbidden to use bonus funds exclusively for passing bonus stages. For example, when the bonus or cash is only used to go through the bonus stages (for example, collecting 9 out of 10 coins to receive a bonus in the game), and then the final stages (for example, a game to get the final coin to get 10 out of 10 coins to open the bonus ) culminate in real money bets where bonus funds have been canceled, lost or wagered and converted into cash. All winnings generated during this game may be void.
                     </p>
                     <p class="text">
-                        Welcome package, reloads and other deposit bonuses are not available for players from Finland. However, they can take full advantage of the VIP program and personal VIP bonuses, weekly and daily tournaments, lotteries and other regular promotions.
+                        Welcome package, reloads and other deposit bonuses are not available for players from Finland. However, they can take full advantage of the VIP program and personal VIP bonuses, lotteries and other regular promotions.
                     </p>
                     <p class="text">You can read the general conditions for granting bonuses and other conditions here.</p>
                 </div>

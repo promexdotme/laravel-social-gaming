@@ -2,6 +2,21 @@
 
 /*
 |--------------------------------------------------------------------------
+| Load Environment Variables
+|--------------------------------------------------------------------------
+|
+| Ensure the .env file is read before the application is bootstrapped.
+| Without this, the framework falls back to default config values and
+| database credentials may be wrong.
+|
+*/
+
+if (file_exists(__DIR__ . '/../.env')) {
+    Dotenv\Dotenv::createImmutable(dirname(__DIR__))->safeLoad();
+}
+
+/*
+|--------------------------------------------------------------------------
 | Create The Application
 |--------------------------------------------------------------------------
 |

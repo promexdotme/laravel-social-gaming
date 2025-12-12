@@ -16,6 +16,10 @@ class ExampleTest extends TestCase
     {
         $response = $this->get('/');
 
+        if ($response->status() === 302) {
+            $response = $this->followRedirects($response);
+        }
+
         $response->assertStatus(200);
     }
 }

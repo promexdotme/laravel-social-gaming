@@ -25,12 +25,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <label>@lang('app.type')</label>
-                           <select name="type" class="form-control">
-                                <option value="">---</option>
-                                <option value="user" {{ Request::get('type') == 'user' ? 'selected' : '' }}>@lang('app.user')</option>
-                                <option value="game" {{ Request::get('type') == 'game' ? 'selected' : '' }}>@lang('app.game')</option>
-                                <option value="shop" {{ Request::get('type') == 'shop' ? 'selected' : '' }}>@lang('app.shop')</option>
-                            </select>
+                            {!! Form::select('type', ['' => '---', 'user' => 'User', 'game' => 'Game', 'shop' => 'Shop'], Request::get('type'), ['class' => 'form-control']) !!}
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
@@ -91,9 +86,7 @@
                                                     {{ $security->user->username }}
                                                 </a>
                                             @elseif( strripos($security->type, 'shop')  !== false )
-                                                <a href="{{ route('backend.shop.edit', $security->item_id) }}">
-                                                    {{ $security->shop->name }}
-                                                </a>
+                                                {{ $security->shop->name }}
                                             @else
                                                 <a href="{{ route('backend.game.edit', $security->item_id) }}">
                                                     {{ $security->game->name }}
@@ -111,9 +104,7 @@
                                         <td>{{ $security->count }}</td>
                                         <td>
                                             @if( $security->shop )
-                                                <a href="{{ route('backend.shop.edit', $security->shop_id) }}">
-                                                    {{ $security->shop->name }}
-                                                </a>
+                                                {{ $security->shop->name }}
                                             @endif
                                         </td>
                                         <td>{{ \Carbon\Carbon::parse($security->created_at)->format(config('app.time_format')) }}</td>

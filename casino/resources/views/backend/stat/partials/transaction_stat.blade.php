@@ -70,7 +70,7 @@
         <td>{{  $transaction->created_at->format(config('app.date_time_format')) }}</td>
     </tr>
 
-@elseif( in_array($transaction->system, ['progress','tournament','refund','happyhour','invite','daily_entry','welcome_bonus','sms_bonus','wheelfortune']) )
+@elseif( in_array($transaction->system, ['progress','refund','happyhour','invite','daily_entry','welcome_bonus','sms_bonus','wheelfortune']) )
     <tr>
     @if(auth()->user()->hasRole(['admin']))
         <td></td>

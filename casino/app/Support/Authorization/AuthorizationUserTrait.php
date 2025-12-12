@@ -21,7 +21,23 @@ trait AuthorizationUserTrait
      */
     public function hasRole($role)
     {
-        return $this->role->name === $role;
+        if (! $this->role) {
+            return false;
+        }
+
+        $roles = array_map('strtolower', (array) $role);
+        $current = strtolower($this->role->slug ?? $this->role->name ?? '');
+
+        if (in_array('admin', $roles, true)) {
+            return $current === 'admin';
+        }
+
+        // Treat any non-admin as generic user
+        if (in_array('user', $roles, true)) {
+            return $current !== 'admin';
+        }
+
+        return in_array($current, $roles, true);
     }
 
     /**
@@ -32,6 +48,10 @@ trait AuthorizationUserTrait
      */
     public function hasPermission($permission, $allRequired = true)
     {
+        if ($this->hasRole('admin')) {
+            return true;
+        }
+
         $permission = (array) $permission;
 
         return $allRequired

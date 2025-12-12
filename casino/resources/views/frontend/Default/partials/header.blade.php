@@ -54,12 +54,11 @@
 
                             <li class="tooltip-btn bonusMenu">
                                 @if(
-                                    auth() ->user()->tournaments > 0 || auth() ->user()->happyhours > 0 || auth() ->user()->refunds > 0 ||
+                                    auth() ->user()->happyhours > 0 || auth() ->user()->refunds > 0 ||
                                     auth() ->user()->progress > 0 || auth() ->user()->daily_entries > 0 || auth() ->user()->invite > 0 ||
                                     auth() ->user()->welcomebonus > 0 || auth() ->user()->smsbonus > 0 || auth() ->user()->wheelfortune > 0
                                 )
                                     <span class="tooltip-item">
-                                        @if(auth() ->user()->tournaments > 0)<p>Tournaments = {{ number_format(auth() ->user()->tournaments, 2,".","") }}</p>@endif
                                         @if(auth() ->user()->happyhours > 0)<p>Happy Hours = {{ number_format(auth() ->user()->happyhours, 2,".","") }}</p>@endif
                                         @if(auth() ->user()->refunds > 0)<p>Refund = {{ number_format(auth() ->user()->refunds, 2,".","") }}</p>@endif
                                         @if(auth() ->user()->progress > 0)<p>Progress Bonus = {{ number_format(auth() ->user()->progress, 2,".","") }}</p>@endif
@@ -73,18 +72,17 @@
                                 @else
                                     <span class="info-icon _disabled"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M3.5,5A3.75,3.75,0,0,1,3,3,3,3,0,0,1,6,0a4.36,4.36,0,0,1,4,3.11A4.36,4.36,0,0,1,14,0a3,3,0,0,1,3,3,3.75,3.75,0,0,1-.5,2H18a2,2,0,0,1,2,2V9a2,2,0,0,1-2,2v7a2,2,0,0,1-2,2H4a2,2,0,0,1-2-2V11A2,2,0,0,1,0,9V7A2,2,0,0,1,2,5ZM9,7H2V9H9Zm9,2H11V7h7ZM9,18V11H4v7Zm7,0H11V11h5ZM6,2A1,1,0,0,0,5,3C5,4.25,6,4.85,8.43,5,8.16,3.11,7.16,2,6,2Zm5.5,3c.27-1.86,1.27-3,2.43-3a1,1,0,0,1,1,1C14.93,4.25,13.91,4.85,11.5,5Z"/></svg></span>
                                 @endif
-                                <span class="info-value">{{ number_format( (auth() ->user()->tournaments + auth() ->user()->happyhours + auth()->user()->refunds + auth() ->user()->progress + auth() ->user()->daily_entries + auth() ->user()->invite + auth() ->user()->welcomebonus + auth() ->user()->smsbonus + auth() ->user()->wheelfortune), 2,".","") }} {{ $currency }}</span>
+                                <span class="info-value">{{ number_format( (auth() ->user()->happyhours + auth()->user()->refunds + auth() ->user()->progress + auth() ->user()->daily_entries + auth() ->user()->invite + auth() ->user()->welcomebonus + auth() ->user()->smsbonus + auth() ->user()->wheelfortune), 2,".","") }} {{ $currency }}</span>
                             </li>
 
 
                             <li class="tooltip-btn wagerMenu">
                                 @if(
-                                    auth() ->user()->count_tournaments > 0 || auth() ->user()->count_happyhours > 0 || auth() ->user()->count_refunds > 0 ||
+                                    auth() ->user()->count_happyhours > 0 || auth() ->user()->count_refunds > 0 ||
                                     auth() ->user()->count_progress > 0 || auth() ->user()->count_daily_entries > 0 || auth() ->user()->count_invite > 0 ||
                                     auth() ->user()->count_welcomebonus > 0 || auth() ->user()->count_smsbonus > 0 || auth() ->user()->count_wheelfortune > 0
                                 )
                                     <span class="tooltip-item">
-                                        @if(auth() ->user()->count_tournaments > 0)<p>Tournaments = {{ number_format(auth() ->user()->count_tournaments, 2,".","") }}</p>@endif
                                         @if(auth() ->user()->count_happyhours > 0)<p>Happy Hours = {{ number_format(auth() ->user()->count_happyhours, 2,".","") }}</p>@endif
                                         @if(auth() ->user()->count_refunds > 0)<p>Refund = {{ number_format(auth() ->user()->count_refunds, 2,".","") }}</p>@endif
                                         @if(auth() ->user()->count_progress > 0)<p>Progress Bonus = {{ number_format(auth() ->user()->count_progress, 2,".","") }}</p>@endif
@@ -99,7 +97,7 @@
                                     <span class="info-icon _disabled"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"><path d="M0,11A11,11,0,1,0,11,0,11,11,0,0,0,0,11Zm20,0a9,9,0,1,1-9-9A9,9,0,0,1,20,11ZM6.58,16.94,7.43,12,3.85,8.53l4.94-.71L11,3.34l2.21,4.48,4.94.71L14.57,12l.85,4.92L11,14.62Zm5.85-5.62.33,2L11,12.36l-1.76.92.33-2L8.15,9.93l2-.29L11,7.86l.88,1.78,2,.29Z"/></svg></span>
                                 @endif
 
-                                <span class="info-value">{{ number_format( (auth() ->user()->count_tournaments + auth() ->user()->count_happyhours + auth()->user()->count_refunds + auth() ->user()->count_progress + auth() ->user()->count_daily_entries + auth() ->user()->count_invite + auth() ->user()->count_welcomebonus + auth() ->user()->count_smsbonus + auth() ->user()->count_wheelfortune), 2,".","") }} {{ $currency }}</span>
+                                <span class="info-value">{{ number_format( (auth() ->user()->count_happyhours + auth()->user()->count_refunds + auth() ->user()->count_progress + auth() ->user()->count_daily_entries + auth() ->user()->count_invite + auth() ->user()->count_welcomebonus + auth() ->user()->count_smsbonus + auth() ->user()->count_wheelfortune), 2,".","") }} {{ $currency }}</span>
                             </li>
 
                             <li class="tooltip-btn refunds-icon">

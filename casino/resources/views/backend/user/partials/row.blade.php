@@ -24,7 +24,6 @@
 
 	<td class="balance_{{ $user->id }}">{{ number_format(floatval($user->balance), 2, '.', '') }}</td>
 	<td class="rating_{{ $user->id }}">{{ $user->rating }}</td>
-	<td class="count_tournaments_{{ $user->id }}">{{ number_format(floatval($user->count_tournaments), 2, '.', '') }}</td>
 	<td class="count_progress_{{ $user->id }}">{{ number_format(floatval($user->count_progress), 2, '.', '') }}</td>
 	<td class="count_daily_entries_{{ $user->id }}">{{ number_format(floatval($user->count_daily_entries), 2, '.', '') }}</td>
 	<td class="count_invite_{{ $user->id }}">{{ number_format(floatval($user->count_invite), 2, '.', '') }}</td>
@@ -34,43 +33,21 @@
 	<td class="count_refunds_{{ $user->id }}">{{ number_format(floatval($user->count_refunds), 2, '.', '') }}</td>
 
 	<td>
-		@if(
-			(Auth::user()->hasRole('admin') && $user->hasRole(['agent'])) ||
-			(Auth::user()->hasRole('agent') && $user->hasRole(['distributor'])) ||
-			(Auth::user()->hasRole('cashier') && $user->hasRole('user'))
-		)
+		@if(Auth::user()->hasRole('admin'))
 		<a class="newPayment addPayment" href="#" data-toggle="modal" data-target="#openAddModal" data-id="{{ $user->id }}" >
 		<button type="button" class="btn btn-block btn-success btn-xs">@lang('app.add')</button>
 		</a>
-		@elseif(auth()->user()->hasRole('distributor'))
-		<button type="button" class="btn btn-block btn-success hidden btn-xs">@lang('app.add')</button>
-		@elseif(auth()->user()->hasRole('manager'))
-		<button type="button" class="btn btn-block btn-success hidden btn-xs">@lang('app.add')</button>
 		@else
 			<button type="button" class="btn btn-block btn-success disabled btn-xs">@lang('app.add')</button>
 		@endif
 	</td>
 	<td>
 		@if(
-    		(
-				(Auth::user()->hasRole('admin') && $user->hasRole(['agent'])) ||
-				(Auth::user()->hasRole('agent') && $user->hasRole(['distributor'])) ||
-				(Auth::user()->hasRole('cashier') && $user->hasRole('user'))
-			)
-			&&
-			!( $user->count_tournaments > 0 || $user->count_happyhours > 0 || $user->count_refunds > 0 ||
-                $user->count_progress > 0 || $user->count_daily_entries > 0 || $user->count_invite > 0 ||
-                $user->count_welcomebonus > 0 || $user->count_smsbonus > 0 || $user->count_wheelfortune > 0 ||
-                $user->status == \VanguardLTE\Support\Enum\UserStatus::BANNED
-            )
+    		Auth::user()->hasRole('admin')
 		)
 		<a class="newPayment outPayment" href="#" data-toggle="modal" data-target="#openOutModal" data-id="{{ $user->id }}" >
 		<button type="button" class="btn btn-block btn-danger btn-xs">@lang('app.out')</button>
 		</a>
-		@elseif(auth()->user()->hasRole('distributor'))
-		<button type="button" class="btn btn-block btn-danger hidden btn-xs">@lang('app.out')</button>
-		@elseif(auth()->user()->hasRole('manager'))
-		<button type="button" class="btn btn-block btn-danger hidden btn-xs">@lang('app.out')</button>
 		@else
 			<button type="button" class="btn btn-block btn-danger disabled btn-xs">@lang('app.out')</button>
 		@endif

@@ -106,7 +106,7 @@ case '4':
         if (file_exists($file)) {
             $content = file_get_contents($file);
             // Replace the domain name
-            $content = str_replace("377casino.com", $_POST['domain_name'], $content);
+            $content = str_replace("betshop.io", $_POST['domain_name'], $content);
             
             // Replace ports if they have changed
             foreach ($defaultPorts as $defaultPort => $newPort) {
