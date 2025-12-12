@@ -108,6 +108,10 @@ namespace VanguardLTE
             ]
         ];
         public $timestamps = false;
+        public function getFrontendAttribute($value)
+        {
+            return ($value && strtolower($value) !== 'default') ? $value : 'Minimal';
+        }
         public static function boot()
         {
             parent::boot();

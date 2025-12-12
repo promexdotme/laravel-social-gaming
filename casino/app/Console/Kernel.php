@@ -12,7 +12,6 @@ namespace VanguardLTE\Console
                 \Spatie\DbDumper\Databases\MySql::create()->setDbName(config('database.connections.mysql.database'))->setUserName(config('database.connections.mysql.username'))->setPassword(config('database.connections.mysql.password'))->dumpToFile(base_path() . '/backups/' . date('Hi_dmY') . '.sql');
             })->daily();
             $_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332 = 45;
-            $schedule->call(new Schedules\Tournaments($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyMinute();
             $schedule->call(new Schedules\SMSBonuses($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyMinute();
             $schedule->call(new Schedules\Securities($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyFiveMinutes();
             $schedule->call(new Schedules\ShopCreates($_obf_0D2F242F2D052B0938193F2D0D2F192F27160616153332))->everyMinute();

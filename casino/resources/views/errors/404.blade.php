@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-<meta http-equiv="Refresh" content="0; url='/'" />
+<!-- <meta http-equiv="Refresh" content="0; url='/'" /> -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>404 Custom Error Page Example</title>

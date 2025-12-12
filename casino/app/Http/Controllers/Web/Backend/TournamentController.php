@@ -7,13 +7,7 @@ namespace VanguardLTE\Http\Controllers\Web\Backend
     {
         public function __construct()
         {
-            $this->middleware([
-                'auth', 
-                '2fa'
-            ]);
-            $this->middleware('permission:access.admin.panel');
-            $this->middleware('permission:tournaments.manage');
-            $this->middleware('shop_not_zero');
+            abort(404);
         }
         public function index(\Illuminate\Http\Request $request)
         {

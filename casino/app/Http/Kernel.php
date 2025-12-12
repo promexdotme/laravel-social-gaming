@@ -18,7 +18,8 @@ namespace VanguardLTE\Http
                 'Illuminate\View\Middleware\ShareErrorsFromSession', 
                 'VanguardLTE\Http\Middleware\VerifyCsrfToken', 
                 'Illuminate\Routing\Middleware\SubstituteBindings', 
-                'VanguardLTE\Http\Middleware\SelectLanguage'
+                'VanguardLTE\Http\Middleware\SelectLanguage',
+                'VanguardLTE\Http\Middleware\ForceShopOne'
             ], 
             'api' => [
                 'VanguardLTE\Http\Middleware\UseApiGuard', 
@@ -46,7 +47,9 @@ namespace VanguardLTE\Http
             'only_for_admin' => 'VanguardLTE\Http\Middleware\OnlyForAdmin', 
             'permission_api' => 'VanguardLTE\Http\Middleware\VerifyPermission', 
             'checker' => 'VanguardLTE\Http\Middleware\Checker', 
-            '2fa' => 'PragmaRX\Google2FALaravel\Middleware'
+            '2fa' => 'PragmaRX\Google2FALaravel\Middleware',
+            'disable.legacy' => 'VanguardLTE\Http\Middleware\DisableLegacyFeatures',
+            'game.homebutton' => 'VanguardLTE\Http\Middleware\InjectGameHomeButton'
         ];
     }
 

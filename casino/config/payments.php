@@ -1,41 +1,16 @@
 <?php
 
 return [
+    'default_currency' => env('APP_CURRENCY', 'USD'),
 
-    /*
-    |--------------------------------------------------------------------------
-    | Piastrix
-    |--------------------------------------------------------------------------    
-    */
-
-    'piastrix' => [
-        'id' => '',
-		'key' => ''
+    'drivers' => [
+        'btcpay' => [
+            'enabled' => env('BTCPAY_ENABLED', false),
+            'host' => env('BTCPAY_HOST', ''), // e.g. https://btcpay.yourdomain.com
+            'store_id' => env('BTCPAY_STORE_ID', ''),
+            'api_key' => env('BTCPAY_API_KEY', ''),
+            'webhook_secret' => env('BTCPAY_WEBHOOK_SECRET', ''),
+            'webhook_route' => '/payment/webhook/btcpay',
+        ],
     ],
-	
-    'interkassa' => [
-        'fields' => ['shop_id', 'token'],
-        'required' => ['shop_id', 'token'],
-        'id' => '',
-        'token' => ''
-    ],
-
-    'coinbase' => [
-        'fields' => ['api_key', 'webhook_key'],
-        'required' => ['api_key', 'webhook_key'],
-        'api_key' => '',
-        'webhook_key' => ''
-    ],
-
-    'btcpayserver' => [
-        'fields' => ['server', 'store_id', 'api_token'],
-        'required' => ['server', 'store_id', 'api_token'],
-        'server' => '',
-        'user' => '',
-        'password' => '',
-        'token' => '',
-        'user_token' => '',
-        'store_id' => ''
-    ]
-
 ];

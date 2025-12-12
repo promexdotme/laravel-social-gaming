@@ -17,7 +17,12 @@ if (! function_exists('settings')) {
             return app('anlutro\LaravelSettings\SettingStore');
         }
 
-        return app('anlutro\LaravelSettings\SettingStore')->get($key, $default);
+        $value = app('anlutro\LaravelSettings\SettingStore')->get($key, $default);
+        if ($key === 'frontend' && (!$value || strtolower($value) === 'default')) {
+            return 'Minimal';
+        }
+
+        return $value;
     }
 }
 

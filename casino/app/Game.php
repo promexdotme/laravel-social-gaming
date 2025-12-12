@@ -819,56 +819,8 @@ namespace VanguardLTE
         }
         public function tournament_stat($slotState, $user_id, $bet, $win)
         {
-            $tournaments = TournamentGame::where('game_id', $this->id)->get();
-            if( $tournaments ) 
-            {
-                foreach( $tournaments as $tournament ) 
-                {
-                    if( \Carbon\Carbon::now()->diffInSeconds(\Carbon\Carbon::parse($tournament->tournament->start), false) >= 0 ) 
-                    {
-                        continue;
-                    }
-                    else if( \Carbon\Carbon::now()->diffInSeconds(\Carbon\Carbon::parse($tournament->tournament->end), false) <= 0 ) 
-                    {
-                        continue;
-                    }
-                    if( $bet < $tournament->tournament->bet ) 
-                    {
-                        continue;
-                    }
-                    $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732 = TournamentStat::where([
-                        'tournament_id' => $tournament->tournament_id, 
-                        'user_id' => $user_id, 
-                        'is_bot' => 0
-                    ])->first();
-                    if( !$_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732 ) 
-                    {
-                        $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732 = TournamentStat::create([
-                            'tournament_id' => $tournament->tournament_id, 
-                            'user_id' => $user_id, 
-                            'is_bot' => 0
-                        ]);
-                    }
-                    $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732->increment('sum_of_bets', $bet);
-                    $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732->increment('sum_of_wins', $win);
-                    $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732->increment('spins');
-                    switch( $tournament->tournament->type ) 
-                    {
-                        case 'amount_of_bets':
-                            $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732->increment('points', $bet);
-                            break;
-                        case 'amount_of_winnings':
-                            $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732->increment('points', $win);
-                            break;
-                        case 'win_to_bet_ratio':
-                            $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732->increment('points', $win / $bet);
-                            break;
-                        case 'profit':
-                            $_obf_0D5C0E330436160F1E3D275B11262E3837273C010E3732->increment('points', $win - $bet);
-                            break;
-                    }
-                }
-            }
+            // Tournaments feature is disabled.
+            return;
         }
         public function set_gamebank($balance, $type = 'update', $slotState = '')
         {

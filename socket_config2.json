@@ -2,10 +2,10 @@
 
 "port":22197,
 
-"host":"377casino.com",
+"host":"clients.377.live",
 "prefix":"https://",
 
-"host_ws":"377casino.com",
+"host_ws":"clients.377.live",
 "prefix_ws":"wss://",
 
 "ssl":true

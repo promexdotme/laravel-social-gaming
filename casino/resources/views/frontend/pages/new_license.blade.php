@@ -5,7 +5,7 @@
 @section('content')
 
 	<section class="content-header">
-		@include('backend.partials.messages')
+		{{-- backend messages removed --}}
 	</section>
 
     <div class="title">@lang('app.license_error')</div>

@@ -27,13 +27,10 @@ namespace VanguardLTE\Http\Middleware
             }
             else if( !$request->is('api*') ) 
             {
+                // Legacy backend is removed; keep admins on the current surface.
                 if( $request->is('backend*') && !$this->auth->user()->hasPermission('access.admin.panel') ) 
                 {
                     return redirect()->to('/');
-                }
-                if( !$request->is('backend*') && $this->auth->user()->hasPermission('access.admin.panel') ) 
-                {
-                    return redirect()->to('/backend/');
                 }
             }
             return $next($request);
