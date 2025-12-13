@@ -13,7 +13,7 @@
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # ✅ Proxy all /games/* requests to VPS FIRST
-    RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L]
+    RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L ,QSA]
 
     # Redirect Trailing Slashes If Not A Folder...
     # ❗ but NEVER touch /games/* (avoid Apache <-> nginx slash ping-pong)
@@ -30,4 +30,5 @@
 
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
+    RequestHeader set X-CDN-Key "REQUEST-A-CDN-KEY-TO-USE-OUR-SERVER"
 </IfModule>
