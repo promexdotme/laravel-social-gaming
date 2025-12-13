@@ -8,6 +8,31 @@
 ## 📖 About This Version (Lite 12)
 This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected version of the legacy platform, stripped down to the essentials for developers building **Social Arcade** and **Amusement** platforms.
 
+## 💎 Unlock the Full Potential
+The Lite version is free for testing. To run a live production site with support and high-speed assets, choose a Sponsorship Tier.
+
+<div align="center">
+  <h3>
+    <a href="https://github.com/sponsors/promexdotme">
+      🚀 Click Here to Sponsor & Upgrade
+    </a>
+  </h3>
+</div>
+
+| Feature | 🆓 Free / Public | 🥉 $10 Supporter | 🥈 $25 Builder | 🥇 $99 Enterprise |
+| :--- | :---: | :---: | :---: | :---: |
+| **Discord Access** | Read-Only | **Chat & Support** | Priority Support | **Direct Access** |
+| **Infrastructure** | Public (Rate Limited) | Public (Rate Limited) | **CDN Whitelist** ✅ | **Self-Hosted** (You own it) |
+| **Websockets** | Shared | Shared | **Private Repo Access** | **Source Code** |
+| **Game Assets** | Cloud Only | Cloud Only | Cloud Only | **40GB Download (Drive)** |
+| **Versions** | Lite-12 Only | Lite-12 Only | Lite-12 Only | **Full + Legacy Packaged** |
+
+### ⚡ Tier Breakdown
+*   **$10 (Supporter):** Unlocks the **Discord Chat**. Get help, report bugs, and talk with other devs (Role: `@Ad-Free Supporter`).
+*   **$25 (Builder):** **CDN Whitelist.** We authorize your domain on our High-Speed Game CDN & Cloud Sockets. Plus, get access to the **Private Socket Repo** to see how it works.
+*   **$99 (SaaS Studio):** **Total Ownership.** Get the Google Drive link to download all **40GB of Assets** to your own server. Includes Legacy v10 versions, AI Scripts, and a 1-on-1 Setup Consultation.
+
+  
 **Major Upgrade: Hybrid Cloud Architecture**
 Unlike previous versions, Lite 12 is designed to run on **Shared Hosting (CPanel)** without root access.
 *   **Websockets:** Hosted on a dedicated external instance (No local Node/PM2 required).
