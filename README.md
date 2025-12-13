@@ -1,58 +1,71 @@
-# 🕹️ Laravel Social Gaming Engine (Lite 12)
-### The Lightweight Open Source RNG Platform (Laravel 11 / PHP 8.4)
+# 🛑 Legacy Gaming Engine (v10 / v11 Architecture)
+### [DISCONTINUED] Multi-Shop, Agent & Distributor System
 
-![Laravel 11](https://img.shields.io/badge/Laravel-11.x-red?style=for-the-badge&logo=laravel) ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-blue?style=for-the-badge&logo=php) ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge) ![Status](https://img.shields.io/badge/Status-Active_Dev-brightgreen?style=for-the-badge)
-
-> **FORMERLY KNOWN AS:** *opensource-casino-v10*. This repository has been rebranded to focus on Social Gaming Architecture and RNG Logic.
-
-## 📖 About This Version (Lite 12)
-This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected version of the legacy platform, stripped down to the essentials for developers building **Social Arcade** and **Amusement** platforms.
-
-**Major Upgrade: Hybrid Cloud Architecture**
-Unlike previous versions, Lite 12 is designed to run on **Shared Hosting (CPanel)** without root access.
-*   **Websockets:** Hosted on a dedicated external instance (No local Node/PM2 required).
-*   **Game Assets:** Served via CDN (Saves you 40GB+ of storage space).
-*   **Proxying:** The included `.htaccess` handles the traffic seamlessly.
+> **⚠️ STATUS: END OF LIFE.**
+> This branch (`legacy-11`) is **no longer maintained**. It contains the complex "Shop/Agent" architecture used in previous versions.
+>
+> **👉 FOR NEW PROJECTS, USE THE MAIN BRANCH (LITE-12):**
+> **[Click here to view the new Laravel Social Gaming Engine](https://github.com/promexdotme/laravel-social-gaming)**
 
 ---
 
-## 🚀 Architecture Changes (The "Minify" Plan)
+## 💎 Need these files packaged?
+If you are looking for a clean, packaged zip of this Legacy version (along with the 40GB assets that go with it), these are available exclusively to **Enterprise Sponsors**.
 
-### 1. Zero-Config Deployment (Shared Hosting Ready)
-We have removed the requirement for VPS root access.
-*   **No PM2/Node.js Required:** The client connects to our public socket instance by default.
-*   **No Huge Downloads:** The `/games/` directory is served remotely via CDN, making this repo lightweight and fast to deploy.
-*   **Easy Overrides:** If you prefer to self-host everything, you can simply point `socket_config.json` and `.htaccess` to your own infrastructure.
-
-### 2. Database & Role Simplification
-*   **Single Tenant:** Multi-shop tables (`w_shops_countries`, etc.) dropped. Enforces `shop_id=1` via `ForceShopOne` middleware.
-*   **Roles:** Reduced to `Admin` and `User` only (No complex Agent trees).
-*   **Clean Code:** Removed legacy bloat (SMS, Pincodes, HappyHours) to focus on performance.
+<div align="center">
+  <h3>
+    <a href="https://github.com/sponsors/promexdotme">
+      🚀 Sponsor ($99 Tier) to Download Legacy Packs
+    </a>
+  </h3>
+</div>
 
 ---
 
-## 🛠️ Key Features
-### 🎮 Game Management (Liteback)
-*   **Active/Inactive Logic:** Seamlessly move games between active and inactive states.
-*   **RNG Engine:** Certifiable logic for game outcomes.
-*   **Visual Management:** Auto-generates icons from `/frontend/Default/ico/{name}.jpg`.
+## 📖 About This Legacy Version
+This is the heavy, multi-tenant version of the platform. Unlike the new "SaaS" version, this architecture relies on a strict hierarchy of roles.
 
-### 💳 Virtual Economy & Payments
-*   **Crypto Top-up:** Integrated BTC Pay Server flow.
-    *   **Config:** `config/payments.php`
-    *   **Flow:** Generates invoice $\rightarrow$ Webhook listener $\rightarrow$ Credits user balance $\rightarrow$ Logs to `w_transactions`.
-*   **Extensible:** Implement `VanguardLTE\Services\Payments\PaymentDriverInterface` to add new gateways.
+**Tech Stack:**
+*   **Backend:** Laravel 8/9/10 (Requires older PHP versions)
+*   **Frontend:** Blade + JQuery (Legacy)
+*   **Structure:** Multi-Shop System
 
-### 🎨 Customizable Hero Section
-The frontend features a dynamic hero banner configurable via filesystem:
-*   **Location:** `/public/minimal/hero/`
-*   **Desktop Video:** `hero.mp4` (1920x1080, <10MB, Muted Loop).
-*   **Images:** `hero-desktop.jpg` and `hero-mobile.jpg`.
-*   *Note:* Enable by setting `$showHero = true` in `resources/views/frontend/Minimal/games/list.blade.php`.
+### 🏛️ Hierarchy System (Old Model)
+This version includes the complex user tree logic:
+1.  **Admin:** Root control.
+2.  **Agent:** Manages distributors.
+3.  **Distributor:** Manages shops.
+4.  **Shop Manager:** Manages cashiers.
+5.  **Cashier:** Handles user deposits.
+6.  **User:** The player.
+
+### 🛠️ Legacy Features (Not in Lite)
+*   **SMS Mailings:** (Requires 3rd party gateways).
+*   **Pincode System:** Voucher generation.
+*   **Happy Hours:** Time-based bonus triggers.
+*   **Progress Bonuses:** Activity-based rewards.
+*   **Geo-Blocking:** `w_shops_countries` tables.
+
+## ⚠️ Installation Warning
+**We do not provide free support for this branch.**
+Setting up this architecture is complex and requires:
+1.  Specific PHP extensions (GMP, BCMath).
+2.  Root VPS access to run the legacy Node.js socket server.
+3.  Manual database seeding for the hierarchy to work.
+
+**If you want a modern, easy setup:**
+[Switch to the Lite-12 Branch](https://github.com/promexdotme/laravel-social-gaming)
 
 ---
 
-## 📦 Installation
-1. **Clone the repo:**
-   ```bash
-   git clone -b lite-12 https://github.com/gamingdotme/laravel-social-gaming.git
+## 📦 How to Access Assets
+The game assets (40GB) for this version are **NOT** hosted on CDN in this branch. You must self-host them.
+
+| Feature | 🆓 Free / Public | 🥇 $99 Enterprise Sponsor |
+| :--- | :---: | :---: |
+| **Source Code** | Viewable on GitHub | **Packaged Zip Download** |
+| **Game Assets** | Not Included | **40GB Drive Download** |
+| **Support** | None | **Email/Meet Consultation** |
+
+[Unlock the Full Legacy Pack](https://github.com/sponsors/promexdotme) OR 
+[Purchase one-time 30days access to Games Drive](https://discordapp.com/channels/982859564795957268/1103430463357452428)
