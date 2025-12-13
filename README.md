@@ -6,7 +6,7 @@
 > **FORMERLY KNOWN AS:** *opensource-casino-v10*. This repository has been rebranded to focus on Social Gaming Architecture and RNG Logic.
 
 ## 📖 About This Version (Lite 12)
-This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected version of the legacy platform, stripped down to the essentials for developers building **Social Arcade** and **Amusement** platforms.
+This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected version of the legacy platform, stripped down to the essentials for developers building **Social Arcade** and **Amusement** platforms. [DEMO](https://one.377.live)
 
 ## 💎 Unlock the Full Potential
 The Lite version is free for testing. To run a live production site with support and high-speed assets, choose a Sponsorship Tier.
