@@ -10,7 +10,7 @@ This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected ve
 
 ## 💎 Unlock the Full Potential
 The Lite version is free for testing. To run a live production site with support and high-speed assets, choose a Sponsorship Tier.
-
+# SPONSORS AUTOMATICALLY GET A PRIVATE REPO WITH A PREPACKED -ANYHOST- ONE PAGE INSTALL SCRIPT.
 <div align="center">
   <h3>
     <a href="https://github.com/sponsors/promexdotme">
