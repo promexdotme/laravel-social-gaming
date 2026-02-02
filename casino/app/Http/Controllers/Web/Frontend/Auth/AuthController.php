@@ -286,10 +286,7 @@ use Illuminate\Support\Facades\Mail;
                 'role_id' => 1, 
                 'status' => (settings('use_email') ? \VanguardLTE\Support\Enum\UserStatus::UNCONFIRMED : \VanguardLTE\Support\Enum\UserStatus::ACTIVE)
             ]));
-            \VanguardLTE\ShopUser::create([
-                'shop_id' => 1, 
-                'user_id' => $user->id
-            ]);
+
             $role = \jeremykenedy\LaravelRoles\Models\Role::where('name', '=', 'User')->first();
             $user->attachRole($role);
             event(new \VanguardLTE\Events\User\Registered($user));
