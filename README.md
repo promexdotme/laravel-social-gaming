@@ -21,7 +21,7 @@ The Lite version is free for testing. To run a live production site with support
 
 | Feature | 🆓 Free / Public | 🥉 $10 Supporter | 🥈 $25 Builder | 🥇 $99 Enterprise |
 | :--- | :---: | :---: | :---: | :---: |
-| **Discord Access** | Read-Only | **Chat & Support** | Priority Support | **Direct Access** |
+| **Discord Access** | 🆓 Free / Public | 🆓 Free / Public | 🆓 Free / Public | 🆓 Free / Public |
 | **Infrastructure** | Public (Rate Limited) | Public (Rate Limited) | **CDN Whitelist** ✅ | **Self-Hosted** (You own it) |
 | **Websockets** | Shared | Shared | **Private Repo Access** | **Source Code** |
 | **Game Assets** | Cloud Only | Cloud Only | Cloud Only | **40GB Download (Drive)** |
