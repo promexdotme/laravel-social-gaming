@@ -171,10 +171,25 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     // Removed legacy CoinPayment integration (controller missing)
 
+    // Sportsbook Frontend Routes
+    Route::get('/sports', ['as' => 'frontend.sports.index', 'uses' => 'SportsController@index']);
+    Route::get('/sports/category/{categorySlug}', ['as' => 'frontend.sports.category', 'uses' => 'SportsController@index']);
+    Route::post('/sports/betslip/add', ['as' => 'frontend.sports.betslip.add', 'uses' => 'SportsController@addToBetslip']);
+    Route::post('/sports/betslip/remove', ['as' => 'frontend.sports.betslip.remove', 'uses' => 'SportsController@removeFromBetslip']);
+    Route::post('/sports/betslip/clear', ['as' => 'frontend.sports.betslip.clear', 'uses' => 'SportsController@clearBetslip']);
+    Route::post('/sports/bet/place', ['as' => 'frontend.sports.bet.place', 'uses' => 'SportsController@placeBet']);
+
+    // PayPal & Manual Payment paths
+    Route::get('payment/paypal/return', ['as' => 'payment.paypal.return', 'uses' => 'TopupController@paypalReturn']);
+    Route::get('payment/manual/{intent}', ['as' => 'payment.manual.show', 'uses' => 'TopupController@showManualPayment']);
+    Route::post('payment/manual/{intent}/submit', ['as' => 'payment.manual.submit', 'uses' => 'TopupController@submitManualDeposit']);
+
 });
 
 // Payment webhooks (no auth)
 Route::post('payment/webhook/btcpay', [\VanguardLTE\Http\Controllers\Web\Frontend\TopupController::class, 'webhookBtcpay'])->name('payment.webhook.btcpay');
+Route::post('payment/webhook/stripe', [\VanguardLTE\Http\Controllers\Web\Frontend\TopupController::class, 'webhookStripe'])->name('payment.webhook.stripe');
+
 
 /**
  *
@@ -197,4 +212,38 @@ Route::prefix('liteback')
         Route::post('/games/{game}/activate', ['as' => 'liteback.games.activate', 'uses' => 'GameController@activate']);
         Route::get('/profile/password', ['as' => 'liteback.profile.password', 'uses' => 'ProfileController@editPassword']);
         Route::post('/profile/password', ['as' => 'liteback.profile.password.update', 'uses' => 'ProfileController@updatePassword']);
+
+        // Sportsbook admin routes
+        Route::prefix('sports')->group(function () {
+            Route::get('/', ['as' => 'liteback.sports.dashboard', 'uses' => 'SportsDashboardController@index']);
+            Route::post('/commands', ['as' => 'liteback.sports.commands.run', 'uses' => 'SportsDashboardController@runCommand']);
+
+            Route::get('/categories', ['as' => 'liteback.sports.categories', 'uses' => 'SportsControlController@categories']);
+            Route::post('/categories', ['as' => 'liteback.sports.categories.store', 'uses' => 'SportsControlController@storeCategory']);
+            Route::post('/categories/{category}/toggle', ['as' => 'liteback.sports.categories.toggle', 'uses' => 'SportsControlController@toggleCategory']);
+
+            Route::post('/leagues/{league}/toggle', ['as' => 'liteback.sports.leagues.toggle', 'uses' => 'SportsControlController@toggleLeague']);
+            Route::post('/leagues/{league}/toggle-api', ['as' => 'liteback.sports.leagues.toggle-api', 'uses' => 'SportsControlController@toggleLeagueApi']);
+
+            Route::get('/games', ['as' => 'liteback.sports.games', 'uses' => 'SportsControlController@games']);
+            Route::post('/games', ['as' => 'liteback.sports.games.store', 'uses' => 'SportsControlController@storeGame']);
+            Route::post('/games/{game}/toggle', ['as' => 'liteback.sports.games.toggle', 'uses' => 'SportsControlController@toggleGame']);
+
+            Route::get('/settlements', ['as' => 'liteback.sports.settlements', 'uses' => 'SportsSettlementController@index']);
+            Route::post('/settlements/{outcome}/settle', ['as' => 'liteback.sports.settlements.settle', 'uses' => 'SportsSettlementController@settle']);
+            Route::post('/settlements/{bet}/refund', ['as' => 'liteback.sports.settlements.refund', 'uses' => 'SportsSettlementController@refundBet']);
+
+            Route::get('/settings', ['as' => 'liteback.sports.settings', 'uses' => 'SportsControlController@settings']);
+            Route::post('/settings', ['as' => 'liteback.sports.settings.update', 'uses' => 'SportsControlController@updateSettings']);
+        });
+
+        // Payments Admin routes
+        Route::prefix('payments')->group(function () {
+            Route::get('/manual', ['as' => 'liteback.payments.manual.index', 'uses' => 'ManualDepositsController@index']);
+            Route::post('/manual/{deposit}/approve', ['as' => 'liteback.payments.manual.approve', 'uses' => 'ManualDepositsController@approve']);
+            Route::post('/manual/{deposit}/reject', ['as' => 'liteback.payments.manual.reject', 'uses' => 'ManualDepositsController@reject']);
+
+            Route::get('/settings', ['as' => 'liteback.payments.settings', 'uses' => 'PaymentSettingsController@index']);
+            Route::post('/settings', ['as' => 'liteback.payments.settings.update', 'uses' => 'PaymentSettingsController@update']);
+        });
     });

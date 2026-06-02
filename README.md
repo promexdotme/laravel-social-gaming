@@ -1,4 +1,4 @@
-# 🕹️ Laravel Social Gaming Engine (Lite 12)
+# 🕹️ Laravel Social Gaming Engine (Lite 13)
 
 ### The Lightweight Open Source RNG Platform (Laravel 11 / PHP 8.4)
 
@@ -6,9 +6,9 @@
 
 > **FORMERLY KNOWN AS:** *opensource-casino-v10*. This repository has been rebranded to focus on Social Gaming Architecture and RNG Logic.
 
-## 📖 About This Version (Lite 12)
+## 📖 About This Version (Lite 13)
 
-This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected version of the legacy platform, stripped down to the essentials for developers building **Social Arcade** and **Amusement** platforms. [DEMO](https://one.377.live)
+This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected version of the legacy platform, stripped down to the essentials for developers building **Social Arcade** and **Amusement** platforms. It now includes a fully integrated Sportsbook engine and robust payment gateways infrastructure. [DEMO](https://one.377.live)
 
 > ⚠️ **Support Policy**
 >
@@ -36,7 +36,7 @@ The Lite version is free for testing and self-hosting. Sponsorship tiers only pr
 | **Infrastructure** | Public (Rate Limited) | Public (Rate Limited) |   **CDN Whitelist** ✅   | **Self-Hosted** (You own it) |
 | **Websockets**     |         Shared        |         Shared        | **Private Repo Access** |        **Source Code**       |
 | **Game Assets**    |       Cloud Only      |       Cloud Only      |        Cloud Only       |   **40GB Download (Drive)**  |
-| **Versions**       |      Lite-12 Only     |      Lite-12 Only     |       Lite-12 Only      |  **Full + Legacy Packaged**  |
+| **Versions**       |      Lite-13 Only     |      Lite-13 Only     |       Lite-13 Only      |  **Full + Legacy Packaged**  |
 
 ### ⚡ Tier Breakdown (Perks Only — No Support Included)
 
@@ -45,7 +45,7 @@ The Lite version is free for testing and self-hosting. Sponsorship tiers only pr
 * **$99 (SaaS Studio):** **Total Ownership.** Google Drive link to download all **40GB of Assets** to your own server. Includes Legacy v10 versions, AI scripts.
 
 **Major Upgrade: Hybrid Cloud Architecture**
-Unlike previous versions, Lite 12 is designed to run on **Shared Hosting (CPanel)** without root access.
+Unlike previous versions, Lite 13 is designed to run on **Shared Hosting (CPanel)** without root access.
 
 * **Websockets:** Hosted on a dedicated external instance (No local Node/PM2 required).
 * **Game Assets:** Served via CDN (Saves you 40GB+ of storage space).
@@ -69,19 +69,31 @@ We have removed the requirement for VPS root access.
 
 ## 🛠️ Key Features
 
+### ⚽ Sportsbook Integration *(New in Lite 13)*
+
+* **Dynamic Sync Engine**: Native integration with The Odds API to fetch upcoming matches, in-play fixtures, and markets.
+* **American to Decimal Conversion**: Auto-converts American odds formats (e.g. -110, +250) to standardized decimal odds (e.g. 1.91, 3.50) dynamically.
+* **Single & Parlay Bet Logic**: Full betslip logic supporting both single and multi-selection (parlay) bets with auto-calculators.
+* **Ops Control Console**: Admin dashboard panel to toggle categories/leagues/games status, run manual sync triggers, and declare winning outcomes (settlement engine) with auto-ledger adjustments.
+
+### 💳 Virtual Economy & Payment Gateways *(New in Lite 13)*
+
+* **Crypto & Fiat Gateways**: Support for multi-gateways payments (Stripe Checkout sessions, PayPal Orders v2, and BTCPay Server crypto).
+* **Manual Bank Transfers**: User submission form to upload transaction proofs and receipts.
+* **Review Queue**: Dedicated Liteback Admin Deposits Review panel for validating and crediting player balances.
+* **Extensibility**: Implement `VanguardLTE\\Services\\Payments\\PaymentDriverInterface` to add new payment gateways.
+
+### 📱 Responsive Sportsbook UI *(New in Lite 13)*
+
+* **Sticky Sidebar Filters**: Scroll-locked search input and compact categories list.
+* **Adaptive Mobile Elements**: Links dynamically convert to custom dark-themed selects on mobile viewports to prevent cut-off scroll pill layouts.
+* **Floating Betslip Drawer**: Sliding bet drawer with backdrop blurs, active selection counts, and clear-all actions.
+
 ### 🎮 Game Management (Liteback)
 
 * **Active/Inactive Logic:** Seamlessly move games between active and inactive states.
 * **RNG Engine:** Certifiable logic for game outcomes.
 * **Visual Management:** Auto-generates icons from `/frontend/Default/ico/{name}.jpg`.
-
-### 💳 Virtual Economy & Payments
-
-* **Crypto Top-up:** Integrated BTC Pay Server flow.
-
-  * **Config:** `config/payments.php`
-  * **Flow:** Generates invoice → Webhook listener → Credits user balance → Logs to `w_transactions`.
-* **Extensible:** Implement `VanguardLTE\\Services\\Payments\\PaymentDriverInterface` to add new gateways.
 
 ### 🎨 Customizable Hero Section
 
@@ -99,7 +111,7 @@ The frontend features a dynamic hero banner configurable via filesystem:
 1. **Clone the repo:**
 
    ```bash
-   git clone -b lite-12 https://github.com/gamingdotme/laravel-social-gaming.git
+   git clone -b lite-13 https://github.com/gamingdotme/laravel-social-gaming.git
    ```
 2. **Install Dependencies:**
 
@@ -120,7 +132,7 @@ The frontend features a dynamic hero banner configurable via filesystem:
      ```env
      APP_URL=https://your-domain.com
      ```
-4. **Migrate:**
+4. **Migrate & Seed:**
 
    ```bash
    php artisan migrate

@@ -104,7 +104,18 @@
                         <div class="form-group">
                             <label for="topup-driver">Gateway</label>
                             <select id="topup-driver" name="driver">
-                                <option value="btcpay">BTC Pay</option>
+                                @if(settings('payment_btcpay_enabled', config('payments.drivers.btcpay.enabled') ? '1' : '0') == '1')
+                                    <option value="btcpay">BTC Pay</option>
+                                @endif
+                                @if(settings('payment_stripe_enabled', config('payments.drivers.stripe.enabled') ? '1' : '0') == '1')
+                                    <option value="stripe">Credit Card (Stripe)</option>
+                                @endif
+                                @if(settings('payment_paypal_enabled', config('payments.drivers.paypal.enabled') ? '1' : '0') == '1')
+                                    <option value="paypal">PayPal</option>
+                                @endif
+                                @if(settings('payment_manual_enabled', config('payments.drivers.manual.enabled') ? '1' : '0') == '1')
+                                    <option value="manual">Manual Transfer (Bank/Mobile)</option>
+                                @endif
                             </select>
                         </div>
                         <button type="submit" class="btn-primary">Pay</button>
