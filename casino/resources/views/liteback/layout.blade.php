@@ -58,6 +58,70 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-trophy"></i>
+                            <p>
+                                Sportsbook
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview ml-3">
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.sports.dashboard') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.sports.categories') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Categories / Leagues</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.sports.games') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Events & Odds</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.sports.settlements') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Settlements</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.sports.settings') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Settings</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item has-treeview">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-credit-card"></i>
+                            <p>
+                                Payments
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview ml-3">
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.payments.manual.index') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Manual Deposits</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{{ route('liteback.payments.settings') }}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Gateways Settings</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
                 </ul>
             </nav>
         </div>

@@ -9,7 +9,6 @@
 	<base href="/games/ActionMoneyEGT/html5/" target="_blank" >
 	<style type="text/css" media="screen">
 		html, body, body.sidebars { width:100%; height:100%; margin:0; padding:0;}
-        #home-btn{position:fixed;top:12px;right:12px;z-index:9999;background:#ec1380;color:#fff;border:none;border-radius:999px;padding:10px 16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.35);}
 	</style>
 	<script src="../js/jquery.js"></script>
 	<script src="device.min.js"></script>
@@ -124,6 +123,5 @@ document.location.href=exitUrl;
 	</script>
 </head>
 <body>
-    <button id="home-btn" onclick="window.location.href='{{ url('/') }}'">Home</button>
 </body>
 </html>

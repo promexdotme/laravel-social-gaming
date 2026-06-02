@@ -39,7 +39,7 @@ document.location.href=exitUrl;
 
 
 
-<iframe id='game' style="margin:0px;border:0px;width:100%;height:100vh;" src='/games/AladdinAndtheSorcerer/gs2c/html5Game.html?lang=en&cur=@if( auth()->user()->present()->shop ){{ auth()->user()->present()->shop->currency }}@endif&gameSymbol=vs20aladdinsorc&websiteUrl=&lobbyURL=' allowfullscreen>
+<iframe id='game' style="margin:0px;border:0px;width:100%;height:100vh;" src='/games/AladdinAndtheSorcerer/gs2c/html5Game.html?lang=en&cur=usd&gameSymbol=vs20aladdinsorc&websiteUrl=&lobbyURL=' allowfullscreen>
 
 
 </iframe>

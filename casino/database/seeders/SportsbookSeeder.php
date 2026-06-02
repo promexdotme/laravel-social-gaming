@@ -1,19 +1,18 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-class DatabaseSeeder extends Seeder
+class SportsbookSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
-     *
-     * @return void
+     * Run the database seeds.
      */
-    public function run()
+    public function run(): void
     {
-        // 1. Seed Sportsbook Settings
         $settings = [
             'sports_feature_betting_enabled' => '1',
             'sports_feature_manual_games' => '1',
@@ -37,7 +36,6 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 2. Seed Default Sports Categories
         $categories = [
             ['name' => 'Soccer', 'odds_api_name' => 'Soccer', 'regions' => '["eu","us","uk","au"]'],
             ['name' => 'Basketball', 'odds_api_name' => 'Basketball', 'regions' => '["us"]'],
