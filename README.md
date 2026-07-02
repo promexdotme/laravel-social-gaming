@@ -71,7 +71,9 @@ We have removed the requirement for VPS root access.
 
 ### ⚽ Sportsbook Integration *(New in Lite 13)*
 
-* **Dynamic Sync Engine**: Native integration with The Odds API to fetch upcoming matches, in-play fixtures, and markets.
+* **Multi-Provider Engine**: Native integration with both **The Odds API** (`the_odds_api`) and **Polyapp Parlay API** (`parlay_api`) to sync fixtures, markets, and odds.
+* **Pinnacle Filter & Credit Optimization**: Supports filtering Odds requests specifically to Pinnacle bookmakers when using the Parlay API, saving credit usage.
+* **Timezone Matching & Expiration**: Automatically parses UTC commence times and converts them to the application's timezone (`app.timezone`) before saving, ensuring kickoff times match the system's timezone and games correctly vanish from the lobby right at kickoff.
 * **American to Decimal Conversion**: Auto-converts American odds formats (e.g. -110, +250) to standardized decimal odds (e.g. 1.91, 3.50) dynamically.
 * **Single & Parlay Bet Logic**: Full betslip logic supporting both single and multi-selection (parlay) bets with auto-calculators.
 * **Ops Control Console**: Admin dashboard panel to toggle categories/leagues/games status, run manual sync triggers, and declare winning outcomes (settlement engine) with auto-ledger adjustments.
@@ -79,15 +81,22 @@ We have removed the requirement for VPS root access.
 ### 💳 Virtual Economy & Payment Gateways *(New in Lite 13)*
 
 * **Crypto & Fiat Gateways**: Support for multi-gateways payments (Stripe Checkout sessions, PayPal Orders v2, and BTCPay Server crypto).
+* **XtoPay Crypto Integration**: Native driver for the XtoPay Cryptocurrency gateway (`https://xto.377.live`), handling USDT/USDC deposits over various blockchain networks (TRON, Polygon, BSC, Ethereum) with automated webhook status callbacks.
 * **Manual Bank Transfers**: User submission form to upload transaction proofs and receipts.
 * **Review Queue**: Dedicated Liteback Admin Deposits Review panel for validating and crediting player balances.
-* **Extensibility**: Implement `VanguardLTE\\Services\\Payments\\PaymentDriverInterface` to add new payment gateways.
+* **Extensibility**: Implement `VanguardLTE\Services\Payments\PaymentDriverInterface` to add new payment gateways.
 
 ### 📱 Responsive Sportsbook UI *(New in Lite 13)*
 
 * **Sticky Sidebar Filters**: Scroll-locked search input and compact categories list.
 * **Adaptive Mobile Elements**: Links dynamically convert to custom dark-themed selects on mobile viewports to prevent cut-off scroll pill layouts.
 * **Floating Betslip Drawer**: Sliding bet drawer with backdrop blurs, active selection counts, and clear-all actions.
+
+### 🔒 Security & Credential Isolation *(New in Lite 13)*
+
+* **Environment-Based Configs**: All sensitive API keys and tokens (e.g., `PARLAY_API_KEY`, `ODS_API_KEY`, `XTO_PAY_TOKEN`) are prioritized and resolved from the local `.env` configuration file.
+* **Automatic Database Cleansing**: When keys are modified or saved from the Admin panel settings, they are automatically written to the root `.env` file, and their database settings table records are purged. This prevents credentials from leaking into database dumps or public repositories.
+* **Prepack Script helper**: Includes a gitignored packing script `prepack.php` that automates database exports (`lite13.sql`) and packages the project directory into a distribution zip, excluding `.env` credentials, git histories, and temporary scratch scripts.
 
 ### 🎮 Game Management (Liteback)
 
@@ -135,8 +144,14 @@ The frontend features a dynamic hero banner configurable via filesystem:
 4. **Migrate & Seed:**
 
    ```bash
-   php artisan migrate
-   ```
+    php artisan migrate
+    ```
+
+### ⚡ Quick Installer Hosting Modes *(New in Lite 13)*
+
+If deploying using the quick installer (`SimpleInstall.php`), you will be prompted for a **Hosting Mode**:
+* **Self-Hosted Mode**: Comments out the VPS CDN rewrite rules inside `.htaccess`, keeping all traffic local.
+* **CDN Hosted Mode**: Keeps the rules active (`RewriteRule ^games/(.*)$ ...`) to route game requests to our VPS CDN to save local storage, whitelisting your domain.
 
 ### ☁️ How the Hybrid Connection Works
 

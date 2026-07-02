@@ -16,16 +16,53 @@ use VanguardLTE\Sports\Outcome;
 
 class SportsOddsSyncService
 {
-    protected $baseUri = 'https://api.the-odds-api.com/v4/';
+    protected function getProvider(): string
+    {
+        $provider = env('SPORTSBOOK_PROVIDER');
+        if (!empty($provider)) {
+            return $provider;
+        }
+        return settings('sportsbook_provider', 'the_odds_api');
+    }
+
+    protected function getBaseUri(): string
+    {
+        if ($this->getProvider() === 'parlay_api') {
+            $url = env('PARLAY_BASE_URL');
+            if (empty($url)) {
+                $url = settings('parlay_base_url', 'https://parlay-api.com');
+            }
+            $url = rtrim($url, '/');
+            if (strpos($url, '/v1') !== false) {
+                return $url . '/';
+            }
+            return $url . '/v1/';
+        }
+        return 'https://api.the-odds-api.com/v4/';
+    }
 
     /**
-     * Get the API key from settings.
+     * Get the API key.
      */
     protected function getApiKey(): string
     {
-        $key = trim(settings('ods_api_key', ''));
+        if ($this->getProvider() === 'parlay_api') {
+            $key = trim(env('PARLAY_API_KEY', ''));
+            if (empty($key)) {
+                $key = trim(settings('parlay_api_key', ''));
+            }
+            if (!$key) {
+                throw new \Exception("Parlay API Key not set.");
+            }
+            return $key;
+        }
+
+        $key = trim(env('ODS_API_KEY', ''));
+        if (empty($key)) {
+            $key = trim(settings('ods_api_key', ''));
+        }
         if (!$key) {
-            throw new \Exception("Odds API key not set in Settings.");
+            throw new \Exception("Odds API key not set.");
         }
         return $key;
     }
@@ -36,7 +73,12 @@ class SportsOddsSyncService
     public function syncSports(): void
     {
         $apiKey = $this->getApiKey();
-        $response = Http::get("{$this->baseUri}sports/?apiKey={$apiKey}&all=true");
+        $baseUri = $this->getBaseUri();
+        $url = "{$baseUri}sports?apiKey={$apiKey}";
+        if ($this->getProvider() === 'the_odds_api') {
+            $url .= "&all=true";
+        }
+        $response = Http::get($url);
 
         if ($response->failed()) {
             throw new \Exception("Odds API request failed: " . $response->body());
@@ -63,7 +105,7 @@ class SportsOddsSyncService
 
                 if ($league) {
                     $league->odds_api_sport_key = $sport->key;
-                    $league->api_status = $sport->active ? 1 : 0;
+                    $league->api_status = ($sport->active ?? false) ? 1 : 0;
                     $league->save();
                 } else {
                     $exists = League::where('odds_api_sport_key', $sport->key)->exists();
@@ -80,8 +122,8 @@ class SportsOddsSyncService
                             'short_name'         => $sport->title,
                             'slug'               => $slug,
                             'description'        => $sport->description,
-                            'has_outrights'      => $sport->has_outrights ? 1 : 0,
-                            'api_status'         => $sport->active ? 1 : 0,
+                            'has_outrights'      => ($sport->has_outrights ?? false) ? 1 : 0,
+                            'api_status'         => ($sport->active ?? false) ? 1 : 0,
                             'status'             => 0, // Disabled by default
                             'manually_added'     => 0,
                             'created_at'         => now(),
@@ -103,10 +145,11 @@ class SportsOddsSyncService
     public function syncGames(?League $targetLeague = null): void
     {
         $apiKey = $this->getApiKey();
+        $baseUri = $this->getBaseUri();
         $leagues = $targetLeague ? collect([$targetLeague]) : League::running()->whereNotNull('odds_api_sport_key')->get();
 
         foreach ($leagues as $league) {
-            $response = Http::get("{$this->baseUri}sports/{$league->odds_api_sport_key}/events?apiKey={$apiKey}");
+            $response = Http::get("{$baseUri}sports/{$league->odds_api_sport_key}/events?apiKey={$apiKey}");
 
             if ($response->failed()) {
                 Log::error("Failed fetching games for league {$league->odds_api_sport_key}: " . $response->body());
@@ -130,7 +173,7 @@ class SportsOddsSyncService
                     if (!$game) {
                         $this->saveGame($league, $event, $homeTeam, $awayTeam);
                     } else {
-                        $game->start_time = Carbon::parse($event->commence_time)->format('Y-m-d H:i:s');
+                        $game->start_time = $this->parseCommenceTime($event->commence_time)->format('Y-m-d H:i:s');
                         $game->save();
                     }
                 });
@@ -144,6 +187,8 @@ class SportsOddsSyncService
     public function syncOdds(string $type = 'active', ?League $targetLeague = null): void
     {
         $apiKey = $this->getApiKey();
+        $baseUri = $this->getBaseUri();
+        $provider = $this->getProvider();
         if ($targetLeague) {
             $leagues = collect([$targetLeague]);
         } else {
@@ -172,7 +217,14 @@ class SportsOddsSyncService
             }
 
             $marketsStr = implode(',', $leagueMarkets);
-            $response = Http::get("{$this->baseUri}sports/{$league->odds_api_sport_key}/odds/?apiKey={$apiKey}&regions={$regions}&markets={$marketsStr}");
+            $url = "{$baseUri}sports/{$league->odds_api_sport_key}/odds?apiKey={$apiKey}&regions={$regions}&markets={$marketsStr}";
+            if ($provider === 'parlay_api') {
+                $url .= "&bookmakers=pinnacle";
+            } else {
+                $url = "{$baseUri}sports/{$league->odds_api_sport_key}/odds/?apiKey={$apiKey}&regions={$regions}&markets={$marketsStr}";
+            }
+
+            $response = Http::get($url);
 
             if ($response->failed()) {
                 Log::error("Failed fetching odds for league {$league->odds_api_sport_key}: " . $response->body());
@@ -199,7 +251,7 @@ class SportsOddsSyncService
                     if (!$game) {
                         $game = $this->saveGame($league, $event, $homeTeam, $awayTeam);
                     } else {
-                        $game->start_time = Carbon::parse($event->commence_time)->format('Y-m-d H:i:s');
+                        $game->start_time = $this->parseCommenceTime($event->commence_time)->format('Y-m-d H:i:s');
                         $game->save();
                     }
 
@@ -275,7 +327,7 @@ class SportsOddsSyncService
             'title' => $title,
             'slug' => $slug,
             'bet_start_time' => now(),
-            'start_time' => Carbon::parse($event->commence_time)->format('Y-m-d H:i:s'),
+            'start_time' => $this->parseCommenceTime($event->commence_time)->format('Y-m-d H:i:s'),
             'is_outright' => $league->has_outrights ?? 0,
             'manually_added' => 0,
             'status' => 1,
@@ -314,7 +366,7 @@ class SportsOddsSyncService
                 'outcome_type' => $outcomeType,
                 'title' => $title,
                 'status' => 1,
-                'market_updated_at' => Carbon::parse($marketData->last_update)->format('Y-m-d H:i:s'),
+                'market_updated_at' => Carbon::parse($marketData->last_update ?? now())->format('Y-m-d H:i:s'),
             ]
         );
 
@@ -360,13 +412,26 @@ class SportsOddsSyncService
     public function syncUpcomingOdds(): void
     {
         $apiKey = $this->getApiKey();
+        $baseUri = $this->getBaseUri();
+        $provider = $this->getProvider();
+        if ($provider === 'parlay_api') {
+            $this->syncOdds('active');
+            return;
+        }
         $regionsSetting = settings('ods_api_regions', 'us');
         $regions = is_array($regionsSetting) ? implode(',', $regionsSetting) : $regionsSetting;
 
         $marketsSetting = settings('ods_api_markets', 'h2h');
         $marketsStr = is_array($marketsSetting) ? implode(',', $marketsSetting) : $marketsSetting;
 
-        $response = Http::get("{$this->baseUri}sports/upcoming/odds/?apiKey={$apiKey}&regions={$regions}&markets={$marketsStr}&oddsFormat=american");
+        $url = "{$baseUri}sports/upcoming/odds?apiKey={$apiKey}&regions={$regions}&markets={$marketsStr}&oddsFormat=american";
+        if ($provider === 'parlay_api') {
+            $url .= "&bookmakers=pinnacle";
+        } else {
+            $url = "{$baseUri}sports/upcoming/odds/?apiKey={$apiKey}&regions={$regions}&markets={$marketsStr}&oddsFormat=american";
+        }
+
+        $response = Http::get($url);
 
         if ($response->failed()) {
             throw new \Exception("Odds API request failed: " . $response->body());
@@ -397,7 +462,7 @@ class SportsOddsSyncService
                 if (!$game) {
                     $game = $this->saveGame($league, $event, $homeTeam, $awayTeam);
                 } else {
-                    $game->start_time = Carbon::parse($event->commence_time)->format('Y-m-d H:i:s');
+                    $game->start_time = $this->parseCommenceTime($event->commence_time)->format('Y-m-d H:i:s');
                     $game->save();
                 }
 
@@ -508,6 +573,28 @@ class SportsOddsSyncService
             return round((100 / abs($american)) + 1, 2);
         }
         return 1.0;
+    }
+
+    /**
+     * Parse the commence time and shift it if in sandbox mode.
+     */
+    protected function parseCommenceTime(string $timeStr): Carbon
+    {
+        $commenceTime = Carbon::parse($timeStr);
+        $baseUri = $this->getBaseUri();
+
+        if (strpos($baseUri, 'sandbox') !== false) {
+            // Shift June 2nd sandbox date to current month/day
+            $sandboxBase = Carbon::parse('2026-06-02 00:00:00');
+            $daysDiff = $sandboxBase->diffInDays(Carbon::today(), false);
+            $shiftedTime = $commenceTime->copy()->addDays($daysDiff);
+            if ($shiftedTime->isPast()) {
+                $shiftedTime->addDays(2);
+            }
+            $commenceTime = $shiftedTime;
+        }
+
+        return $commenceTime->timezone(config('app.timezone', 'Europe/Berlin'));
     }
 }
 

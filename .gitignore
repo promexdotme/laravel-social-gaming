@@ -1,1 +1,6 @@
+.env
+casino/.env
+prepack.php
+upgrade.php
+*.zip
 casino/casino1.zip

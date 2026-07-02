@@ -148,6 +148,50 @@
                         <div class="col-sm-9">
                             <textarea name="payment_manual_instructions" class="form-control" rows="6" placeholder="Enter instructions for the player...">{{ settings('payment_manual_instructions', config('payments.drivers.manual.instructions')) }}</textarea>
                             <small class="text-muted">This text will be shown to users when they initiate a manual bank transfer deposit, advising them how/where to transfer money before uploading proof.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- XTOPAY CONFIGURATION -->
+            <div class="card card-success card-outline mb-4">
+                <div class="card-header">
+                    <h3 class="card-title"><i class="fas fa-coins text-success mr-2"></i> XtoPay Crypto Integration</h3>
+                </div>
+                <div class="card-body">
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Enable XtoPay</label>
+                        <div class="col-sm-9">
+                            <select name="payment_xto_enabled" class="form-control">
+                                <option value="1" {{ settings('payment_xto_enabled', config('payments.drivers.xtopay.enabled') ? '1' : '0') == '1' ? 'selected' : '' }}>Yes</option>
+                                <option value="0" {{ settings('payment_xto_enabled', config('payments.drivers.xtopay.enabled') ? '1' : '0') == '0' ? 'selected' : '' }}>No</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Website Name</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_xto_website_name" class="form-control" value="{{ settings('payment_xto_website_name', config('payments.drivers.xtopay.website_name')) }}" placeholder="e.g. one">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Merchant JWT Token</label>
+                        <div class="col-sm-9">
+                            <input type="password" name="payment_xto_token" class="form-control" value="{{ env('XTO_PAY_TOKEN', settings('payment_xto_token', config('payments.drivers.xtopay.token'))) }}" placeholder="Enter Merchant JWT Token">
+                            <small class="text-muted">The secret token will be saved securely to the <code>.env</code> file (<code>XTO_PAY_TOKEN</code>) to prevent database leaks.</small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Allowed Methods (comma-separated)</label>
+                        <div class="col-sm-9">
+                            <input type="text" name="payment_xto_methods" class="form-control" value="{{ settings('payment_xto_methods', config('payments.drivers.xtopay.allowed_methods')) }}" placeholder="TRC20_USDT,POLYGON_USDT,BSC_USDT,ERC20_USDT,POLYGON_USDC,BSC_USDC,ERC20_USDC">
+                            <small class="text-muted">Comma-separated list of crypto billing methods. Standard: <code>TRC20_USDT,POLYGON_USDT,BSC_USDT,ERC20_USDT,POLYGON_USDC,BSC_USDC,ERC20_USDC</code></small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-form-label">Webhook Callback URL</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" value="{{ route('payment.webhook.xtopay') }}" readonly>
+                            <small class="text-muted">Configure this webhook URL inside the XtoPay merchant gateway dashboard settings to receive status notifications.</small>
                         </div>
                     </div>
                 </div>

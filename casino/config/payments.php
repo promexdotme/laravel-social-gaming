@@ -28,5 +28,11 @@ return [
             'enabled' => env('MANUAL_PAYMENT_ENABLED', false),
             'instructions' => env('MANUAL_PAYMENT_INSTRUCTIONS', "Please send money to our Bank Account:\nIBAN: US1234567890\nBank Name: Sports Bank"),
         ],
+        'xtopay' => [
+            'enabled' => env('XTO_PAY_ENABLED', false),
+            'token' => env('XTO_PAY_TOKEN', ''),
+            'website_name' => env('XTO_PAY_WEBSITE_NAME', 'one'),
+            'allowed_methods' => env('XTO_PAY_METHODS', 'TRC20_USDT,POLYGON_USDT,BSC_USDT,ERC20_USDT,POLYGON_USDC,BSC_USDC,ERC20_USDC'),
+        ],
     ],
 ];

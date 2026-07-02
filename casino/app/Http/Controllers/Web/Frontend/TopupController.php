@@ -234,6 +234,97 @@ class TopupController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    public function webhookXtopay(Request $request)
+    {
+        $enabled = settings('payment_xto_enabled', config('payments.drivers.xtopay.enabled'));
+        if (!$enabled) {
+            return response()->json(['error' => 'XtoPay disabled'], 404);
+        }
+
+        $payload = $request->all();
+        $event = $payload['event'] ?? '';
+        $data = $payload['data'] ?? [];
+
+        if ($event !== 'payment.status_updated') {
+            return response()->json(['error' => 'Unsupported event'], 200);
+        }
+
+        $status = $data['status'] ?? '';
+        if (strtoupper($status) !== 'PAID') {
+            return response()->json(['error' => 'Payment status is not PAID'], 200);
+        }
+
+        $paymentId = $data['id'] ?? null;
+        $merchantRef = $data['merchant_ref'] ?? '';
+
+        if (!$paymentId && !$merchantRef) {
+            return response()->json(['error' => 'Missing transaction identifier'], 422);
+        }
+
+        // Try to parse intent_id from merchant_ref (format: one377_{intent_id}_{rand})
+        $intentId = null;
+        if (str_starts_with($merchantRef, 'one377_')) {
+            $parts = explode('_', $merchantRef);
+            if (count($parts) >= 2) {
+                $intentId = $parts[1];
+            }
+        }
+
+        // Look up payment intent
+        $query = DB::table('payment_intents');
+        if ($paymentId) {
+            $query->where('external_id', (string)$paymentId);
+        }
+        if ($intentId) {
+            $query->orWhere('id', $intentId);
+        }
+        
+        $intent = $query->lockForUpdate()->first();
+
+        if (!$intent) {
+            return response()->json(['error' => 'Payment intent not found'], 404);
+        }
+
+        if ($intent->status === 'paid') {
+            return response()->json(['ok' => true]);
+        }
+
+        $user = User::find($intent->user_id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        DB::transaction(function () use ($intent, $user) {
+            $creditAmount = $intent->amount;
+            $newBalance = (float)$user->balance + $creditAmount;
+
+            DB::table('users')->where('id', $user->id)->update([
+                'balance' => $newBalance,
+                'updated_at' => now(),
+            ]);
+
+            DB::table('transactions')->insert([
+                'user_id' => $user->id,
+                'admin_id' => null,
+                'direction' => 'payment',
+                'amount' => $creditAmount,
+                'balance_before' => $user->balance,
+                'balance_after' => $newBalance,
+                'source' => 'xtopay',
+                'note' => 'XtoPay deposit ' . ($intent->external_id ?? ''),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('payment_intents')->where('id', $intent->id)->update([
+                'status' => 'paid',
+                'updated_at' => now(),
+            ]);
+        });
+
+        return response()->json(['ok' => true]);
+    }
+
     public function paypalReturn(Request $request)
     {
         $status = $request->input('status');
@@ -496,6 +587,19 @@ class TopupController extends Controller
                 return null;
             }
             return new \VanguardLTE\Services\Payments\ManualPaymentDriver($cfg);
+        }
+
+        if ($driver === 'xtopay') {
+            $cfg = [
+                'enabled' => settings('payment_xto_enabled', config('payments.drivers.xtopay.enabled')),
+                'token' => env('XTO_PAY_TOKEN', settings('payment_xto_token', config('payments.drivers.xtopay.token'))),
+                'website_name' => settings('payment_xto_website_name', config('payments.drivers.xtopay.website_name')),
+                'allowed_methods' => settings('payment_xto_methods', config('payments.drivers.xtopay.allowed_methods')),
+            ];
+            if (!$cfg['enabled']) {
+                return null;
+            }
+            return new \VanguardLTE\Services\Payments\XtopayDriver($cfg);
         }
 
         return null;

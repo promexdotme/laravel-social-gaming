@@ -46,9 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dbName = trim($_POST['db_name'] ?? $envDefaults['DB_DATABASE']);
     $hostname = trim($_POST['hostname'] ?? $hostname);
     $basePassword = trim($_POST['base_password'] ?? '');
+    $hostingMode = trim($_POST['hosting_mode'] ?? 'cdn_hosted');
     $isLocalHost = in_array(strtolower($hostname), ['localhost', '127.0.0.1', '::1'], true) || preg_match('/(localhost|127\\.0\\.0\\.1|::1)$/i', $hostname);
 
-    if ($isLocalHost) {
+    if ($isLocalHost && $hostingMode !== 'self_hosted') {
         $status['warnings'][] = 'Games CDN will not work if your IP is not reachable and authorized. Msg us on Discord to whitelist one IP.';
     }
 
@@ -116,6 +117,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 $stmt->close();
             }
+        }
+
+        // Step 5: Update .htaccess based on hosting mode selection
+        $htaccessPath = __DIR__ . '/.htaccess';
+        if (file_exists($htaccessPath)) {
+            $htaccess = file_get_contents($htaccessPath);
+            $targetLine = 'RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L]';
+
+            if ($hostingMode === 'self_hosted') {
+                // Comment out RewriteRule ^games/...
+                if (strpos($htaccess, $targetLine) !== false && strpos($htaccess, '# ' . $targetLine) === false && strpos($htaccess, '#' . $targetLine) === false) {
+                    $htaccess = str_replace($targetLine, '# ' . $targetLine, $htaccess);
+                }
+                if (file_put_contents($htaccessPath, $htaccess) !== false) {
+                    $status['warnings'][] = 'Self-Hosted mode selected: VPS proxy lines in .htaccess have been disabled/commented out. Make sure to host your own games in the /games folder.';
+                } else {
+                    $status['warnings'][] = '[WARN] Failed to write root .htaccess modification.';
+                }
+            } else {
+                // Uncomment RewriteRule ^games/...
+                if (strpos($htaccess, '# ' . $targetLine) !== false) {
+                    $htaccess = str_replace('# ' . $targetLine, $targetLine, $htaccess);
+                } elseif (strpos($htaccess, '#' . $targetLine) !== false) {
+                    $htaccess = str_replace('#' . $targetLine, $targetLine, $htaccess);
+                }
+                if (file_put_contents($htaccessPath, $htaccess) !== false) {
+                    $status['warnings'][] = 'CDN Hosted mode selected: VPS proxy lines in .htaccess are active. Note: Your IP must be whitelisted and requires sponsorship from <a href="https://github.com/promexdotme/laravel-social-gaming" target="_blank" style="color: #38bdf8; text-decoration: underline;">https://github.com/promexdotme/laravel-social-gaming</a>.';
+                } else {
+                    $status['warnings'][] = '[WARN] Failed to write root .htaccess modification.';
+                }
+            }
+        } else {
+            $status['warnings'][] = '[WARN] root .htaccess file not found; could not configure games proxy rule.';
         }
     }
 }
@@ -185,6 +219,13 @@ function updateEnvValue(string $content, string $key, string $value): string
                 <div>
                     <label for="base_password">New Password (admin & new)</label>
                     <input id="base_password" name="base_password" type="password" placeholder="Leave blank to skip">
+                </div>
+                <div>
+                    <label for="hosting_mode">Hosting / CDN Mode</label>
+                    <select id="hosting_mode" name="hosting_mode" style="width: 100%; padding: 10px 12px; margin-top: 6px; border-radius: 6px; border: 1px solid #1f2937; background: #0b1220; color: #e2e8f0;">
+                        <option value="cdn_hosted" <?php echo (($_POST['hosting_mode'] ?? 'cdn_hosted') === 'cdn_hosted') ? 'selected' : ''; ?>>CDN Hosted (VPS Proxy - Recommended)</option>
+                        <option value="self_hosted" <?php echo (($_POST['hosting_mode'] ?? '') === 'self_hosted') ? 'selected' : ''; ?>>Self-Hosted (Local / Own CDN)</option>
+                    </select>
                 </div>
             </div>
             <button type="submit">Run Quick Install</button>

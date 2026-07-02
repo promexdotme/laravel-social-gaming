@@ -116,6 +116,9 @@
                                 @if(settings('payment_manual_enabled', config('payments.drivers.manual.enabled') ? '1' : '0') == '1')
                                     <option value="manual">Manual Transfer (Bank/Mobile)</option>
                                 @endif
+                                @if(settings('payment_xto_enabled', config('payments.drivers.xtopay.enabled') ? '1' : '0') == '1')
+                                    <option value="xtopay">Crypto / Tether (USDT/USDC)</option>
+                                @endif
                             </select>
                         </div>
                         <button type="submit" class="btn-primary">Pay</button>

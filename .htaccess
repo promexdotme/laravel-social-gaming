@@ -12,12 +12,17 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
+    # ✅ Proxy all /games/* requests to VPS FIRST
+    RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L]
+
     # Redirect Trailing Slashes If Not A Folder...
+    # ❗ but NEVER touch /games/* (avoid Apache <-> nginx slash ping-pong)
+    RewriteCond %{REQUEST_URI} !^/games/
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Handle Front Controller...
+    # Handle Front Controller (Laravel) for everything else...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
@@ -26,4 +31,3 @@
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
 </IfModule>
-

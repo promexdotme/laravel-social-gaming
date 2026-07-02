@@ -189,6 +189,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 // Payment webhooks (no auth)
 Route::post('payment/webhook/btcpay', [\VanguardLTE\Http\Controllers\Web\Frontend\TopupController::class, 'webhookBtcpay'])->name('payment.webhook.btcpay');
 Route::post('payment/webhook/stripe', [\VanguardLTE\Http\Controllers\Web\Frontend\TopupController::class, 'webhookStripe'])->name('payment.webhook.stripe');
+Route::post('payment/webhook/xtopay', [\VanguardLTE\Http\Controllers\Web\Frontend\TopupController::class, 'webhookXtopay'])->name('payment.webhook.xtopay');
 
 
 /**

@@ -63,10 +63,31 @@
                         </div>
                     </div>
 
+                    <h5 class="border-bottom pb-2 mt-4" style="border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-top: 20px;"><strong>Odds Provider Selector</strong></h5>
+                    <div class="form-group">
+                        <label for="sportsbook_provider">Active Sportsbook Provider</label>
+                        <select name="sportsbook_provider" class="form-control" id="sportsbook_provider">
+                            <option value="the_odds_api" {{ env('SPORTSBOOK_PROVIDER', settings('sportsbook_provider', 'the_odds_api')) === 'the_odds_api' ? 'selected' : '' }}>The Odds API</option>
+                            <option value="parlay_api" {{ env('SPORTSBOOK_PROVIDER', settings('sportsbook_provider')) === 'parlay_api' ? 'selected' : '' }}>Polyapp Parlay API</option>
+                        </select>
+                    </div>
+
+                    <h5 class="border-bottom pb-2 mt-4" style="border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-top: 20px;"><strong>Polyapp Parlay API Credentials</strong></h5>
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label for="parlay_api_key">Parlay API Key</label>
+                            <input type="text" name="parlay_api_key" class="form-control" id="parlay_api_key" value="{{ env('PARLAY_API_KEY', settings('parlay_api_key')) }}" placeholder="Enter your Parlay API Key">
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label for="parlay_base_url">Parlay Base URL</label>
+                            <input type="text" name="parlay_base_url" class="form-control" id="parlay_base_url" value="{{ env('PARLAY_BASE_URL', settings('parlay_base_url', 'https://parlay-api.com')) }}" placeholder="https://parlay-api.com">
+                        </div>
+                    </div>
+
                     <h5 class="border-bottom pb-2 mt-4" style="border-bottom: 1px solid #dee2e6; padding-bottom: 8px; margin-top: 20px;"><strong>The Odds API Credentials</strong></h5>
                     <div class="form-group">
                         <label for="ods_api_key">API Secret Key</label>
-                        <input type="text" name="ods_api_key" class="form-control" id="ods_api_key" value="{{ settings('ods_api_key') }}" placeholder="Enter your Odds API Key">
+                        <input type="text" name="ods_api_key" class="form-control" id="ods_api_key" value="{{ env('ODS_API_KEY', settings('ods_api_key')) }}" placeholder="Enter your Odds API Key">
                     </div>
                     <div class="row">
                         <div class="col-md-6 form-group">
