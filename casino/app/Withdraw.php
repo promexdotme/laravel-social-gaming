@@ -7,10 +7,16 @@ namespace VanguardLTE
         protected $fillable = [
             'user_id', 
             'amount', 
+            'coin_amount',
+            'fiat_amount',
             'currency', 
+            'method',
             'wallet', 
             'status', 
-            'shop_id'
+            'admin_note',
+            'shop_id',
+            'created_at',
+            'confirmed_at'
         ];
         public $timestamps = false;
         public static function boot()

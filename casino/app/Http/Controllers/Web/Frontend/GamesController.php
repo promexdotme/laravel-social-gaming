@@ -27,6 +27,9 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
                 'shop_id' => $shop_id
             ]);
             $frontend = 'Minimal';
+            if (empty($category1)) {
+                $category1 = 'hot';
+            }
             if ($category1 != '') {
                 $cat1 = \VanguardLTE\Category::where(['href' => $category1])->first();
                 if (
@@ -760,63 +763,47 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
         }
         public function go(\Illuminate\Http\Request $request, $game, $prego = '')
         {
-            if ($prego == '') {
-                if (\Illuminate\Support\Facades\Auth::check() && !auth()->user()->hasRole('user')) {
-                    // keep admins on frontend; legacy backend removed
-                }
-                if (!\Illuminate\Support\Facades\Auth::check()) {
-                    return redirect()->route('frontend.auth.login');
-                }
-                $userId = \Illuminate\Support\Facades\Auth::id();
-                $request->session()->put('freeUserID', 0);
-            } else {
-                $freeUser = \Auth::getProvider()->retrieveByCredentials(array('email' => 'demo01@gmail.com'));
-                if (!isset($freeUser)) {
-                    $userId = 1;
-                } else {
-                    $freeUser->balance = 10000;
-                    $freeUser->count_balance = 10000;
-                    $freeUser->last_login = new \DateTime("now", new \DateTimeZone("UTC"));
-                    $freeUser->session = '';
-
-                    $userId = $freeUser->id;
-
-                    $freeUser->save();
-                }
-
-                \Auth::login($freeUser, false);
-                $request->session()->put('freeUserID', $userId);
+            if (!\Auth::check()) {
+                return redirect()->route('frontend.game.list')->with('modal', 'modal-login');
             }
+            // Demo URLs must never adopt or reset another user's account.
+            $userId = \Auth::id();
+            $request->session()->put('freeUserID', 0);
 
             $detect = new \Detection\MobileDetect();
             $object = '\VanguardLTE\Games\\' . $game . '\SlotSettings';
-            if (!class_exists($object)) {
-                abort(404);
+            $slot = class_exists($object) ? new $object($game, $userId) : null;
+
+            // Search game object cleanly
+            $gameObj = \VanguardLTE\Game::where('name', $game)->first();
+            if (!$gameObj) {
+                // Fallback search by id or title slug
+                $gameObj = \VanguardLTE\Game::where('title', 'like', "%{$game}%")->first();
             }
-            $game = \VanguardLTE\Game::where([
-                'name' => $game,
-                'shop_id' => auth()->user()->shop_id
-            ]);
-            if ($detect->isMobile() || $detect->isTablet()) {
-                $game = $game->whereIn('device', [
-                    0,
-                    2
-                ]);
-            } else {
-                $game = $game->whereIn('device', [
-                    1,
-                    2
-                ]);
-            }
-            $game = $game->first();
-            if (!$game) {
+
+            if (!$gameObj) {
                 return redirect()->route('frontend.game.list');
             }
-            if (!$game->view) {
-                return redirect()->route('frontend.game.list');
-            }
-            $slot = new $object($game->name, $userId);
+            $game = $gameObj;
             $is_api = false;
+
+            // Handle Custom Folder or External URL source types
+            if ($game->source_type === 'external_url' && !empty($game->custom_path)) {
+                $externalUrl = $game->custom_path;
+                return view('frontend.games.external', compact('game', 'externalUrl'));
+            }
+
+            if ($game->source_type === 'custom_folder' && !empty($game->custom_path)) {
+                $externalUrl = $game->custom_path;
+                if (str_starts_with($externalUrl, 'http://') || str_starts_with($externalUrl, 'https://')) {
+                    return view('frontend.games.external', compact('game', 'externalUrl'));
+                }
+                return view('frontend.games.external', [
+                    'game' => $game,
+                    'externalUrl' => url($externalUrl)
+                ]);
+            }
+
             return view('frontend.games.list.' . $game->name, compact('slot', 'game', 'is_api'));
         }
         public function progress()
@@ -1022,20 +1009,27 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
         }
         public function server(\Illuminate\Http\Request $request, $game)
         {
-            if (\Illuminate\Support\Facades\Auth::check() && !auth()->user()->hasRole('user')) {
+            /* if (\Illuminate\Support\Facades\Auth::check() && !auth()->user()->hasRole('user')) {
                 echo '{"responseEvent":"error","responseType":"start","serverResponse":"Wrong User"}';
                 exit();
+            } */
+            if (!\Auth::check()) {
+                return response()->json(['status' => 'error', 'message' => 'Sign in to play.'], 401);
             }
-            if (!\Illuminate\Support\Facades\Auth::check()) {
-                echo '{"responseEvent":"error","responseType":"start","serverResponse":"User not Authorized"}';
-                exit();
+            if (in_array($game, \VanguardLTE\Services\CedarGameService::GAMES, true)) {
+                return response()->json((new \VanguardLTE\Services\CedarGameService())->handle($request, $game));
             }
+            $engine = '\\VanguardLTE\\Games\\' . $game . '\\Server';
+            if (!preg_match('/^[A-Za-z0-9_]+$/D', $game) || !class_exists($engine)) {
+                return response()->json(['status' => 'error', 'message' => 'Game not found.'], 404);
+            }
+            $sessionId = $request->sessionId ?: ($request->input('sessionId') ?: 'cedar_sess_' . auth()->user()->id . '_' . date('Ymd'));
             $subssession = \VanguardLTE\Subsession::where([
-                'subsession' => $request->sessionId,
+                'subsession' => $sessionId,
                 'user_id' => auth()->user()->id
             ])->orderBy('created_at', 'desc')->first();
             if (settings('check_active_tab')) {
-                if (!$request->sessionId) {
+                if (!$sessionId) {
                     echo '{"responseEvent":"error","responseType":"start","serverResponse":"Wrong sessionId"}';
                     exit();
                 }
@@ -1046,7 +1040,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             }
             if (!$subssession) {
                 $subssession = \VanguardLTE\Subsession::create([
-                    'subsession' => $request->sessionId,
+                    'subsession' => $sessionId,
                     'user_id' => auth()->user()->id
                 ]);
             }

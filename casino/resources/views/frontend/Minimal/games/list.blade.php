@@ -1,119 +1,215 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', $title)
+@section('page-title', 'Casino du Liban - Premier Social Gaming Lobby')
 
 @section('content')
-    @php
-        $providerCount = is_iterable($categories) ? count($categories) : 0;
-        $gamesCount = isset($games) ? count($games) : 0;
-        $heroBase = base_path('../minimal/hero');
-        $heroVideo = file_exists($heroBase . '/hero.mp4') ? '/minimal/hero/hero.mp4' : null;
-        $heroDesktop = file_exists($heroBase . '/hero-desktop.jpg') ? '/minimal/hero/hero-desktop.jpg' : null;
-        $heroMobile = file_exists($heroBase . '/hero-mobile.jpg') ? '/minimal/hero/hero-mobile.jpg' : $heroDesktop;
-        $showHero = false; // toggle to true to show hero media
-    @endphp
 
-    <div class="page-shell">
-        @if($showHero)
-            <section class="hero-media container">
-                <div class="media-frame">
-                    @if($heroVideo)
-                        <video class="hero-video" autoplay muted loop playsinline poster="{{ $heroDesktop ?? $heroMobile }}">
-                            <source src="{{ $heroVideo }}" type="video/mp4">
-                        </video>
-                    @elseif($heroDesktop || $heroMobile)
-                        <picture>
-                            @if($heroMobile)
-                                <source media="(max-width: 640px)" srcset="{{ $heroMobile }}">
-                            @endif
-                            <img src="{{ $heroDesktop ?? $heroMobile }}" alt="Hero feature" class="hero-image">
-                        </picture>
-                    @else
-                        <div class="media-placeholder">
-                            <span class="pill subtle">Hero placeholder</span>
-                            <p>Drop a video at <code>/minimal/hero/hero.mp4</code> or images at <code>/minimal/hero/hero-desktop.jpg</code> and <code>/minimal/hero/hero-mobile.jpg</code>.</p>
-                        </div>
-                    @endif
-                    <div class="media-overlay">
-                        <span class="badge">Featured</span>
-                        <div class="overlay-copy">
-                            <p class="overlay-title">Customizable hero</p>
-                            <p class="overlay-sub">Swap media files in <code>/minimal/hero/</code> for desktop/mobile or MP4 video.</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        @endif
-
-        <section class="toolbar-panel container" id="providers">
-            <div class="toolbar-header">
-                <div>
-                    <p class="eyebrow">Providers</p>
-                    <h3>Browse {{ $gamesCount }} games across {{ $providerCount }} providers</h3>
-                </div>
-                <label class="search-wrapper toolbar-search">
-                    <span class="search-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" role="presentation">
-                            <path fill="currentColor"
-                                d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 0 0 1.57-5.34A6.5 6.5 0 1 0 9 15.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l4.75 4.74 1.49-1.49L15.5 14Zm-6.5 0a4.5 4.5 0 1 1 .01-9.01A4.5 4.5 0 0 1 9 14Z" />
-                        </svg>
-                    </span>
-                    <input type="text" id="game-search" class="search-input" placeholder="Search games or providers">
-                </label>
+<!-- Hero Feature Banner Carousel -->
+<div class="relative overflow-hidden rounded-2xl md:rounded-3xl bg-gradient-to-r from-[#121826] via-[#162032] to-[#111624] border border-white/[0.08] shadow-2xl p-6 sm:p-8 md:p-10">
+    <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="space-y-2.5 max-w-xl">
+            <div class="inline-flex items-center gap-2 bg-primary/10 border border-primary/25 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                <span class="text-[11px] font-bold text-primary font-mono-jet uppercase tracking-wider">OFFICIAL SOCIAL CASINO</span>
             </div>
-
-            <div class="category-scroller">
-                <a href="{{ route('frontend.game.list.category', 'all') }}" class="category-pill {{ $category1 == 'all' ? 'active' : '' }}">All</a>
-                @foreach($categories as $cat)
-                    @if(is_object($cat))
-                        <a href="{{ route('frontend.game.list.category', $cat->href) }}" class="category-pill {{ $category1 == $cat->href ? 'active' : '' }}">{{ $cat->title }}</a>
-                    @endif
-                @endforeach
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                Play 1,000+ Slots & <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">CEDAR Originals</span>
+            </h1>
+            <p class="text-xs sm:text-sm text-on-surface-muted leading-relaxed">
+                Experience high-energy arcade slots, the thrilling Cedar Space Crash, live sports wagering, and multi-draw jackpots with 100% Free Cedar Coins.
+            </p>
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+                <a href="/categories/cedar_games" class="bg-gradient-to-r from-accent-gold to-accent-amber hover:from-yellow-400 hover:to-accent-gold text-black font-extrabold px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-accent-gold/25 transition-all no-underline flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg">rocket_launch</span>
+                    <span>Play CEDAR Crash</span>
+                </a>
+                <button type="button" class="open-modal bg-white/[0.06] hover:bg-white/[0.12] text-white border border-white/10 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all" data-target="{{ Auth::check() ? 'modal-profile' : 'modal-login' }}">
+                    {{ Auth::check() ? 'Claim Free Refill' : 'Sign In / Register' }}
+                </button>
             </div>
-        </section>
+        </div>
 
-        <section class="games-section container">
-            <div class="section-header">
-                <div>
-                    <p class="eyebrow">Lobby</p>
-                    <h3>{{ $title }}</h3>
-                </div>
-                <span class="muted">Showing {{ $gamesCount }} games</span>
-            </div>
-
-            @if(count($games) > 0)
-                <div class="games-grid">
-                    @foreach($games as $game)
-                        <div class="game-card" data-title="{{ $game->title }}">
-                            <div class="game-media">
-                                <img src="/frontend/Default/ico/{{ $game->name }}.jpg" alt="{{ $game->title }}" class="game-image" loading="lazy">
-                                <div class="game-overlay">
-                                    <div class="overlay-meta">
-                                        <span class="pill subtle">{{ $game->label ?? 'Slots' }}</span>
-                                        <span class="game-title">{{ $game->title }}</span>
-                                    </div>
-                                    <div class="game-actions">
-                                        @if(Auth::check())
-                                            <a href="{{ route('frontend.game.go', $game->name) }}" class="play-btn">Play now</a>
-                                        @else
-                                            <a href="#" class="play-btn open-modal" data-target="modal-login">Login to play</a>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="game-info">
-                                <div class="game-name">{{ $game->title }}</div>
-                                <div class="game-sub">Instant play | HD ready</div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="no-games">
-                    <h4>No games found in this category.</h4>
-                    <p class="muted">Try a different provider or clear the search.</p>
-                </div>
-            @endif
-        </section>
+        <!-- Featured Crash Multiplier Display -->
+        <div class="hidden sm:flex flex-col items-center justify-center p-6 rounded-2xl bg-[#0b0e14]/60 border border-white/[0.08] backdrop-blur-md text-center min-w-[200px]">
+            <span class="text-[10px] font-bold text-on-surface-subtle uppercase tracking-widest mb-1">CEDAR CRASH MULTIPLIER</span>
+            <span class="font-mono-jet text-4xl font-extrabold text-accent-gold tracking-tighter animate-pulse">48.72x</span>
+            <span class="text-[10px] text-primary font-bold mt-1">LAST TOP ROUND</span>
+            <a href="/game/CedarCrash" class="mt-3 text-xs font-bold text-white bg-primary hover:bg-primary-dark px-4 py-1.5 rounded-lg no-underline transition-colors uppercase">
+                Launch
+            </a>
+        </div>
     </div>
+    
+    <!-- Ambient Background Lighting -->
+    <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -left-10 -top-10 w-72 h-72 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
+</div>
+
+<!-- Live Social Winners Marquee -->
+<div class="flex items-center gap-3 overflow-hidden bg-[#121622] border border-white/[0.06] rounded-xl px-4 py-2.5 text-xs">
+    <div class="flex items-center gap-1.5 text-accent-gold font-bold flex-shrink-0 uppercase tracking-wider text-[11px]">
+        <span class="material-symbols-outlined text-base">military_tech</span>
+        <span>Live Wins:</span>
+    </div>
+    <div class="flex items-center gap-6 overflow-x-auto no-scrollbar font-mono-jet text-on-surface-muted whitespace-nowrap text-[11px]">
+        <div class="flex items-center gap-1.5"><span class="text-white font-bold">Ahmad_K</span> won <span class="text-primary font-bold">142,000 C</span> on <span class="text-white">Book of Ra</span></div>
+        <span class="text-white/20">•</span>
+        <div class="flex items-center gap-1.5"><span class="text-white font-bold">Maya_L</span> hit <span class="text-accent-gold font-bold">38.4x</span> on <span class="text-white">Cedar Space Crash</span></div>
+        <span class="text-white/20">•</span>
+        <div class="flex items-center gap-1.5"><span class="text-white font-bold">Charbel99</span> won <span class="text-primary font-bold">88,500 C</span> on <span class="text-white">Beetle Mania</span></div>
+        <span class="text-white/20">•</span>
+        <div class="flex items-center gap-1.5"><span class="text-white font-bold">Georges_B</span> hit <span class="text-secondary font-bold">3-Match</span> in <span class="text-white">Jackpot Lotto</span></div>
+    </div>
+</div>
+
+<!-- Games Grid Section -->
+<section class="space-y-5">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white uppercase">Game Arena</h2>
+            </div>
+            <p class="text-on-surface-muted text-xs sm:text-sm mt-1">Select any game to launch instant demo mode with 10,000 free coins.</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <span class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1 rounded-lg">
+                {{ count($games) }} TITLES ONLINE
+            </span>
+        </div>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1.5 custom-scrollbar max-w-full">
+        <a href="{{ route('frontend.game.list.category', 'all') }}" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ ($category1 ?? 'all') == 'all' ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06] hover:border-white/15' }}">
+            All Games
+        </a>
+        <a href="/categories/cedar_games" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ request()->is('categories/cedar_games*') ? 'bg-accent-gold text-black shadow-md shadow-accent-gold/25' : 'bg-surface-card text-accent-gold hover:text-yellow-300 border border-accent-gold/20' }}">
+            🚀 CEDAR Games
+        </a>
+        @if(is_iterable($categories))
+            @foreach($categories as $cat)
+                <a href="{{ route('frontend.game.list.category', $cat->href) }}" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ ($category1 ?? '') == $cat->href ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06] hover:border-white/15' }}">
+                    {{ $cat->title }}
+                </a>
+            @endforeach
+        @endif
+    </div>
+
+    <!-- Games Grid: 2-col mobile, 3-col tablet, 4-col laptop, 5-col wide -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+        @forelse($games as $game)
+            <div class="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#161c2b] border border-white/[0.07] hover:border-primary/50 shadow-md hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 flex flex-col justify-end">
+                <!-- Cover Image -->
+                <img src="/frontend/Default/ico/{{ $game->name }}.jpg" 
+                     onerror="this.src='/frontend/Default/ico/DayofDead.jpg'"
+                     alt="{{ $game->title }}" 
+                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                     loading="lazy">
+                
+                <!-- Dark Gradient Overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-[#0b0e14] via-[#0b0e14]/40 to-transparent opacity-90 group-hover:opacity-95 transition-opacity"></div>
+                
+                <!-- Game Info & Action -->
+                <div class="relative z-10 p-3 sm:p-4 space-y-1.5">
+                    <span class="text-[9px] text-primary font-mono-jet font-bold uppercase tracking-wider block">
+                        {{ strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT')) }}
+                    </span>
+                    <h4 class="text-xs sm:text-sm font-bold text-white leading-tight truncate" title="{{ $game->title }}">
+                        {{ $game->title }}
+                    </h4>
+                    
+                    <a href="{{ route('frontend.game.go', $game->name) }}" class="block text-center bg-primary hover:bg-primary-dark text-white py-1.5 sm:py-2 rounded-xl font-bold text-[11px] sm:text-xs uppercase tracking-wider transition-all no-underline shadow-md shadow-primary/20">
+                        Play
+                    </a>
+                </div>
+            </div>
+        @empty
+            <div class="col-span-full text-center py-16 bg-[#121622] rounded-3xl border border-white/[0.06]">
+                <span class="material-symbols-outlined text-4xl text-on-surface-subtle mb-2">sentiment_dissatisfied</span>
+                <p class="text-on-surface-muted text-sm font-medium">No games found in this category.</p>
+                <a href="{{ route('frontend.game.list') }}" class="mt-3 inline-block bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl no-underline uppercase">
+                    View All Games
+                </a>
+            </div>
+        @endforelse
+    </div>
+</section>
+
+<!-- Sports & Prediction Highlights Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5 pt-4">
+    <!-- Battle Odds Card -->
+    <div class="lg:col-span-2 bg-[#121622] rounded-3xl p-6 border border-white/[0.08] shadow-lg space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center text-secondary">
+                    <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">sports_soccer</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white tracking-tight">Battle Odds Arena</h3>
+                    <span class="text-[11px] text-on-surface-muted">Live Global Match Fixtures</span>
+                </div>
+            </div>
+            <a href="{{ route('frontend.sports.index') }}" class="text-xs font-bold text-secondary hover:text-secondary-light no-underline uppercase flex items-center gap-1">
+                <span>All Odds</span>
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="bg-[#161c2b] rounded-2xl p-4 border border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 text-center sm:text-left flex-1">
+                <div class="flex-1">
+                    <span class="text-[10px] text-on-surface-subtle uppercase tracking-wider block">CHAMPIONS LEAGUE</span>
+                    <span class="text-sm font-bold text-white">REAL MADRID</span>
+                </div>
+                <span class="text-xs font-bold text-secondary bg-secondary/10 px-2.5 py-1 rounded-lg">VS</span>
+                <div class="flex-1">
+                    <span class="text-[10px] text-on-surface-subtle uppercase tracking-wider block">CHAMPIONS LEAGUE</span>
+                    <span class="text-sm font-bold text-white">MANCHESTER CITY</span>
+                </div>
+            </div>
+            <a href="{{ route('frontend.sports.index') }}" class="w-full sm:w-auto bg-secondary hover:bg-secondary-dark text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors no-underline text-center">
+                Wager Free
+            </a>
+        </div>
+    </div>
+
+    <!-- Future Vote Card -->
+    <div class="bg-[#121622] rounded-3xl p-6 border border-white/[0.08] shadow-lg space-y-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                    <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">query_stats</span>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white tracking-tight">Future Vote</h3>
+                    <span class="text-[11px] text-on-surface-muted">Prediction Markets</span>
+                </div>
+            </div>
+            <a href="{{ route('frontend.predictions.index') }}" class="text-xs font-bold text-primary hover:text-primary-light no-underline uppercase flex items-center gap-1">
+                <span>Vote</span>
+                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </a>
+        </div>
+
+        <div class="space-y-3">
+            <h4 class="text-xs sm:text-sm font-bold text-white leading-snug">Will Commercial Humanoid AI Robots enter consumer homes before 2027?</h4>
+            <div class="space-y-1.5">
+                <div class="flex justify-between font-mono-jet text-xs font-bold">
+                    <span class="text-primary">YES 42%</span>
+                    <span class="text-on-surface-muted">NO 58%</span>
+                </div>
+                <div class="w-full h-2 bg-black/40 rounded-full overflow-hidden flex">
+                    <div class="h-full bg-primary" style="width: 42%"></div>
+                    <div class="h-full bg-white/10" style="width: 58%"></div>
+                </div>
+            </div>
+            <a href="{{ route('frontend.predictions.index') }}" class="block text-center w-full bg-primary hover:bg-primary-dark text-white py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all no-underline shadow-md shadow-primary/20">
+                Vote Free Prediction
+            </a>
+        </div>
+    </div>
+</div>
+
 @endsection

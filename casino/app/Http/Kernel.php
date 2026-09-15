@@ -19,7 +19,8 @@ namespace VanguardLTE\Http
                 'VanguardLTE\Http\Middleware\VerifyCsrfToken', 
                 'Illuminate\Routing\Middleware\SubstituteBindings', 
                 'VanguardLTE\Http\Middleware\SelectLanguage',
-                'VanguardLTE\Http\Middleware\ForceShopOne'
+                'VanguardLTE\Http\Middleware\ForceShopOne',
+                'VanguardLTE\Http\Middleware\ReferralTracking'
             ], 
             'api' => [
                 'VanguardLTE\Http\Middleware\UseApiGuard', 

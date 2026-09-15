@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\Royal20FruitsNG
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\GoldenTourPTM
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

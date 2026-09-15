@@ -6,6 +6,9 @@
 <html>
 
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 
     <meta charset="utf-8">
 
@@ -86,7 +89,7 @@
 
         WEBSOCKETURL= 'ws://' + hostname;
 
-        SELSVRURL='http://'+hostname+"/game/{{ $game->name }}/server?sessionId="+sessionStorage.getItem('sessionId')+"&command=init";
+        SELSVRURL='//'+hostname+"/game/{{ $game->name }}/server?sessionId="+sessionStorage.getItem('sessionId')+"&command=init";
 
     }
 

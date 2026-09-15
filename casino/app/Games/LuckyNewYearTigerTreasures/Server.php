@@ -1,5 +1,5 @@
 <?php 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures
 {
 
      use VanguardLTE\Game;
@@ -14,7 +14,8 @@ namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures
     use VanguardLTE\User;
 
     set_time_limit(10);
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

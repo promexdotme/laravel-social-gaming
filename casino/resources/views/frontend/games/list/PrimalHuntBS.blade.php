@@ -3,6 +3,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 	<meta charset="utf-8" />
 	<base href="/games/{{ $game->name }}/" target="_blank" >
 	  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">

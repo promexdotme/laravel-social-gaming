@@ -6,6 +6,9 @@
 <html lang="en">
 
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 <base href="/games/{{ $game->name }}/">
     <meta charset="utf-8" />
     <link rel="icon" href="/favicon.ico" />

@@ -1,7 +1,10 @@
 
 
 
-	<!doctype html><html><head><meta charset="UTF-8">
+	<!doctype html><html><head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+<meta charset="UTF-8">
 	
 	
 			<title>{{ $game->title }}</title>

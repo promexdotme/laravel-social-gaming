@@ -1,5 +1,8 @@
 <html>
    <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
       <title>{{ $game->title }}</title>
       <meta charset="utf-8">
       <meta name="apple-mobile-web-app-capable" content="yes" />

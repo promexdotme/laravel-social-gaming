@@ -1,6 +1,48 @@
 .env
+*.env*
 casino/.env
+casino/.env.*
+_access/
+games/
+casino/public/games/
 prepack.php
 upgrade.php
 *.zip
 casino/casino1.zip
+
+# Database dumps & backups
+*.sql
+*.sql.gz
+database_backup.sql
+
+# Local logs
+*.log
+casino/storage/logs/*.log
+
+# Local scratch / maintenance scripts
+set_admin.php
+casino/set_admin.php
+export-database.php
+inspect-db.php
+clean-database-games.php
+cleanup-step2.php
+count-amatic.php
+size-breakdown*.php
+unzip-games.ps1
+add-allow-dynamic-properties.php
+audit-games.php
+inject-mock.php
+create-prepackaged-zip.php
+fix-amatic-blades.php
+fix-game-symbols.php
+
+# Local agent contexts & design notes
+*Context.md
+*.md
+!README.md
+context/
+Shared.md
+Collaborated_Tasks.md
+
+/output/playwright/
+/.playwright-cli/

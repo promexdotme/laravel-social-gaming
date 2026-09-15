@@ -15,7 +15,8 @@ namespace VanguardLTE\Games\DayofDead
     
 
     set_time_limit(10);
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

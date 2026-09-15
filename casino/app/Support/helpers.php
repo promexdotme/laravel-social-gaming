@@ -13,16 +13,23 @@ if (! function_exists('settings')) {
      */
     function settings($key = null, $default = null)
     {
-        if (is_null($key)) {
-            return app('anlutro\LaravelSettings\SettingStore');
-        }
+        try {
+            if (is_null($key)) {
+                return app('anlutro\LaravelSettings\SettingStore');
+            }
 
-        $value = app('anlutro\LaravelSettings\SettingStore')->get($key, $default);
-        if ($key === 'frontend' && (!$value || strtolower($value) === 'default')) {
-            return 'Minimal';
-        }
+            $value = app('anlutro\LaravelSettings\SettingStore')->get($key, $default);
+            if ($key === 'frontend' && (!$value || strtolower($value) === 'default')) {
+                return 'Minimal';
+            }
 
-        return $value;
+            return $value;
+        } catch (\Exception $e) {
+            if ($key === 'frontend') {
+                return 'Minimal';
+            }
+            return $default;
+        }
     }
 }
 

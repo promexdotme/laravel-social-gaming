@@ -180,9 +180,7 @@ class SportsControlController extends Controller
             'sports_feature_exports_enabled' => 'required|in:0,1',
             'sports_feature_admin_sync_enabled' => 'required|in:0,1',
             'sports_feature_admin_settlement_enabled' => 'required|in:0,1',
-            'sportsbook_provider' => 'required|in:the_odds_api,parlay_api',
-            'parlay_api_key' => 'nullable|string',
-            'parlay_base_url' => 'nullable|string',
+            'sportsbook_provider' => 'nullable|in:the_odds_api',
             'ods_api_key' => 'nullable|string',
             'ods_api_regions' => 'required|string',
             'ods_api_markets' => 'required|string',
@@ -199,9 +197,6 @@ class SportsControlController extends Controller
             'sports_feature_exports_enabled',
             'sports_feature_admin_sync_enabled',
             'sports_feature_admin_settlement_enabled',
-            'sportsbook_provider',
-            'parlay_api_key',
-            'parlay_base_url',
             'ods_api_key',
             'ods_api_regions',
             'ods_api_markets',
@@ -217,15 +212,13 @@ class SportsControlController extends Controller
 
         // Exclude env settings from database storage to prevent credentials leakage
         $envData = [
-            'SPORTSBOOK_PROVIDER' => $request->input('sportsbook_provider'),
-            'PARLAY_API_KEY' => $request->input('parlay_api_key', ''),
-            'PARLAY_BASE_URL' => $request->input('parlay_base_url', ''),
+            'SPORTSBOOK_PROVIDER' => 'the_odds_api',
             'ODS_API_KEY' => $request->input('ods_api_key', ''),
         ];
         $this->updateEnvFile($envData);
 
         // Blank out DB settings counterpart so they don't get exported to lite13.sql
-        settings()->set('sportsbook_provider', '');
+        settings()->set('sportsbook_provider', 'the_odds_api');
         settings()->set('parlay_api_key', '');
         settings()->set('parlay_base_url', '');
         settings()->set('ods_api_key', '');

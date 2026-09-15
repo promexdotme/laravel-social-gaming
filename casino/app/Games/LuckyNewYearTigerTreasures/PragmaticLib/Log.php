@@ -1,6 +1,6 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 class Log
 {
@@ -33,4 +33,21 @@ class Log
         ]);
     }
 
+    public static function changeLog($gameId, $userId, $ms){
+        $lastLog = \VanguardLTE\GameLog::where(['game_id' => $gameId, 'user_id' => $userId])->orderBy('id', 'desc')->first();
+        $history = json_decode($lastLog->str, true);
+        $history['ms'] = $ms;
+        $history = json_encode($history);
+        $lastLog->str = $history;
+        $lastLog->save();
+    }
+
+    public static function setCollected($gameId, $userId, $isCollected){
+        $lastLog = \VanguardLTE\GameLog::where(['game_id' => $gameId, 'user_id' => $userId])->orderBy('id', 'desc')->first();
+        $history = json_decode($lastLog->str, true);
+        $history['isCollected'] = $isCollected;
+        $history = json_encode($history);
+        $lastLog->str = $history;
+        $lastLog->save();
+    }
 }

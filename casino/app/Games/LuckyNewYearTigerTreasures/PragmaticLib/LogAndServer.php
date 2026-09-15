@@ -1,251 +1,238 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 class LogAndServer
 {
-    public static function getResult($slotArea, $index, $counter, $bet, $lines, $doubleChance, $reelSet, $win,
-                                     $log, $user, $freeSpins, $multipliers, $changeBalance){
+    public static function getResult($slotArea, $index, $counter, $bet, $lines, $reelSet, $win, $pur, 
+                                     $log, $user, $changeBalance, $gameSettings){
+        var_dump('5_0');
         $toLog = [
-            'SymbolsAfter' => $slotArea['SymbolsAfter'],
-            'SymbolsBelow' => $slotArea['SymbolsBelow'],
-            'SlotArea' => $slotArea['SlotArea'],
+            'sa' => $slotArea['SymbolsAfter'],
+            'sb' => $slotArea['SymbolsBelow'],
+            's' => $slotArea['SlotArea'],
             'Balance' => $user->balance + $changeBalance,
             'Index' => $index,
             'Counter' => $counter,
             'Bet' => $bet,
-            'Lines' => $lines,
-            'DoubleChance' => $doubleChance,
-            'ReelSet' => $reelSet,
-            'TotalWin' => $win['TotalWin'],
-            'Win' => $win['TotalWin'],
+            'l' => $lines,
+            'tw' => $win['TotalWin'],
+            'w' => $win['TotalWin'],
+            'state' => 'spin',
+            'na' => 'c',
+            'n_reel_set' => $reelSet
         ];
         $time = (int) round(microtime(true) * 1000);
         $toServer = [
-            'prg_m=wm',
-            'balance='.$toLog['Balance'],
-            'prg=1',
+            'tw='.$toLog['w'],
+            'balance='.number_format($toLog['Balance'], 2, ".", ""),
             'index='.$toLog['Index'],
-            'balance_cash='.$toLog['Balance'],
-            'reel_set='.$toLog['ReelSet'],
+            'balance_cash='.number_format($toLog['Balance'], 2, ".", ""),
             'balance_bonus=0.00',
-            'na=s',
-            'bl='.$toLog['DoubleChance'],
+            'na=c',
             'stime='.$time,
-            'sa='.implode(',', $toLog['SymbolsAfter']),
-            'sb='.implode(',', $toLog['SymbolsBelow']),
-            'sh=5',
+            'sa='.implode(',', $toLog['sa']),
+            'sb='.implode(',', $toLog['sb']),
+            'sh='.$gameSettings['sh'],
             'c='.$toLog['Bet'],
             'sver=5',
             'counter='.$toLog['Counter'],
-            'l='.$toLog['Lines'],
-            's='.implode(',', $toLog['SlotArea']),
-            'w='.$toLog['Win'],
+            'l='.$toLog['l'],
+            's='.implode(',', $toLog['s']),
+            'w='.$toLog['w'],
+            'n_reel_set='.$reelSet
         ];
-
-        // Если нет выигрыша
-        if ($win['TotalWin'] == 0){
-                // Если предыдущий раз был Respin или FirstRespin
-                if ($log && $log['State'] === 'Respin' || $log['State'] === 'FirstRespin'){
-                    $addLog = [
-                        'Respin' => $log['Respin'] + 1,
-                        'RespinWin' => $log['RespinWin'],
-                        'WinLines' => $win['WinLines'],
-                        'TotalWin' => $log['TotalWin'],
-                        'tmb_res' => $log['tmb_res'],
-                        'tmb_win' => $log['tmb_win'],
-                        'State' => 'LastRespin'
-                    ];
-                    $toLog = array_merge($toLog, $addLog);
-                    $repl = array_keys($toServer, 'na=s');
-                    $toServer[$repl[0]] = 'na=c'; // заменить значение
-                    $addResponse = [
-                        'rs_t='.$toLog['Respin'],
-                        'rs_win='.$toLog['RespinWin'],
-                        'tmb_res='.$toLog['tmb_res'],
-                        'tmb_win='.$toLog['tmb_win'],
-                    ];
-                    $toServer = array_merge($toServer, $addResponse);
+        var_dump('5_1_0');
+        $nakey = array_keys($toServer, 'na=c')[0];
+        $twkey = array_keys($toServer, 'tw='.$toLog['w'])[0];
+        $wkey = array_keys($toServer, 'w='.$toLog['w'])[0];
+        var_dump('5_1_1');
+        
+        $addKeys = ['mo', 'mo_t'];
+        foreach($addKeys as $val){
+            if(array_key_exists($val, $slotArea)){
+                $toLog[$val] = $slotArea[$val];
+                switch($val){ 
+                    case 'accv':
+                        $toServer[] = $val.'='.$toLog[$val];
+                        break;
+                    case 'accm':
+                        $toServer[] = $val.'='.$toLog[$val];
+                        break;
+                    default:
+                        $toServer[] = $val.'='.implode(',', $toLog[$val]);
                 }
-                else{
-                    $toLog['State'] = 'Spin';
-                }
-
-                if ($freeSpins){
-                // Если выпало добавление фриспинов а не сами фриспины
-                if (array_key_exists('AddFreeSpins', $freeSpins)){
-                    $addFSLog = [
-                        'FreeState' => 'AddFreeSpin',
-                        'FreeSpins' => $log['FreeSpins'] + $freeSpins['AddFreeSpins'],
-                        'FreeSpinNumber' => $log['FreeSpinNumber'] + 1,
-                    ];
-                    $responseFs = [
-                        'fsmul=1',
-                        'fsmax='.($addFSLog['FreeSpins']),
-                        'fswin=0.00',
-                        'fs='.$addFSLog['FreeSpinNumber'],
-                        'fsres=0.00',
-                        'fsmore=5',
-                    ];
-                }
-                // Если выпали основные фриспины
-                else{
-                    if ($log && ($log['State'] === 'Respin' || $log['State'] === 'FirstRespin')) $toLog['TotalWin'] = $log['TotalWin'];
-                    $addFSLog = [
-                        'FreeState' => 'FirstFreeSpin',
-                        'FreeSpins' => $freeSpins['FreeSpins'],
-                        'FreeSpinNumber' => 1,
-                        'FSPay' => $freeSpins['Pay'],
-                        'Scatter' => $freeSpins['Scatter'],
-                        'ScatterPositions' => $freeSpins['ScatterPositions'],
-                        'TotalWin' => $toLog['TotalWin'] + $freeSpins['Pay'],
-                        'Win' => $toLog['TotalWin'] + $freeSpins['Pay']
-                    ];
-
-                    $responseFs = [
-                        'fsmul=1',
-                        'fsmax='.$addFSLog['FreeSpins'],
-                        'fswin=0.00',
-                        'fs='.$addFSLog['FreeSpinNumber'],
-                        'fsres=0.00',
-                        'fs_bought=10',
-                        'psym='.$addFSLog['Scatter'].'~'.$addFSLog['FSPay'].'~'.implode(',', $addFSLog['ScatterPositions'])
-                    ];
-                }
-                    if ($log && $log['State'] === 'Respin' || $log['State'] === 'FirstRespin')$addFSLog['State'] = 'LastRespin';
-                    else $addFSLog['State'] = 'Spin';
-                    $toLog = array_merge($toLog, $addFSLog);
-                    $toServer = array_merge($toServer, $responseFs);
-                }
+            }
         }
-        // Если есть выигрыш
-        else{
-            // Если предыдущий раз был Respin или FirstRespin
-            if ($log && $log['State'] === 'Respin' || $log['State'] === 'FirstRespin'){
-                $addLog = [
-                    'Respin' => $log['Respin'] + 1,
-                    'RespinWin' => $log['RespinWin'] + $win['TotalWin'],
-                    'WinLines' => $win['WinLines'],
-                    'TotalWin' => $log['TotalWin'] + $win['TotalWin'],
-                    'tmb_res' => $log['tmb_res'] + $win['TotalWin'],
-                    'tmb_win' => $log['tmb_win'] + $win['TotalWin'],
-                    'State' => 'Respin'
-                ];
-                $positions = self::positionsToServer($addLog['WinLines']);
-                $toServer = array_merge($toServer, $positions);
-                $addToServer = [
-                    'rs_p='.$addLog['Respin'],
-                    'rs_c=1',
-                    'rs_m=1',
-                    'tmb_win='.$addLog['tmb_win'],
-                    'tmb_res='.$addLog['tmb_res'],
-                    'rs_win='.$addLog['RespinWin'],
 
-                ];
-            }
-            // Если предыдущий не респин
-            else{
-                $addLog = [
-                    'Respin' => 0,
-                    'RespinWin' => 0,
-                    'WinLines' => $win['WinLines'],
-                    'tmb_res' => $win['TotalWin'],
-                    'tmb_win' => $win['TotalWin'],
-                    'State' => 'FirstRespin'
-                ];
-                $positions = self::positionsToServer($addLog['WinLines']);
-                $toServer = array_merge($toServer, $positions);
-                $addToServer = [
-                    'rs=t',
-                    'rs_p='.$addLog['Respin'],
-                    'rs_c=1',
-                    'rs_m=1',
-                    'tmb_win='.$addLog['tmb_win'],
-                    'tmb_res='.$addLog['tmb_res'],
-                ];
-            }
-            $toLog = array_merge($toLog, $addLog);
+        // If this is the trigger to Super Respin
+        if($pur === '2'){
+            $bpw = 0;
+            foreach($slotArea['mo'] as $val)
+                $bpw += $val;
+            $bpw *= $bet;
+            $addToLog = [
+                'na' => 'b',
+                'bgid' => 0,
+                'rsb_s' => [11, 12],
+                'rsb_m' => 3,
+                'rsb_c' => 0,
+                'na' => 'b',
+                'bgt' => 11,
+                'bw' => 1,
+                'end' => 0,
+                'bpw' => $bpw,
+                'e_aw' => 0
+            ];
+            $addToServer = [
+                'bgid=0',
+                'rsb_s=11,12',
+                'rsb_m=3',
+                'rsb_c=0',
+                'na=b',
+                'bgt=11',
+                'bw=1',
+                'end=0',
+                'bpw='.$bpw,
+                'e_aw=0'
+            ];
+            $toServer[$nakey] = 'na=b';
+            $toServer[$twkey] = 'tw='.$toLog['tw'];
+            $toServer[$wkey] = 'w='.$toLog['w'];
+            var_dump('5_1_1_2.8');
+            $toLog = array_merge($toLog, $addToLog);
+            $toServer = array_merge($toServer, $addToServer);            
+        }
+
+        // handling FS
+        $fswin = 0;
+        if(array_key_exists('fswin', $win)){
+            $fswin = $win['fswin'];
+            $me = $log['ms'].'~'.implode(',', $win['msPositions']).'~'.implode(',', $win['rmsPositions']);
+            $mes = implode(',', $win['mes']);
+            $psym = $log['ms'].'~'.$fswin.'~'.implode(',', $win['msPositions']);
+        }
+
+        // If this is the trigger to the Free Spin Mode
+        if($pur === '0'){
+            $psym = SlotArea::getPsym($gameSettings, $slotArea['SlotArea'], $bet, $lines);
+            var_dump('5_1_1_2.8', $psym);
+            $addToLog = [
+                'fsmul' => 1,
+                'fsmax' => 5,
+                'na' => 's',
+                'fswin' => 0,
+                'fs' => 1,
+                'fsres' => 0
+            ];
+            $addToServer = [
+                'fsmul=1',
+                'fsmax=5',
+                'fswin=0',
+                'fs=1',
+                'fsres=0'
+            ];
+            $toLog['state'] = 'firstRespin';
+            $toLog['tw'] += $fswin + $psym['psymwin'];
+            $toLog['w'] += $fswin + $psym['psymwin'];
+            $toServer[$nakey] = 'na=s';
+            $toServer[$twkey] = 'tw='.$toLog['tw'];
+            $toServer[$wkey] = 'w='.$toLog['w'];
+            var_dump('5_1_1_2.8');
+            $toServer[] = 'psym='.$psym['psym'];
+            $toLog = array_merge($toLog, $addToLog);
             $toServer = array_merge($toServer, $addToServer);
         }
 
-        // Если сейчас идут фриспины
-        if ($log && array_key_exists('FreeSpinNumber', $log) && $log['FreeState'] != 'LastFreeSpin'){
-            // Если Spin или LastRespin - то добавить счетчик фриспинов
-            if ($toLog['State'] === 'Spin' || $toLog['State'] === 'LastRespin'){
-                $toLog['FreeSpinNumber'] = $log['FreeSpinNumber'] + 1;
-            }else{
-                $toLog['FreeSpinNumber'] = $log['FreeSpinNumber'];
-            }
-            if(!array_key_exists('FreeSpins', $toLog)) $toLog['FreeSpins'] = $log['FreeSpins'];
-            $toLog['TotalWin'] = $toLog['Win'] + $log['TotalWin'];
-            // Если сейчас последний фриспин - подвести итоги иначе обычную строку фриспинов добавить с счетчиком
-            if ($toLog['FreeSpinNumber'] <= $toLog['FreeSpins']){
-                $toLog['FreeState'] = 'FreeSpin';
-                $toServerFs = [
-                    'fsmul=1',
-                    'fsmax='.$toLog['FreeSpins'],
-                    'fswin=0.00',
-                    'fs='.$toLog['FreeSpinNumber'],
-                    'fsres=0.00',
+        var_dump('5_2');
+        // If this is free spin
+        if($log && array_key_exists('fs', $log)){
+            if($log['fs'] == $log['fsmax']){
+                $addToLog = [
+                    'fs_total' => $log['fs'],
+                    'fswin_total' => $log['fswin'] + $win['TotalWin'] + $fswin,
+                    'fsmul_total' => 1,
+                    'fsres_total' => $log['fsres'] + $win['TotalWin'] + $fswin
                 ];
-                $repl = array_keys($toServer, 'na=c');
-                if ($repl) $toServer[$repl[0]] = 'na=s'; // заменить значение
-            }else{
-                $repl = array_keys($toServer, 'na=s');
-                if ($repl) $toServer[$repl[0]] = 'na=c'; // заменить значение
-                $toLog['FreeState'] = 'LastFreeSpin';
-                $toServerFs = [
+                $addToServer = [
+                    'fs_total='.$addToLog['fs_total'],
+                    'fswin_total='.$addToLog['fswin_total'],
                     'fsmul_total=1',
-                    'fswin_total=0.00',
-                    'fs_total='.($toLog['FreeSpinNumber'] - 1),
-                    'fsres_total=0.00',
-                    'fs_bought=10'
+                    'fsres_total='.$addToLog['fsres_total']
                 ];
+                $toLog['state'] = 'lastRespin';
+                $toLog['na'] = 'c';
+                $toLog['w'] = $fswin + $win['TotalWin'];
+                $toLog['tw'] = $log['tw'] + $toLog['w'];
+                $toServer[$nakey] = 'na=c';
+                $toServer[$twkey] = 'tw='.$toLog['tw'];
+                $toServer[$wkey] = 'w='.$toLog['w'];
             }
-            $toServer = array_merge($toServer, $toServerFs);
+            else {
+                $addToLog = [
+                    'fsmul' => 1,
+                    'fsmax' => $pur === '1' ? $log['fsmax'] + $gameSettings['settings_addfs'] : $log['fsmax'],
+                    'fswin' => $log['fswin'] + $win['TotalWin'] + $fswin,
+                    'fs' => $log['fs'] + 1,
+                    'fsres' => $log['fswin'] + $win['TotalWin'] + $fswin
+                ];
+                $addToServer = [
+                    'fsmul=1',
+                    'fsmax='.$addToLog['fsmax'],
+                    'fswin='.$addToLog['fswin'],
+                    'fs='.$addToLog['fs'],
+                    'fsres='.$addToLog['fsres']
+                ];
+                $toLog['state'] = 'respin';
+                $toLog['na'] = 's';
+                $toLog['w'] = $fswin + $win['TotalWin'];
+                $toLog['tw'] = $log['tw'] + $toLog['w'];
+                $toServer[$nakey] = 'na=s';
+                $toServer[$twkey] = 'tw='.$toLog['tw'];
+                $toServer[$wkey] = 'w='.$toLog['w'];
+            }
+            // if($pur === '1'){
+            //     var_dump('3_pur='.$pur.'_fsmax='.$addToLog['fsmax']);
+            // }
+            if($fswin > 0){
+                $addToLog['me'] = $me;
+                $addToLog['mes'] = $mes;
+                $addToLog['psym'] = $psym;
+                $addToServer[] = 'me='.$me;
+                $addToServer[] = 'mes='.$mes;
+                $addToServer[] = 'psym='.$psym;
+            }
+            $toLog = array_merge($toLog, $addToLog);
+            $toServer = array_merge($toServer, $addToServer);
         }
+        var_dump('5_3');
 
-        // Если найдены множители на поле
-        if ($multipliers){
-            $toLog['Multipliers'] = $multipliers;
-            $prg = 0;
-            $rmul = 'rmul=';
-            foreach ($multipliers as $key => $multiplier) {
-                unset($multiplier['Reel']);
-                $prg += $multiplier['Multiplier'];
-                if ($key == 0) $rmul .= implode('~',$multiplier);
-                else $rmul .= ';'.implode('~',$multiplier);
-            }
-            $repl = array_keys($toServer, 'prg=1');
-            if ($repl && $prg != 0) $toServer[$repl[0]] = 'prg='.$prg; // заменить значение prg
-            $toServer[] = $rmul; // добавить строку с описанием множителей
-            // умножить выигрыш на выданный множитель
-            if ($prg != 0 && $toLog['State'] === 'LastRespin'){
-                $addMultWin = $toLog['tmb_res'] * $prg;
-                $toLog['MultWin'] = $prg;
-                $toLog['tmb_res'] = $addMultWin;
-                $toLog['TotalWin'] += $addMultWin - $toLog['tmb_win'];
-            }
+        if($win['TotalWin'] > 0){
+            $addLog = [
+                'WinLines' => $win['WinLines']
+            ];
+            $positions = self::positionsToServer($addLog['WinLines']);
+            $toServer = array_merge($toServer, $positions);
+            $toLog = array_merge($toLog, $addLog);
         }
-
-        array_unshift($toServer, 'tw='.$toLog['TotalWin']);
-
         $toLog['ServerState'] = $toServer;
-
         return ['Log' => $toLog, 'Server' => $toServer];
     }
+    
 
-    private static function positionsToServer($winLines){
-        // вернуть позиции в подходящем виде
+    public static function positionsToServer($winLines){
+        // return positions in a suitable form
         $result = [];
-        $tmb = [];
+        // $tmb = [];
         $l = [];
         foreach ($winLines as $key => $winLine) {
-            $l = 'l'.$key.'=0~'.$winLine['Pay'].'~'.implode('~', $winLine['Positions']);
-            $tmb[] = implode(','.$winLine['WinSymbol'].'~', $winLine['Positions']);
+            $l = 'l'.$key.'='.$winLine['l'].'~'.$winLine['Pay'].'~'.implode('~', $winLine['Positions']);
+            // $tmb[] = implode(','.$winLine['WinSymbol'].'~', $winLine['Positions']);
             $result[] = $l;
         }
-        $result[] = 'tmb='.implode('~', $tmb);
+        // $result[] = 'tmb='.implode('~', $tmb);
+        
+        var_dump('5_7');
         return $result;
 
         //'tmb=1,10~2,11~4,11~6,11~7,10~8,10~10,11~11,10~12,11~14,10~17,10~21,10~23,11~25,11~27,10~29,11',

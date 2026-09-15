@@ -1,70 +1,117 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 use VanguardLTE\Services\Api\Api;
 
 class Spin
 {
-    public static function spinResult($user, $game, $bet, $lines, $log, $gameSettings, $index, $counter, $callbackUrl, $doubleChance, $buyFS, $bank, $shop, $jpgs){
-        if ($user->balance < $bet * $lines) return false;
+    public static function spinResult($user, $game, $bet, $lines, $log, $gameSettings, $index, $counter, $callbackUrl, $pur, $bank, $shop, $jpgs){
+        var_dump('0');
+       // if ($user->balance < $bet * $lines) return false;
+        $newSpinCnt = 0;
         $gameSettings = $gameSettings->all;
         $currentLog = $log->getLog();
-        $lines = $doubleChance == 0 ? $lines : $lines * 1.25;
+        var_dump('0_1');
+        // $lines = $doubleChance == 0 ? $lines : $lines * 1.25;
         if ($currentLog &&
-            ($currentLog['State'] != 'Spin' && $currentLog['State'] != 'LastRespin' ||
+            (array_key_exists('state', $currentLog) && $currentLog['state'] != 'spin' && $currentLog['state'] != 'lastRespin' ||
                 array_key_exists('FreeState', $currentLog) && $currentLog['FreeState'] != 'LastFreeSpin')){
             $changeBalance = 0;
         }else{
             $changeBalance = ($bet * $lines * -1);
-            if ($buyFS === '0') $changeBalance *= 100;
+            if ($pur === '0') $changeBalance *= 100;
         }
-
+        var_dump('0_2');
+        if ($user->balance < -1 * $changeBalance) return false;
         NewSpin:
-        //построить игровое поле
-        $reelSet = $doubleChance == 0 ? 0 : 2;
-        if ($currentLog && array_key_exists('FreeState', $currentLog)
-            && $currentLog['FreeState'] != 'LastFreeSpin' && $currentLog['FreeSpinNumber'] > 1) $reelSet = 1; // если фриспины - то набор катушек 4й
+        //build a playing field
+        $reelSet = 0;
+        $pur1 = $pur;
+        if($currentLog && array_key_exists('puri', $currentLog) || $pur1 == '0')    $reelSet = 1;
+        if ($currentLog && array_key_exists('fs', $currentLog)) $reelSet = 1; // if free spins - then the set of reels is 4th
         $slotArea = SlotArea::getSlotArea($gameSettings,$reelSet,$currentLog);
+        var_dump('1');
 
-        if ($buyFS === '0') BuyFreeSpins::getFreeSpin($slotArea['SlotArea'], $gameSettings); // покупка фриспинов
-
-        //проверить выигрыш (вернуть массив с суммой выигрыша и позициями символов
-        $winChecker = new WinChecker($gameSettings);
-        $win = $winChecker->getWin($bet, $slotArea);
-
-        $freeSpins = false;
-        // проверить фриспины если нет выигрыша
-        if ($win['TotalWin'] == 0) {
-            $freeSpins = FreeSpin::check($slotArea['SlotArea'], $currentLog, $gameSettings, $bet);
-            /*if ($freeSpins && $currentLog && array_key_exists('FreeSpins', $currentLog) && $currentLog['FreeState'] == 'LastFreeSpin')
-                goto NewSpin;*/
+        // BuyFreeSpins::addWilds($slotArea['SlotArea'], $gameSettings, 0, 5); // add wilds
+        // SlotArea::makeFullStack($slotArea);
+        if(SlotArea::getMsCnt($slotArea['SlotArea']) > 5){
+            if($currentLog && array_key_exists('fs', $currentLog))
+                goto NewSpin;
+               if($game->stat_in - $game->stat_out < 5000)
+                goto NewSpin;
+            $pur1 = '2';
         }
+        else if($currentLog && array_key_exists('fs', $currentLog) && $currentLog['fs'] == $currentLog['fsmax'])
+            $slotArea['ScatterCount'] = BuyFreeSpins::addScatters($slotArea['SlotArea'], $gameSettings, 0, 1);
+        else if($currentLog && array_key_exists('fs', $currentLog))
+            $slotArea['ScatterCount'] = BuyFreeSpins::addScatters($slotArea['SlotArea'], $gameSettings, 0, 2);
+       else 
+            $slotArea['ScatterCount'] = BuyFreeSpins::addScatters($slotArea['SlotArea'], $gameSettings, 0, 3);
 
-        // отключить получение дополнительных фриспинов при последнем фриспине, иначе они не засчитываются.
-        //if ($currentLog && array_key_exists('FreeSpins', $currentLog) && $currentLog['FreeSpinNumber'] >= $currentLog['FreeSpins']) if (!$freeSpins) goto NewSpin;
-        // проверить множители если фриспины
-        $multipliers = false;
-        if ($currentLog && array_key_exists('FreeSpins', $currentLog) && $currentLog['FreeState'] != 'LastFreeSpin')
-            $multipliers = Multiple::getBonanzaMultiple($slotArea['SlotArea'], $gameSettings, $currentLog);
+        // if scatter count is greater than settings_needfs make pur = 0
+        if($slotArea['ScatterCount'] >= $gameSettings['settings_needfs'])
+            if(!$currentLog || $currentLog && !array_key_exists('fs', $currentLog))
+                $pur1 = '0';
+            else {
+                var_dump('2_1_scatterCount='.$slotArea['ScatterCount'].'_settings-needfs='.$gameSettings['settings_needfs']);
+                $pur1 = '1';
+            }
+        $reelSet = $pur1 == '0' ? $reelSet = 1 : $reelSet;
+        SlotArea::getMO($gameSettings, $slotArea, $log, $pur1);
+        var_dump('2_needfs='.$gameSettings['settings_needfs'].'sCnt='.$slotArea['ScatterCount']);
+        if($currentLog && array_key_exists('fs', $currentLog))
+            SlotArea::setGiantSymbol($gameSettings, $slotArea, $currentLog);
+        //check win (return array with win amount and symbol positions
+        $winChecker = new WinChecker($gameSettings);
+        $win = $winChecker->getWin($pur1, $currentLog, $bet, $slotArea);
+        var_dump('3');
 
-
-        //составить все в удобный массив
-        $logAndServer = LogAndServer::getResult($slotArea, $index, $counter, $bet, $lines, $doubleChance, $reelSet,
-            $win, $currentLog, $user, $freeSpins, $multipliers, $changeBalance);
-
-        // проверить можно ли выиграть
-        if ($win['TotalWin'] > 0)
-            $win_permission = WinPermission::winCheck($freeSpins,$buyFS,$bank,$logAndServer['Log'],$win['TotalWin'], $multipliers, $currentLog);
+        //put everything in a convenient array
+        $logAndServer = LogAndServer::getResult($slotArea, $index, $counter, $bet, $lines, $reelSet,
+            $win, $pur1, $currentLog, $user, $changeBalance, $gameSettings);
+        var_dump('6');
+        // check if you can win
+        $fswin = array_key_exists('fswin', $win) ? $win['fswin'] : 0;
+        if(array_key_exists(1, array_count_values($slotArea['SlotArea'])) && array_count_values($slotArea['SlotArea'])[1] > 2)
+            $win['TotalWin'] += SlotArea::getPsym($gameSettings, $slotArea['SlotArea'], $bet, $lines)['psymwin'];
+        else if($pur1 === '0')
+            $win['TotalWin'] += SlotArea::getPsym($gameSettings, $slotArea['SlotArea'], $bet, $lines)['psymwin'];
+        if ($win['TotalWin'] + $fswin > 0 || array_key_exists('bpw', $logAndServer['Log']))
+            $win_permission = WinPermission::winCheck($fswin,$pur1,$bank,$logAndServer['Log'],$win['TotalWin'], $currentLog, $changeBalance, $shop);
         else $win_permission = true;
-        if (!$win_permission) goto NewSpin;
-        // распределить деньги в банк и записать в статистику
-        SwitchMoney::set($changeBalance, $shop, $bank, $jpgs, $user, $game, $callbackUrl, $win['TotalWin'], $slotArea, $freeSpins, $logAndServer['Log'], $win_permission);
-        //записать лог
+        if (!$win_permission) {
+            $newSpinCnt ++;
+            goto NewSpin;
+        }
+        // check rtp when you spin
+        $checkRtpSlots = new CheckRtp($gameSettings['rtp_slots'], $game);
+        if($pur1 != '0' && $currentLog && !array_key_exists('fs', $currentLog) && !$checkRtpSlots->checkRtp($bet * $lines, $win['TotalWin'] , $user, $game, $bank) && $newSpinCnt < 4 && $bank->slots > $bet * $lines){
+            $newSpinCnt ++;
+            goto NewSpin;
+        }
+        // check rtp when you're on free spin
+        $checkRtpBonus = new CheckRtp($gameSettings['rtp_bonus'], $game);
+        if($currentLog 
+        && array_key_exists('fs', $currentLog) 
+        && !$checkRtpBonus->checkRtp($bet * $lines * 100 / $currentLog['fsmax'], $win['TotalWin'] + $fswin, $user, $game, $bank)
+        && $bank->bonus + $bank->slots > $bet * $lines * 100 / $currentLog['fsmax']
+        && $newSpinCnt < 4){
+            $newSpinCnt ++;
+            goto NewSpin;
+        }
+        $fswin = 0;
+        // allocate money to the bank and write it down in statistics
+        // $freeSpins = 0;
+        SwitchMoney::set($pur1, $changeBalance, $shop, $bank, $jpgs, $user, $game, $callbackUrl, $win['TotalWin'], $slotArea, $fswin, $logAndServer['Log'], $win_permission, 0);
+        var_dump('8');
+        //write a log
         Log::setLog($logAndServer['Log'], $game->id, $user->id, $user->shop_id);
+        var_dump('9');
 
-        //отдать серверу
-        $response = implode('&', $logAndServer['Server']);
+        //give to the server
+        $response = '&'.(implode('&', $logAndServer['Server']));
+        var_dump('10');
         return $response;
     }
 

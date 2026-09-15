@@ -4,6 +4,9 @@
 <html>
 
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 
  <title>{{ $game->title }}</title>
  

@@ -1,6 +1,9 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
  <title>{{ $game->title }}</title>
 <base href="/games/{{ $game->name }}/SSLobby/1278.3/web-mobile/">
 <!DOCTYPE html>

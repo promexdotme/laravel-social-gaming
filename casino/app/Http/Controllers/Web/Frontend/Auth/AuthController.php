@@ -271,8 +271,7 @@ use Illuminate\Support\Facades\Mail;
         }
         public function getRegister()
         {
-            $frontend = $this->getBasicTheme();
-            return view('frontend.' . $frontend . '.auth.register');
+            return redirect()->route('frontend.game.list')->with('modal', 'modal-register');
         }
         public function postRegister(\VanguardLTE\Http\Requests\Auth\RegisterRequest $request)
         {
@@ -281,7 +280,18 @@ use Illuminate\Support\Facades\Mail;
             {
                 return redirect()->route('frontend.auth.login')->withErrors([__('app.blocked_domain_zone', ['zone' => $return['domain']])]);
             }
+            $refCode = $request->get('ref') ?: $request->cookie('cedar_ref') ?: session('cedar_ref');
+            $parentId = 0;
+            if (!empty($refCode)) {
+                $inviter = \VanguardLTE\User::where('invite_code', $refCode)->orWhere('username', $refCode)->first();
+                if ($inviter) {
+                    $parentId = $inviter->id;
+                    $inviter->increment('count_invite');
+                }
+            }
+
             $user = $this->users->create(array_merge($data, [
+                'parent_id' => $parentId,
                 'shop_id' => 1,
                 'role_id' => 1, 
                 'status' => (settings('use_email') ? \VanguardLTE\Support\Enum\UserStatus::UNCONFIRMED : \VanguardLTE\Support\Enum\UserStatus::ACTIVE)

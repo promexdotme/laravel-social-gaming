@@ -172,17 +172,38 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     // Removed legacy CoinPayment integration (controller missing)
 
     // Sportsbook Frontend Routes
-    Route::get('/sports', ['as' => 'frontend.sports.index', 'uses' => 'SportsController@index']);
-    Route::get('/sports/category/{categorySlug}', ['as' => 'frontend.sports.category', 'uses' => 'SportsController@index']);
-    Route::post('/sports/betslip/add', ['as' => 'frontend.sports.betslip.add', 'uses' => 'SportsController@addToBetslip']);
-    Route::post('/sports/betslip/remove', ['as' => 'frontend.sports.betslip.remove', 'uses' => 'SportsController@removeFromBetslip']);
-    Route::post('/sports/betslip/clear', ['as' => 'frontend.sports.betslip.clear', 'uses' => 'SportsController@clearBetslip']);
-    Route::post('/sports/bet/place', ['as' => 'frontend.sports.bet.place', 'uses' => 'SportsController@placeBet']);
+    Route::get('/sports', ['as' => 'frontend.sports.index', 'uses' => 'SportsbookController@index']);
+    Route::post('/sports/bet', ['as' => 'frontend.sports.bet', 'uses' => 'SportsbookController@placeBet']);
+    Route::get('/sports/cashout-quote/{betId}', ['as' => 'frontend.sports.cashout_quote', 'uses' => 'SportsbookController@getCashoutQuote']);
+    Route::post('/sports/cashout', ['as' => 'frontend.sports.cashout', 'uses' => 'SportsbookController@cashout']);
 
     // PayPal & Manual Payment paths
     Route::get('payment/paypal/return', ['as' => 'payment.paypal.return', 'uses' => 'TopupController@paypalReturn']);
     Route::get('payment/manual/{intent}', ['as' => 'payment.manual.show', 'uses' => 'TopupController@showManualPayment']);
     Route::post('payment/manual/{intent}/submit', ['as' => 'payment.manual.submit', 'uses' => 'TopupController@submitManualDeposit']);
+    Route::post('profile/withdraw', ['as' => 'frontend.profile.withdraw', 'uses' => 'ProfileController@withdraw']);
+
+    // Free Coin Refills
+    Route::post('/refill-coins', ['as' => 'frontend.free.refill', 'uses' => 'SocialGamingController@refillCoins']);
+
+    // Lotto & Jackpot Zone
+    Route::get('/jackpot-zone', ['as' => 'frontend.lotto.index', 'uses' => 'SocialGamingController@lotto']);
+    Route::post('/jackpot-zone/buy-ticket', ['as' => 'frontend.lotto.buy', 'uses' => 'SocialGamingController@buyTicket']);
+
+    // Future Vote / Prediction Markets
+    Route::get('/future-vote', ['as' => 'frontend.predictions.index', 'uses' => 'PredictionsController@index']);
+    Route::post('/future-vote/bet', ['as' => 'frontend.predictions.bet', 'uses' => 'PredictionsController@placeBet']);
+    Route::post('/future-vote/shares', ['as' => 'frontend.predictions.shares', 'uses' => 'PredictionsController@calculateShares']);
+
+    // 3-Tier Affiliates
+    Route::get('/affiliates', ['as' => 'frontend.affiliates.index', 'uses' => 'AffiliateController@index']);
+    Route::post('/affiliates/claim', ['as' => 'frontend.affiliates.claim', 'uses' => 'AffiliateController@claim']);
+
+    // VIP Club & Loyalty Vault
+    Route::get('/vip', ['as' => 'frontend.vip.index', 'uses' => 'VipController@index']);
+    Route::post('/vip/claim-rakeback', ['as' => 'frontend.vip.claim_rakeback', 'uses' => 'VipController@claimRakeback']);
+    Route::post('/vip/claim-bonus', ['as' => 'frontend.vip.claim_bonus', 'uses' => 'VipController@claimLevelBonus']);
+    Route::post('/vip/claim-level-bonus', ['as' => 'frontend.vip.claim_level_bonus', 'uses' => 'VipController@claimLevelBonus']);
 
 });
 
@@ -204,6 +225,8 @@ Route::prefix('liteback')
     ->group(function () {
         Route::get('/', ['as' => 'liteback.users.index', 'uses' => 'UserController@index']);
         Route::post('/users/{user}/balance', ['as' => 'liteback.users.balance', 'uses' => 'UserController@adjustBalance']);
+        Route::post('/users/{user}/toggle-status', ['as' => 'liteback.users.toggle_status', 'uses' => 'UserController@toggleStatus']);
+        Route::get('/users/{user}/detail', ['as' => 'liteback.users.detail', 'uses' => 'UserController@detail']);
         Route::post('/users', ['as' => 'liteback.users.store', 'uses' => 'UserController@store']);
         Route::delete('/users/{user}', ['as' => 'liteback.users.delete', 'uses' => 'UserController@destroy']);
         Route::get('/games', ['as' => 'liteback.games.index', 'uses' => 'GameController@index']);
@@ -211,6 +234,12 @@ Route::prefix('liteback')
         Route::delete('/games/{game}', ['as' => 'liteback.games.delete', 'uses' => 'GameController@destroy']);
         Route::post('/games/{game}/deactivate', ['as' => 'liteback.games.deactivate', 'uses' => 'GameController@deactivate']);
         Route::post('/games/{game}/activate', ['as' => 'liteback.games.activate', 'uses' => 'GameController@activate']);
+        Route::post('/games/{game}/toggle-view', ['as' => 'liteback.games.toggle_view', 'uses' => 'GameController@toggleView']);
+        Route::post('/games/{game}/update-params', ['as' => 'liteback.games.update_params', 'uses' => 'GameController@updateParams']);
+        Route::post('/games/bulk-provider-toggle', ['as' => 'liteback.games.bulk_provider_toggle', 'uses' => 'GameController@bulkProviderToggle']);
+        Route::post('/games/bulk-action', ['as' => 'liteback.games.bulk_action', 'uses' => 'GameController@bulkAction']);
+        Route::post('/games/{game}/update-source', ['as' => 'liteback.games.update_source', 'uses' => 'GameController@updateSource']);
+        Route::post('/games/manual', ['as' => 'liteback.games.store_manual', 'uses' => 'GameController@storeManualGame']);
         Route::get('/profile/password', ['as' => 'liteback.profile.password', 'uses' => 'ProfileController@editPassword']);
         Route::post('/profile/password', ['as' => 'liteback.profile.password.update', 'uses' => 'ProfileController@updatePassword']);
 
@@ -246,5 +275,61 @@ Route::prefix('liteback')
 
             Route::get('/settings', ['as' => 'liteback.payments.settings', 'uses' => 'PaymentSettingsController@index']);
             Route::post('/settings', ['as' => 'liteback.payments.settings.update', 'uses' => 'PaymentSettingsController@update']);
+        });
+
+        // Player Cashout & Withdrawals Admin routes
+        Route::prefix('withdrawals')->group(function () {
+            Route::get('/', ['as' => 'liteback.withdrawals.index', 'uses' => 'WithdrawalController@index']);
+            Route::post('/{id}/approve', ['as' => 'liteback.withdrawals.approve', 'uses' => 'WithdrawalController@approve']);
+            Route::post('/{id}/reject', ['as' => 'liteback.withdrawals.reject', 'uses' => 'WithdrawalController@reject']);
+        });
+
+        // Lotto Admin routes
+        Route::prefix('lotto')->group(function () {
+            Route::get('/', ['as' => 'liteback.lotto.index', 'uses' => 'LottoController@index']);
+            Route::post('/', ['as' => 'liteback.lotto.store', 'uses' => 'LottoController@store']);
+            Route::post('/{game}/toggle', ['as' => 'liteback.lotto.toggle', 'uses' => 'LottoController@toggle']);
+            Route::post('/{game}/draw', ['as' => 'liteback.lotto.draw', 'uses' => 'LottoController@draw']);
+        });
+
+        // Prediction Markets Admin routes
+        Route::prefix('predictions')->group(function () {
+            Route::get('/', ['as' => 'liteback.predictions.index', 'uses' => 'PredictionController@index']);
+            Route::post('/', ['as' => 'liteback.predictions.store', 'uses' => 'PredictionController@store']);
+            Route::post('/{id}/settle', ['as' => 'liteback.predictions.settle', 'uses' => 'PredictionController@settle']);
+        });
+
+        // Multi-Tier Affiliate Admin routes
+        Route::prefix('affiliates')->group(function () {
+            Route::get('/', ['as' => 'liteback.affiliates.index', 'uses' => 'AffiliateController@index']);
+            Route::post('/settings', ['as' => 'liteback.affiliates.settings', 'uses' => 'AffiliateController@updateRates']);
+        });
+
+        // VIP Club & Loyalty Rakeback Admin routes
+        Route::prefix('vip')->group(function () {
+            Route::get('/', ['as' => 'liteback.vip.index', 'uses' => 'VipController@index']);
+            Route::post('/settings', ['as' => 'liteback.vip.settings', 'uses' => 'VipController@updateSettings']);
+            Route::post('/users/{user}/tier', ['as' => 'liteback.vip.users.tier', 'uses' => 'VipController@setUserTier']);
+        });
+
+        // System Settings & Global API Controls
+        Route::prefix('settings')->group(function () {
+            Route::get('/', ['as' => 'liteback.settings.index', 'uses' => 'SystemSettingsController@index']);
+            Route::post('/', ['as' => 'liteback.settings.update', 'uses' => 'SystemSettingsController@update']);
+            Route::post('/clear-cache', ['as' => 'liteback.settings.clear_cache', 'uses' => 'SystemSettingsController@clearCache']);
+            Route::post('/test-odds-api', ['as' => 'liteback.settings.test_odds_api', 'uses' => 'SystemSettingsController@testOddsApi']);
+            Route::post('/test-polymarket-api', ['as' => 'liteback.settings.test_polymarket_api', 'uses' => 'SystemSettingsController@testPolymarketApi']);
+            Route::post('/sync-odds-now', ['as' => 'liteback.settings.sync_odds_now', 'uses' => 'SystemSettingsController@syncOddsNow']);
+            Route::post('/settle-matches-now', ['as' => 'liteback.settings.settle_matches_now', 'uses' => 'SystemSettingsController@runSettlementNow']);
+            Route::post('/draw-lotto-now', ['as' => 'liteback.settings.draw_lotto_now', 'uses' => 'SystemSettingsController@drawLottoNow']);
+        });
+
+        // Store, Add-ons & License Hub
+        Route::prefix('store')->group(function () {
+            Route::get('/', ['as' => 'liteback.store.index', 'uses' => 'StoreController@index']);
+            Route::post('/license', ['as' => 'liteback.store.update_license', 'uses' => 'StoreController@updateLicense']);
+            Route::post('/refresh', ['as' => 'liteback.store.refresh_license', 'uses' => 'StoreController@refreshLicense']);
+            Route::post('/install', ['as' => 'liteback.store.install_pack', 'uses' => 'StoreController@installPack']);
+            Route::post('/apply-update', ['as' => 'liteback.store.apply_update', 'uses' => 'StoreController@applyUpdate']);
         });
     });

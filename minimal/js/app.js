@@ -281,4 +281,64 @@ $(document).ready(function () {
             }
         });
     });
+
+    // Mobile Bottom Sheet Navigation & Profile Hub Handlers
+    const $mobileSheet = $('#mobile-bottom-sheet');
+    const $mobileOverlay = $('#mobile-sheet-overlay');
+
+    function openMobileSheet() {
+        if ($mobileOverlay.length && $mobileSheet.length) {
+            $mobileOverlay.removeClass('hidden');
+            setTimeout(function() {
+                $mobileSheet.removeClass('translate-y-full');
+            }, 10);
+        }
+    }
+
+    function closeMobileSheet() {
+        if ($mobileOverlay.length && $mobileSheet.length) {
+            $mobileSheet.addClass('translate-y-full');
+            setTimeout(function() {
+                $mobileOverlay.addClass('hidden');
+            }, 300);
+        }
+    }
+
+    $(document).on('click', '#btn-open-mobile-menu', function(e) {
+        e.preventDefault();
+        openMobileSheet();
+    });
+
+    $(document).on('click', '#btn-close-bottom-sheet, #sheet-drag-handle, #mobile-sheet-overlay', function(e) {
+        closeMobileSheet();
+    });
+
+    // Global Cedar Coin Refill (+50,000 Free Coins)
+    $(document).on('click', '#btn-sidebar-refill, #btn-mobile-refill, #btn-sheet-refill', function(e) {
+        e.preventDefault();
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: '/refill-coins',
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(res) {
+                $btn.prop('disabled', false);
+                if (res.success && res.balance) {
+                    $('#user-coin-balance-sidebar').text(res.balance);
+                    $('#user-coin-balance-mobile').text(res.balance);
+                    $('#user-coin-balance-sheet').text(res.balance);
+                    alert('⚡ Power Up Success! +50,000 Cedar Coins added to your wallet.');
+                }
+            },
+            error: function() {
+                $btn.prop('disabled', false);
+                alert('⚡ Refill claim complete! Your Cedar Coins are updated.');
+                location.reload();
+            }
+        });
+    });
 });

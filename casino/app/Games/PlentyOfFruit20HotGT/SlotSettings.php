@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\PlentyOfFruit20HotGT
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

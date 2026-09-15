@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\NarcosNET
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

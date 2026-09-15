@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
     <title>{{ $game->name }}</title>
     <meta id="metaToken" name="csrf-token" content="VPB4XRBUqmjcJlKQsL46EU913fLg6XMOokxyfJho">
     <meta charset="utf-8">

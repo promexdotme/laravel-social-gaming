@@ -2,7 +2,8 @@
 namespace VanguardLTE\Games\BurningHot6Reels5EGT
 {
     set_time_limit(5);
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

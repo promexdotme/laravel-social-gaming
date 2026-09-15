@@ -27,7 +27,7 @@ class SportsDashboardController extends Controller
     public function runCommand(Request $request)
     {
         $request->validate([
-            'command' => 'required|string|in:sports:sync:leagues,sports:sync:games,sports:sync:odds,sports:sync:odds-inplay,sports:games:open,sports:events:cleanup,sports:sync:upcoming,sports:sync:all'
+            'command' => 'required|string|in:sports:sync:leagues,sports:sync:games,sports:sync:odds,sports:sync:odds-inplay,sports:games:open,sports:events:cleanup,sports:sync:upcoming,sports:sync:all,sports:sync-odds,sports:settle-matches'
         ]);
 
         $command = $request->input('command');

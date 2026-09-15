@@ -2,7 +2,8 @@
 namespace VanguardLTE\Games\JiXiang8PT
 {
     set_time_limit(5);
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

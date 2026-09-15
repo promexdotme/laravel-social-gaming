@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\EmeraldCityMN
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

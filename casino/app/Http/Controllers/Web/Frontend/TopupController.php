@@ -117,7 +117,8 @@ class TopupController extends Controller
         }
 
         DB::transaction(function () use ($intent, $user) {
-            $newBalance = (float) $user->balance + (float) $intent->amount;
+            $creditCoins = $this->calculateCoinsForDeposit((float) $intent->amount);
+            $newBalance = (float) $user->balance + $creditCoins;
 
             DB::table('users')->where('id', $user->id)->update([
                 'balance' => $newBalance,
@@ -128,11 +129,11 @@ class TopupController extends Controller
                 'user_id' => $user->id,
                 'admin_id' => null,
                 'direction' => 'payment',
-                'amount' => $intent->amount,
+                'amount' => $creditCoins,
                 'balance_before' => $user->balance,
                 'balance_after' => $newBalance,
                 'source' => 'btcpay',
-                'note' => 'BTCPay invoice ' . $intent->external_id,
+                'note' => 'BTCPay invoice ' . $intent->external_id . ' ($' . $intent->amount . ' -> ' . number_format($creditCoins, 0) . ' coins)',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -205,7 +206,8 @@ class TopupController extends Controller
         }
 
         DB::transaction(function () use ($intent, $user) {
-            $newBalance = (float) $user->balance + (float) $intent->amount;
+            $creditCoins = $this->calculateCoinsForDeposit((float) $intent->amount);
+            $newBalance = (float) $user->balance + $creditCoins;
 
             DB::table('users')->where('id', $user->id)->update([
                 'balance' => $newBalance,
@@ -216,11 +218,11 @@ class TopupController extends Controller
                 'user_id' => $user->id,
                 'admin_id' => null,
                 'direction' => 'payment',
-                'amount' => $intent->amount,
+                'amount' => $creditCoins,
                 'balance_before' => $user->balance,
                 'balance_after' => $newBalance,
                 'source' => 'stripe',
-                'note' => 'Stripe session ' . ($intent->external_id ?? ''),
+                'note' => 'Stripe session ' . ($intent->external_id ?? '') . ' ($' . $intent->amount . ' -> ' . number_format($creditCoins, 0) . ' coins)',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -295,8 +297,8 @@ class TopupController extends Controller
         }
 
         DB::transaction(function () use ($intent, $user) {
-            $creditAmount = $intent->amount;
-            $newBalance = (float)$user->balance + $creditAmount;
+            $creditCoins = $this->calculateCoinsForDeposit((float) $intent->amount);
+            $newBalance = (float) $user->balance + $creditCoins;
 
             DB::table('users')->where('id', $user->id)->update([
                 'balance' => $newBalance,
@@ -307,11 +309,11 @@ class TopupController extends Controller
                 'user_id' => $user->id,
                 'admin_id' => null,
                 'direction' => 'payment',
-                'amount' => $creditAmount,
+                'amount' => $creditCoins,
                 'balance_before' => $user->balance,
                 'balance_after' => $newBalance,
                 'source' => 'xtopay',
-                'note' => 'XtoPay deposit ' . ($intent->external_id ?? ''),
+                'note' => 'XtoPay deposit ' . ($intent->external_id ?? '') . ' ($' . $intent->amount . ' -> ' . number_format($creditCoins, 0) . ' coins)',
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -395,7 +397,8 @@ class TopupController extends Controller
                     return;
                 }
 
-                $newBalance = (float) $user->balance + (float) $intent->amount;
+                $creditCoins = $this->calculateCoinsForDeposit((float) $intent->amount);
+                $newBalance = (float) $user->balance + $creditCoins;
 
                 DB::table('users')->where('id', $user->id)->update([
                     'balance' => $newBalance,
@@ -406,11 +409,11 @@ class TopupController extends Controller
                     'user_id' => $user->id,
                     'admin_id' => null,
                     'direction' => 'payment',
-                    'amount' => $intent->amount,
+                    'amount' => $creditCoins,
                     'balance_before' => $user->balance,
                     'balance_after' => $newBalance,
                     'source' => 'paypal',
-                    'note' => 'PayPal order ' . $intent->external_id,
+                    'note' => 'PayPal order ' . $intent->external_id . ' ($' . $intent->amount . ' -> ' . number_format($creditCoins, 0) . ' coins)',
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -421,7 +424,9 @@ class TopupController extends Controller
                 ]);
             });
 
-            return redirect('/')->with('success', 'Deposit of ' . $intent->amount . ' credited successfully.');
+            $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
+            $coinsTotal = (float) $intent->amount * $rate;
+            return redirect('/')->with('success', 'Deposit of $' . $intent->amount . ' (' . number_format($coinsTotal, 0) . ' coins) credited successfully.');
 
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::error('PayPal Capture Error: ' . $e->getMessage());
@@ -603,5 +608,14 @@ class TopupController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * Convert fiat USD amount to virtual coins according to platform exchange rate
+     */
+    protected function calculateCoinsForDeposit(float $fiatAmount): float
+    {
+        $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
+        return round($fiatAmount * ($rate > 0 ? $rate : 100), 2);
     }
 }

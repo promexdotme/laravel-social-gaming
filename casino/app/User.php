@@ -16,6 +16,8 @@ namespace VanguardLTE
             'password', 
             'email', 
             'username', 
+            'first_name',
+            'last_name',
             'currency',
             'avatar', 
             'balance', 
@@ -52,6 +54,12 @@ namespace VanguardLTE
             'language', 
             'phone', 
             'phone_verified', 
+            'phone_verified_at',
+            'otp_code',
+            'otp_expires_at',
+            'social_id',
+            'social_provider',
+            'invite_code',
             'sms_token', 
             'inviter_id', 
             'remember_token', 
@@ -825,7 +833,7 @@ namespace VanguardLTE
                         $_obf_0D2C1707150E2E382C0B292C181C0D0703112607020301->increment('sum', $sum);
                     }
                 }
-                if( $type == 'bet' && (double)$progress->bet <= (double)$sum ) 
+                if( $type == 'bet' && (float)$progress->bet <= (float)$sum ) 
                 {
                     $_obf_0D2C1707150E2E382C0B292C181C0D0703112607020301->increment('spins');
                 }

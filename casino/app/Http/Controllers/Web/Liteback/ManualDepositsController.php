@@ -43,7 +43,9 @@ class ManualDepositsController extends Controller
         }
 
         DB::transaction(function () use ($deposit, $intent, $user) {
-            $newBalance = (float) $user->balance + (float) $intent->amount;
+            $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
+            $coinsCredited = (float) $intent->amount * $rate;
+            $newBalance = (float) $user->balance + $coinsCredited;
 
             DB::table('users')->where('id', $user->id)->update([
                 'balance' => $newBalance,
@@ -54,11 +56,11 @@ class ManualDepositsController extends Controller
                 'user_id' => $user->id,
                 'admin_id' => auth()->id(),
                 'direction' => 'payment',
-                'amount' => $intent->amount,
+                'amount' => $coinsCredited,
                 'balance_before' => $user->balance,
                 'balance_after' => $newBalance,
                 'source' => 'manual',
-                'note' => 'Manual Bank Deposit approved by admin ' . auth()->user()->username,
+                'note' => 'Manual Deposit of $' . $intent->amount . ' (' . number_format($coinsCredited, 0) . ' coins) approved by admin ' . auth()->user()->username,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);

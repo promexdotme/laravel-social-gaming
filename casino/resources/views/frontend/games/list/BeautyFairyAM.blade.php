@@ -1,6 +1,9 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
  <title>{{ $game->title }}</title>
 <base href="/games/{{ $game->name }}/amarent/">
 <script>
@@ -11,8 +14,8 @@ document.cookie = 'PHPSESSID' + "=; expires=" + date.toGMTString();
 document.cookie = 'phpsessid' + "=; expires=" + date.toGMTString();
 
 
- window.console={ log:function(){}, error:function(){} };       
- window.onerror=function(){return true};
+ , error:function(){} };       
+ 
 
     if( !sessionStorage.getItem('sessionId') ){
         sessionStorage.setItem('sessionId', parseInt(Math.random() * 1000000));

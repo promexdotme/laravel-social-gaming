@@ -933,52 +933,141 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend
         {
             return redirect()->route('frontend.profile.balance')->withSuccess(trans('app.payment_fail'));
         }
-        public function withdraw(\VanguardLTE\Http\Requests\User\WithdrawRequest $request)
+        public function withdraw(\Illuminate\Http\Request $request)
         {
-            if(!auth()->user()->email)
-            {
-                return redirect()->back()->withErrors(trans('app.you_have_to_provide_email'));
-            }
-            $txtamount = $request->txtamount;
-            $txtcurrency = $request->txtcurrency;
-            
-            $user = \VanguardLTE\User::find(auth()->user()->id);
-            if((int)$user->balance < (int)$txtamount)
-            {
-                return redirect()->back()->withErrors([trans('app.not_enough_money_in_the_user_balance', [
-                    'name' => $user->username, 
-                    'balance' => $user->balance
-                ])]);
-            }
-            $result = $user->addBalance('out', $txtamount);
-            $result = json_decode($result, true);
-            if($result['status'] == 'error')
-            {
-                return redirect()->back()->withErrors([$result['message']]);
+            if (!auth()->check()) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => 'Please sign in to request a cashout.'], 401);
+                }
+                return redirect()->route('frontend.auth.login');
             }
 
-            $details = [
-                'username' => auth()->user()->username,
-                'email' => auth()->user()->email,
-                'amount' => $txtamount,
-                'currency' => $txtcurrency,
-            ];
-            Mail::to(env('APP_EMAIL'))->send(new UserWithdrawRequest($details));
-            $withdraw = new \VanguardLTE\Withdraw;
-            $withdraw->user_id = auth()->user()->id;
-            $withdraw->amount = $txtamount;
-            $withdraw->currency = $txtcurrency;
-            $withdraw->shop_id = auth()->user()->shop_id;
-            $withdraw->wallet = $request->wallet;
-            $withdraw->save();
+            $user = \VanguardLTE\User::find(auth()->id());
 
-            event(new \VanguardLTE\Events\User\UpdatedProfileDetails());
-            return redirect()->back()->withSuccess(
-                array(
-                'title' => 'Thank you for your request the funds will be added to your wallet within 24 hours',
-                'msg' => ''
-            )                //		trans('app.user_withdrawal_request_submitted')
-            );
+            // Check if cashout module is enabled platform-wide
+            $enabled = (function_exists('settings') ? settings('enable_cashout', '1') : '1') == '1';
+            if (!$enabled) {
+                $msg = 'Cashout / Prize redemption is currently disabled by administrator.';
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 403);
+                }
+                return redirect()->back()->withErrors([$msg]);
+            }
+
+            $rate = (float) (function_exists('settings') ? settings('coins_per_dollar', 100) : 100);
+            if ($rate <= 0) $rate = 100;
+            $minCoins = (float) (function_exists('settings') ? settings('min_cashout_coins', 2000) : 2000);
+
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+                'amount' => 'required|numeric|min:' . $minCoins,
+                'method' => 'required|string|max:100',
+                'wallet' => 'required|string|max:500',
+            ], [
+                'amount.min' => "The minimum cashout limit is " . number_format($minCoins, 0) . " points ($" . number_format($minCoins / $rate, 2) . " USD).",
+                'method.required' => "Please choose a cashout method.",
+                'wallet.required' => "Please enter your destination wallet address, phone number, or account details.",
+            ]);
+
+            if ($validator->fails()) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+                }
+                return redirect()->back()->withErrors($validator);
+            }
+
+            $coins = (float) $request->input('amount');
+            $method = trim($request->input('method'));
+            $wallet = trim($request->input('wallet'));
+
+            if ((float) $user->balance < $coins) {
+                $msg = "Insufficient balance. You currently have " . number_format($user->balance, 0) . " points available.";
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json(['success' => false, 'message' => $msg], 422);
+                }
+                return redirect()->back()->withErrors([$msg]);
+            }
+
+            $fiatAmount = round($coins / $rate, 2);
+
+            return \Illuminate\Support\Facades\DB::transaction(function () use ($user, $coins, $fiatAmount, $method, $wallet, $rate, $request) {
+                $lockedUser = \VanguardLTE\User::where('id', $user->id)->lockForUpdate()->first();
+                if ((float) $lockedUser->balance < $coins) {
+                    $msg = "Insufficient balance for this cashout request.";
+                    if ($request->expectsJson() || $request->ajax()) {
+                        return response()->json(['success' => false, 'message' => $msg], 422);
+                    }
+                    return redirect()->back()->withErrors([$msg]);
+                }
+
+                $newBalance = (float) $lockedUser->balance - $coins;
+                $lockedUser->balance = $newBalance;
+                $lockedUser->save();
+
+                // Record transaction
+                \Illuminate\Support\Facades\DB::table('transactions')->insert([
+                    'user_id' => $lockedUser->id,
+                    'admin_id' => null,
+                    'direction' => 'out',
+                    'amount' => $coins,
+                    'balance_before' => $lockedUser->balance + $coins,
+                    'balance_after' => $newBalance,
+                    'source' => 'cashout_request',
+                    'note' => "Manual Cashout Request of " . number_format($coins, 0) . " pts ($" . number_format($fiatAmount, 2) . " USD) via " . $method,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Create withdrawal record
+                $withdraw = \VanguardLTE\Withdraw::create([
+                    'user_id' => $lockedUser->id,
+                    'amount' => $coins,
+                    'coin_amount' => $coins,
+                    'fiat_amount' => $fiatAmount,
+                    'currency' => 'USD',
+                    'method' => $method,
+                    'wallet' => $wallet,
+                    'status' => 0, // 0 = Pending
+                    'shop_id' => $lockedUser->shop_id ?? 1,
+                    'created_at' => now(),
+                    'confirmed_at' => now(),
+                ]);
+
+                // Try sending notification email if configured
+                try {
+                    $adminEmail = env('APP_EMAIL');
+                    if ($adminEmail) {
+                        \Illuminate\Support\Facades\Mail::to($adminEmail)->send(new \VanguardLTE\Mail\UserWithdrawRequest([
+                            'username' => $lockedUser->username,
+                            'email' => $lockedUser->email ?? $lockedUser->phone,
+                            'amount' => $coins,
+                            'currency' => "Points ($" . number_format($fiatAmount, 2) . " USD via " . $method . ")",
+                        ]));
+                    }
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("[Cashout Mail Notice] Could not send email notification: " . $e->getMessage());
+                }
+
+                $successMsg = "Cashout request for " . number_format($coins, 0) . " points ($" . number_format($fiatAmount, 2) . " USD) submitted successfully! Status: PENDING review by cashier.";
+
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => $successMsg,
+                        'new_balance' => number_format($newBalance, 0),
+                        'withdrawal' => [
+                            'id' => $withdraw->id,
+                            'coins' => number_format($coins, 0),
+                            'usd' => number_format($fiatAmount, 2),
+                            'method' => $method,
+                            'wallet' => $wallet,
+                            'status' => 'Pending',
+                            'date' => date('M d, Y H:i')
+                        ]
+                    ]);
+                }
+
+                return redirect()->back()->withSuccess(['title' => 'Cashout Submitted', 'msg' => $successMsg]);
+            });
         }
     }
 

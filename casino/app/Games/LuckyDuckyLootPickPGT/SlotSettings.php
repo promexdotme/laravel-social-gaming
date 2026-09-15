@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\LuckyDuckyLootPickPGT
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

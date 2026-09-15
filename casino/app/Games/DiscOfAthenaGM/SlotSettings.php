@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\DiscOfAthenaGM
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

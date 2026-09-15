@@ -1,17 +1,17 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 class SpinDispenser
 {
     public static function getSpin($slotArea, $index, $counter, $bet, $lines, $doubleChance, $reelSet, $win, $currentLog, $user, $freeSpins){
-        // если нет лога - то обычный спин, состояние Spin
-        // если нет выигрыша и нет респина в предыдущем вращении - то обычный спин, состояние Spin
-        // если нет выигрыша, но есть респин в предыдущем вращении - то LastRespin
-        // если есть выигрыш, но нет респина в предыдущем вращении - то FirstRespin
-        // если есть выигрыш, и есть респин или FirstRespin - то Respin
-        // если бесплатные игры выпали - то FirstFreeSpin
-        // если бесплатные игры добавились то AddFreeSpin
-        // если идут бесплатные игры то FreeSpin
+        // if there is no log, then the usual spin, Spin state
+         // if there is no win and no respin in the previous rotation - then the usual spin, Spin state
+         // if there is no win, but there is a respin in the previous spin - then LastRespin
+         // if there is a win, but there is no respin in the previous spin - then FirstRespin
+         // if there is a win, and there is a respin or FirstRespin - then Respin
+         // if free games are dropped - then FirstFreeSpin
+         // if free games are added then AddFreeSpin
+         // if there are free games then FreeSpin
     }
 }

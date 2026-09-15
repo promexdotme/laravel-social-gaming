@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\DesertTreasurePT
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
     <title>{{ $game->title }}</title>
     <meta charset="utf-8">
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -37,7 +40,7 @@ document.location.href=exitUrl;
 <body style="margin:0px;width:100%;background-color:black;overflow:hidden">
 
 <iframe id='game' style="margin:0px;border:0px;width:100%;height:100vh;"
-        src='/games/PirateGoldenAge/gs2c/html5Game.html?lang=en&cur=usd&gameSymbol=vs1dragon8&websiteUrl=&lobbyURL='
+        src='/games/PirateGoldenAge/gs2c/html5Game.html?lang=en&cur=usd&gameSymbol=vs40samurai3&websiteUrl=&lobbyURL='
         allowfullscreen>
 
 

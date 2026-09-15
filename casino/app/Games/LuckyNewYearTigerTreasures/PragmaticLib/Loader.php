@@ -1,6 +1,6 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 class Loader
 {
@@ -11,13 +11,12 @@ class Loader
         $this->initFile = $initFile;
         $this->log = $log->getLog();
         $time = (int) round(microtime(true) * 1000);
-        array_push($this->initFile, 'stime='.$time);
-        array_push($this->initFile, 'balance=' . $balance, 'balance_cash=' . $balance);
-        if (!$this->log){
-            $def_set = $this->mergeLog();
-            $this->initFile = array_merge($this->initFile, $def_set);
+        // array_push($this->initFile, 'stime='.$time);
+        if ($this->log){
+            $serverState[] = implode('&', $this->log['ServerState']);
+            $this->initFile = array_merge($serverState, $this->initFile);
         }
-        else array_push($this->initFile, implode('&', $this->log['ServerState']));
+        $this->initFile = array_merge(array('&balance='.$balance.'&balance_cash='.$balance.'&'), $this->initFile);
     }
 
     public function initStr()
@@ -28,14 +27,14 @@ class Loader
     private function mergeLog()
     {
         return [
-            'def_s=3,8,4,8,1,10,6,10,5,7,8,9,6,9,8,7,4,5,3,4,3,8,4,8,1,10,6,10,5,7',
-            's=3,8,4,8,1,10,6,10,5,7,8,9,6,9,8,7,4,5,3,4,3,8,4,8,1,10,6,10,5,7',
-            'sa=8,3,4,3,11,3',
-            'sb=5,10,11,8,1,7',
+            'def_s=5,7,4,2,7,4,8,3,3,6,3,9,5,1,11',
+            's=5,7,4,2,7,4,8,3,3,6,3,9,5,1,11',
+            'sa=3,10,4,5,11',
+            'sb=5,6,11,2,8',
             'bl=0',
             'defc=0.10',
             'c=0.10',
-            'l=20',
+            'l=5',
             ];
     }
 

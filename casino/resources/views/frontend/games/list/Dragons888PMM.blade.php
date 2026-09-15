@@ -4,6 +4,9 @@
 <html>
 
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 
     <title>888 Dragons</title>
 
@@ -167,7 +170,7 @@ s[e]}}}("object"==typeof window?window:this);var goog={require:function(){},prov
 
 window.console=window.console||function(){var c={};c.log=c.warn=c.debug=c.info=c.error=c.time=c.dir=c.profile=c.clear=c.exception=c.trace=c.assert=function(){};return c}();UHTConsole.Message=function(type,args){this.type=type;this.args=args};UHTConsole.allowToWrite=false;UHTConsole.methods=["log","info","warn","error"];UHTConsole.source={};UHTConsole.replacement={};UHTConsole.messages=[];UHTConsole.wasAllowedToWrite=false;UHTConsole.redirectOutput=false;UHTConsole.logFilename=null;
 
-UHTConsole.GetReplacement=function(methodIdx){return function(){var stringARGS=[];for(var i=0;i<arguments.length;i++)if(arguments[i]!=null)stringARGS.push(arguments[i].toString());if(UHTConsole.redirectOutput){var args=[];args.push(["g",UHT_CONFIG.SYMBOL].join("="));args.push(["f",UHTConsole.logFilename].join("="));args.push(["d",(new Date).getTime()].join("="));args.push([UHTConsole.methods[methodIdx],stringARGS.join(",")].join("="));(new Image).src="http://192.168.10.108:8000/console.php?"+args.join("&")}else UHTConsole.messages.push(new UHTConsole.Message(UHTConsole.methods[methodIdx],
+UHTConsole.GetReplacement=function(methodIdx){return function(){var stringARGS=[];for(var i=0;i<arguments.length;i++)if(arguments[i]!=null)stringARGS.push(arguments[i].toString());if(UHTConsole.redirectOutput){var args=[];args.push(["g",UHT_CONFIG.SYMBOL].join("="));args.push(["f",UHTConsole.logFilename].join("="));args.push(["d",(new Date).getTime()].join("="));args.push([UHTConsole.methods[methodIdx],stringARGS.join(",")].join("="));(new Image).src="//192.168.10.108:8000/console.php?"+args.join("&")}else UHTConsole.messages.push(new UHTConsole.Message(UHTConsole.methods[methodIdx],
 
 stringARGS));if(UHTConsole.messages.length>512)UHTConsole.messages.splice(0,128)}};
 

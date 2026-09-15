@@ -29,6 +29,12 @@ namespace VanguardLTE
         public static function boot()
         {
             parent::boot();
+            static::created(function ($stat) {
+                if ((float) $stat->getRawOriginal('bet') > 0 && $stat->user_id > 0) {
+                    \VanguardLTE\Services\AffiliateService::recordWagerCommission($stat->user_id, (float) $stat->getRawOriginal('bet'), 'slots');
+                    \VanguardLTE\Services\VipService::recordWagerXpAndRakeback($stat->user_id, (float) $stat->getRawOriginal('bet'), 3.0);
+                }
+            });
         }
         public function getSlotsBankAttribute($value)
         {

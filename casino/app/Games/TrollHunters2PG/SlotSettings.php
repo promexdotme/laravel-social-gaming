@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\TrollHunters2PG
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

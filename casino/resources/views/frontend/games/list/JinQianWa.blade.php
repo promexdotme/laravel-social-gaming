@@ -2,6 +2,9 @@
 <html>
 
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 
 	<base href="/games/JinQianWa/">
 <title>{{ $game->title }}</title>

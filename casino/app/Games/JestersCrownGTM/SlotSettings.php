@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\JestersCrownGTM
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

@@ -14,22 +14,131 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = 20;
+        $perPage = 25;
         $term = trim((string) $request->input('q', ''));
-        // Use base table name; prefix is applied automatically via DB config.
-        $query = DB::table('users')->select('id', 'username', 'balance');
+        $statusFilter = $request->input('status', 'all');
+        $balanceFilter = $request->input('balance_filter', 'all');
+
+        $query = DB::table('users')->select(
+            'id',
+            'username',
+            'email',
+            'phone',
+            'phone_verified_at',
+            'invite_code',
+            'inviter_id',
+            'role_id',
+            'balance',
+            'status',
+            'is_blocked',
+            'created_at'
+        );
 
         if ($term !== '') {
             $query->where(function ($q) use ($term) {
-                $q->where('username', 'like', '%' . $term . '%');
+                $q->where('username', 'like', '%' . $term . '%')
+                  ->orWhere('email', 'like', '%' . $term . '%')
+                  ->orWhere('phone', 'like', '%' . $term . '%')
+                  ->orWhere('invite_code', 'like', '%' . $term . '%');
+                if (is_numeric($term)) {
+                    $q->orWhere('id', (int) $term);
+                }
             });
         }
 
-        $users = $query->orderByDesc('id')->paginate($perPage)->appends($request->only('q'));
+        if ($statusFilter === 'active') {
+            $query->where(function($q) {
+                $q->where('is_blocked', 0)->orWhereNull('is_blocked');
+            });
+        } elseif ($statusFilter === 'blocked') {
+            $query->where('is_blocked', 1);
+        }
+
+        if ($balanceFilter === 'positive') {
+            $query->where('balance', '>', 0);
+        }
+
+        $users = $query->orderByDesc('id')->paginate($perPage)->appends($request->only('q', 'status', 'balance_filter'));
 
         return view('liteback.users.index', [
             'users' => $users,
             'term' => $term,
+            'statusFilter' => $statusFilter,
+            'balanceFilter' => $balanceFilter,
+        ]);
+    }
+
+    public function toggleStatus($userId)
+    {
+        [$lookupId, $lookupUsername] = $this->normalizeUserLookup($userId);
+
+        $user = User::where(function ($q) use ($lookupId, $lookupUsername) {
+            if ($lookupId !== null) {
+                $q->orWhere('id', $lookupId);
+            }
+            if ($lookupUsername !== null) {
+                $q->orWhere('username', $lookupUsername);
+            }
+        })->first();
+
+        if (!$user) {
+            return redirect()->back()->withErrors('User not found.');
+        }
+
+        $newBlocked = $user->is_blocked ? 0 : 1;
+        $user->is_blocked = $newBlocked;
+        $user->status = $newBlocked ? UserStatus::BANNED : UserStatus::ACTIVE;
+        $user->save();
+
+        $action = $newBlocked ? 'blocked' : 'unblocked';
+        return redirect()->back()->with('success', "User {$user->username} has been {$action}.");
+    }
+
+    public function detail($userId)
+    {
+        [$lookupId, $lookupUsername] = $this->normalizeUserLookup($userId);
+
+        $user = User::where(function ($q) use ($lookupId, $lookupUsername) {
+            if ($lookupId !== null) {
+                $q->orWhere('id', $lookupId);
+            }
+            if ($lookupUsername !== null) {
+                $q->orWhere('username', $lookupUsername);
+            }
+        })->first();
+
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'User not found'], 404);
+        }
+
+        $sportsBetsCount = Schema::hasTable('sports_bets') ? DB::table('sports_bets')->where('user_id', $user->id)->count() : 0;
+        $sportsBetsSum = Schema::hasTable('sports_bets') ? DB::table('sports_bets')->where('user_id', $user->id)->sum('stake_amount') : 0;
+        $lottoTicketsCount = Schema::hasTable('lotto_tickets') ? DB::table('lotto_tickets')->where('user_id', $user->id)->count() : 0;
+        $predictionVotesCount = Schema::hasTable('prediction_votes') ? DB::table('prediction_votes')->where('user_id', $user->id)->count() : 0;
+        $predictionStakeSum = Schema::hasTable('prediction_votes') ? DB::table('prediction_votes')->where('user_id', $user->id)->sum('stake') : 0;
+        $referralsCount = DB::table('users')->where('inviter_id', $user->id)->count();
+
+        return response()->json([
+            'success' => true,
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'phone' => $user->phone,
+                'phone_verified' => (bool) $user->phone_verified_at,
+                'balance' => $user->balance,
+                'status' => $user->status,
+                'is_blocked' => (bool) $user->is_blocked,
+                'invite_code' => $user->invite_code,
+                'created_at' => $user->created_at ? $user->created_at->format('Y-m-d H:i') : 'N/A',
+            ],
+            'stats' => [
+                'sports_bets_count' => $sportsBetsCount,
+                'sports_bets_total' => $sportsBetsSum,
+                'lotto_tickets_count' => $lottoTicketsCount,
+                'prediction_votes_count' => $predictionVotesCount,
+                'referrals_count' => $referralsCount,
+            ]
         ]);
     }
 

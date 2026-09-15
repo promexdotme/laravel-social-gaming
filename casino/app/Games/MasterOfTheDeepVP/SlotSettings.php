@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\MasterOfTheDeepVP
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

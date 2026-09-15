@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\UltraSevensGT
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

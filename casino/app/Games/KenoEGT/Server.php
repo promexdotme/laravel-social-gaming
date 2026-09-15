@@ -3,7 +3,8 @@ namespace VanguardLTE\Games\KenoEGT
 {
     set_time_limit(5);
 	use Lang;
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

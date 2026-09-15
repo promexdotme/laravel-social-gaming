@@ -1,6 +1,9 @@
 <html>
 
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 
    
     <meta charset="UTF-8">
@@ -8,7 +11,7 @@
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="robots" content="noindex, nofollow">
     <title>{{$game->title}}</title>
-	 <script type="text/javascript" src="index.js?6fb2e03a5abed8994180"></script></head> 
+	 </head> 
 	<script>
 
     if( !sessionStorage.getItem('sessionId') ){

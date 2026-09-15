@@ -33,6 +33,8 @@ namespace VanguardLTE
             'scaleMode', 
             'slotViewState', 
             'view', 
+            'source_type',
+            'custom_path',
             'denomination', 
             'category_temp', 
             'original_id', 

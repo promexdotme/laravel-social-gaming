@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\DemonJack27WD
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

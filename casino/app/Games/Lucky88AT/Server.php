@@ -2,7 +2,8 @@
 namespace VanguardLTE\Games\Lucky88AT
 {
     set_time_limit(5);
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

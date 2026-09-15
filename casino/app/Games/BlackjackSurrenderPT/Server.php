@@ -4,7 +4,8 @@ namespace VanguardLTE\Games\BlackjackSurrenderPT
     set_time_limit(10);
     include('InitGames.php');
     include('GamesConfig.php');
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

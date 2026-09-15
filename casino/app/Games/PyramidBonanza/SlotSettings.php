@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\PyramidBonanza
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

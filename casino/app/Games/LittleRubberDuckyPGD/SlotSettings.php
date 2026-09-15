@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\LittleRubberDuckyPGD
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

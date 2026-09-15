@@ -1,21 +1,21 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 class Multiple
 {
     public static function getBonanzaMultiple($slotArea, $gameSettings, $currentLog){
         $tmp = explode(';', $gameSettings['prm']);
         $tmp = explode('~', $tmp[0]);
-        $prm = $tmp[0]; // символ множителя
-        $prmMultipliers = explode(',',$tmp[1]); // массив возможных значений множителя
+        $prm = $tmp[0]; // multiplier symbol
+        $prmMultipliers = explode(',',$tmp[1]); // array of possible multiplier values
 
-        // перестроить игровое поле на катушки
+        // rebuild the playing field on reels
         $reels = 6;
         $tmpSlotArea = array_chunk($slotArea, $reels);
         $currentSlotArea = [];
         $k = 0;
-        while ($k < $reels) { // перестроить со строк на ряды
+        while ($k < $reels) { // rearrange from rows to rows
             $i = 0;
             while ($i < $gameSettings['sh']) {
                 $currentSlotArea[$k][] = $tmpSlotArea[$i][$k];
@@ -24,12 +24,12 @@ class Multiple
             $k++;
         }
         $prmReady = [];
-        // пройти по всем катушкам с конца, и присвоить множители, в лог писать какой множитель от какой катушки
+        // go through all the coils from the end, and assign multipliers, write in the log which multiplier from which coil
         foreach ($currentSlotArea as $reelKey => $reel) {
             foreach (array_reverse($reel) as $symbolKey => $symbol) {
                 if ($symbol == $prm){
-                    $symbolsCount = $gameSettings['sh'] - 1; // массивы с 0 начинаются. Чтобы узнать сколько должно быть в катушке символов
-                    $prmSymbol = $reelKey + ($reels * ($symbolsCount - $symbolKey)); // вычисляем поозицию. Номер катушки, прибавляем к позиции  катушке с начала
+                    $symbolsCount = $gameSettings['sh'] - 1; // arrays start at 0. To find out how many symbols should be in the reel
+                    $prmSymbol = $reelKey + ($reels * ($symbolsCount - $symbolKey)); // calculate position. Coil number, add to the coil position from the beginning
                     $prmReady[] = [
                         'Symbol' => $prm,
                         'Position' => $prmSymbol,

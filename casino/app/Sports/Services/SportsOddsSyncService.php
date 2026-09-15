@@ -16,28 +16,13 @@ use VanguardLTE\Sports\Outcome;
 
 class SportsOddsSyncService
 {
-    protected function getProvider(): string
+    public function getProvider(): string
     {
-        $provider = env('SPORTSBOOK_PROVIDER');
-        if (!empty($provider)) {
-            return $provider;
-        }
-        return settings('sportsbook_provider', 'the_odds_api');
+        return 'the_odds_api';
     }
 
     protected function getBaseUri(): string
     {
-        if ($this->getProvider() === 'parlay_api') {
-            $url = env('PARLAY_BASE_URL');
-            if (empty($url)) {
-                $url = settings('parlay_base_url', 'https://parlay-api.com');
-            }
-            $url = rtrim($url, '/');
-            if (strpos($url, '/v1') !== false) {
-                return $url . '/';
-            }
-            return $url . '/v1/';
-        }
         return 'https://api.the-odds-api.com/v4/';
     }
 
@@ -46,23 +31,15 @@ class SportsOddsSyncService
      */
     protected function getApiKey(): string
     {
-        if ($this->getProvider() === 'parlay_api') {
-            $key = trim(env('PARLAY_API_KEY', ''));
-            if (empty($key)) {
-                $key = trim(settings('parlay_api_key', ''));
-            }
-            if (!$key) {
-                throw new \Exception("Parlay API Key not set.");
-            }
-            return $key;
-        }
-
         $key = trim(env('ODS_API_KEY', ''));
+        if (empty($key)) {
+            $key = trim(settings('odds_api_key', ''));
+        }
         if (empty($key)) {
             $key = trim(settings('ods_api_key', ''));
         }
         if (!$key) {
-            throw new \Exception("Odds API key not set.");
+            throw new \Exception("The Odds API Key not set.");
         }
         return $key;
     }

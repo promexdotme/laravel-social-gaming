@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\HitInVegasNG
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

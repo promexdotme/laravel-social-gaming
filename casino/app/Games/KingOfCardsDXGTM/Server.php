@@ -2,7 +2,8 @@
 namespace VanguardLTE\Games\KingOfCardsDXGTM
 {
     set_time_limit(5);
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

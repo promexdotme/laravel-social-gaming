@@ -12,8 +12,11 @@
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-    # ✅ Proxy all /games/* requests to VPS FIRST
-    RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L]
+    # Route clean URLs for installers
+    RewriteRule ^install$ install.php [L]
+    RewriteRule ^simple-install$ SimpleInstall.php [L]
+
+
 
     # Redirect Trailing Slashes If Not A Folder...
     # ❗ but NEVER touch /games/* (avoid Apache <-> nginx slash ping-pong)

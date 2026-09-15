@@ -3,6 +3,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
 	<meta charset="utf-8" />
 	<title>{{ $game->title }}</title>
 	<meta name="viewport" content="width=device-width,height = device-height, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">

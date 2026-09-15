@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\SecretOfAlchemyEGT
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

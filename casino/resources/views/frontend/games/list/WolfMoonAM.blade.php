@@ -1,6 +1,9 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
  <title>{{ $game->title }}</title>
 <base href="/games/{{ $game->name }}/amarent/">
 <script>
@@ -8,8 +11,8 @@
 document.cookie = 'phpsessid=; Max-Age=0; path=/; domain=' + location.host; 
 document.cookie = 'PHPSESSID=; Max-Age=0; path=/; domain=' + location.host;
 
- window.console={ log:function(){}, error:function(){} };       
- window.onerror=function(){return true};
+ , error:function(){} };       
+ 
 
     if( !sessionStorage.getItem('sessionId') ){
         sessionStorage.setItem('sessionId', parseInt(Math.random() * 1000000));
@@ -61,8 +64,8 @@ document.location.href=exitUrl;
 document.cookie = 'phpsessid=; Max-Age=0; path=/; domain=' + location.host; 
 document.cookie = 'PHPSESSID=; Max-Age=0; path=/; domain=' + location.host;
 
- window.console={ log:function(){}, error:function(){} };       
- window.onerror=function(){return true};
+ , error:function(){} };       
+ 
 
     if( !sessionStorage.getItem('sessionId') ){
         sessionStorage.setItem('sessionId', parseInt(Math.random() * 1000000));

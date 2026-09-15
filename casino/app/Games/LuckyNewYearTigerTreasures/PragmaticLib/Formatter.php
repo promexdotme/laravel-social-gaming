@@ -1,6 +1,6 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 
 class Formatter
@@ -20,7 +20,7 @@ class Formatter
             'TotalWin' => $win['TotalWin'],
             'Win' => $win['TotalWin'],
         ];
-        $addLog = self::situationToLog($log, $win, $freeSpins, $toLog); // обычные ситуации с играми
+        $addLog = self::situationToLog($log, $win, $freeSpins, $toLog); // common gaming situations
         return array_merge($toLog, $addLog);
 
     }
@@ -40,7 +40,7 @@ class Formatter
             'stime='.time()*1000,
             'sa='.implode(',', $logData['SymbolsAfter']),
             'sb='.implode(',', $logData['SymbolsBelow']),
-            'sh=5',
+            'sh=3',
             'c='.$logData['Bet'],
             'sver=5',
             'counter='.$logData['Counter'],
@@ -49,7 +49,7 @@ class Formatter
             'w='.$logData['Win'],
         ];
 
-        // Если не было респина и появился первый выигрыш
+        // If there was no respin and the first win appeared
         if ($logData['State'] === 'FirstRespin' && $logData['Win'] > 0){
             $positions = self::positionsToServer($logData['WinLines']);
             $addResponse = [
@@ -62,7 +62,7 @@ class Formatter
             ];
             $response = array_merge($response, $positions, $addResponse);
         }
-        // Если был респин и появился еще выигрыш
+        // If there was a respin and another win appeared
         if ($logData['State'] === 'Respin' && $logData['Win'] > 0){
             $positions = self::positionsToServer($logData['WinLines']);
             $addResponse = [
@@ -75,10 +75,10 @@ class Formatter
             ];
             $response = array_merge($response, $positions, $addResponse);
         }
-        // если это последний респин
+        // if this is the last respin
         if ($logData['State'] === 'LastRespin'){
             $repl = array_keys($response, 'na=s');
-            $response[$repl[0]] = 'na=c'; // заменить значение
+            $response[$repl[0]] = 'na=c'; // replace value
             $addResponse = [
                 'rs_t='.$logData['Respin'],
                 'rs_win='.$logData['RespinWin'],
@@ -89,7 +89,7 @@ class Formatter
             $response = array_merge($response, $addResponse);
         }
 
-        if (array_key_exists('FSPay', $logData)){ // при выигрыше фриспина показать где скаттеры и сколько оплата
+        if (array_key_exists('FSPay', $logData)){ // When you win a free spin, show where the scatters are and how much the payment is
             $responseFs[] = 'psym='.$logData['Scatter'].'~'.$logData['FSPay'].'~'.implode(',', $logData['ScatterPositions']);
         }
         if (array_key_exists('FreeSpinNumber', $logData) && $logData['FreeSpinNumber'] < $logData['FreeSpins']){
@@ -185,7 +185,7 @@ class Formatter
     }
 
     private static function positionsToServer($winLines){
-        // вернуть позиции в подходящем виде
+        // return positions in a suitable form
         $result = [];
         $tmb = [];
         $l = [];
@@ -205,14 +205,14 @@ class Formatter
     }
 
     private static function situationToLog($log, $win, $freeSpins, $toLog){
-    //если нет лога то по умолчанию состояние Spin
+    //if there is no log then the default state Spin
         if (!$log || !array_key_exists('State', $log)) $state = 'Spin';
         else $state = $log['State'];
-    //если нет выигрыша, и нет предыдущего респина - то состояние Spin
+    //if there is no win, and there is no previous respin - then the state Spin
         if ($win['TotalWin'] == 0 && $state != 'Respin'){
             $addLog = [ 'State' => 'Spin' ];
         }
-	//если есть выигрыш, но нет фриспинов, и нет предыдущего респина - то FirstRespin
+	//if there is a win, but no free spins, and there is no previous respin - then FirstRespin
         if ($win['TotalWin'] > 0 && $state != 'Respin'){
             $addLog = [
                 'Respin' => 0,
@@ -221,7 +221,7 @@ class Formatter
                 'State' => 'FirstRespin'
             ];
         }
-	//если есть выигрыш, и есть предыдущий респин - то Respin
+	//if there is a win and there is a previous respin - то Respin
         if ($win['TotalWin'] > 0 && ($state === 'Respin' || $state === 'FirstRespin')){
             $addLog = [
                 'Respin' => $log['Respin'] + 1,
@@ -231,7 +231,7 @@ class Formatter
                 'State' => 'Respin'
             ];
         }
-	//если нет выигрыша, и есть предыдущий респин - то LastRespin
+	//if there is no win and there is a previous respin - то LastRespin
         if ($win['TotalWin'] == 0 && ($state === 'Respin' || $state === 'FirstRespin')){
             $addLog = [
                 'Respin' => $log['Respin'],
@@ -242,7 +242,7 @@ class Formatter
         }
 
 
-	//если нет выигрыша, и это фриспины, и предыдущий спин или ласт респин - то состояние Spin
+	//if there is no win, and these are free spins, and the previous spin or last respin - then the state Spin
         if ($log && $freeSpins && !array_key_exists('FreeSpinNumber', $log)){
             $addFSLog = [
                 'FreeState' => 'FirstFreeSpin',
@@ -273,7 +273,7 @@ class Formatter
             $addLog = array_merge($addLog, $addFSLog);
         }
 
-	//Если LastRespin или FreeLastRespin - проверяем есть ли выигрыш фриспинов и добавляем фриспины или дополнительные фриспины и выигрыш от скаттеров
+	//If LastRespin or FreeLastRespin - check if there is a free spins win and add free spins or additional free spins and winnings from scatters
 
         return $addLog;
     }

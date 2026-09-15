@@ -4,7 +4,8 @@ namespace VanguardLTE\Games\AtTheMoviesBS
     set_time_limit(5);
     use DB;
     use Auth;
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

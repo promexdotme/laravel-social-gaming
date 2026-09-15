@@ -14,7 +14,8 @@ namespace VanguardLTE\Games\PirateGoldDeluxe
     use VanguardLTE\User;
 
     set_time_limit(10);
-    class Server
+    #[\AllowDynamicProperties]
+class Server
     {
         public function get($request, $game)
         {

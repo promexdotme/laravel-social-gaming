@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
   <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
     <meta charset="utf-8" content="text/html" http-equiv="Content-Type">
     <meta content="initial-scale=1, maximum-scale=1" name="viewport">
     <meta content="yes" name="apple-mobile-web-app-capable">

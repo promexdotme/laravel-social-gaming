@@ -1,8 +1,6 @@
 <?php
 
-
 namespace VanguardLTE\Lib;
-
 
 use Detection\MobileDetect;
 use Illuminate\Support\Facades\Cache;
@@ -11,9 +9,7 @@ use VanguardLTE\StatGame;
 
 class GetHotNewMyGames
 {
-
     public static function get_new_games($finded = false){
-
         $is_mobile = 0;
         $shop_id = (isset(auth()->user()->shop_id) ? auth()->user()->shop_id : 1);
 
@@ -27,7 +23,7 @@ class GetHotNewMyGames
         } else {
             $random_20_games = [];
             $last_30_games = Game::where(['view' => 1, 'shop_id' => $shop_id]);
-            // dd($last_30_games);
+            
             if( $is_mobile ){
                 $last_30_games = $last_30_games->whereIn('device', [0,2]);
             }else{
@@ -36,8 +32,9 @@ class GetHotNewMyGames
             $last_30_games = $last_30_games->orderBy('id', 'DESC')
                 ->take(30)
                 ->get();
-            if( $last_30_games ){
-                $random_20_games = $last_30_games->random(20)->pluck('id');
+            if( $last_30_games && count($last_30_games) ){
+                $takeCount = min(20, count($last_30_games));
+                $random_20_games = $last_30_games->random($takeCount)->pluck('id');
                 if($random_20_games && count($random_20_games)){
                     $random_20_games = $random_20_games->toArray();
                 }
@@ -47,23 +44,14 @@ class GetHotNewMyGames
         }
 
         if($finded){
-            if( $data && count($data) ){
-                return true;
-            }
-            return false;
+            return ( $data && count($data) );
         }
-        if( $data ){
-            return $data;
-        }
-        return [0];
+        return $data ?: [0];
     }
 
-
-
     public static function get_my_games($finded = false){
-
         $my_games_stat = StatGame::where('user_id', (isset(auth()->user()->id) ? auth()->user()->id : 0))->groupBy('game')->take(20)->pluck('game');
-        if($my_games_stat){
+        if($my_games_stat && count($my_games_stat)){
             $my_games = Game::where(['view' => 1, 'shop_id' => (isset(auth()->user()->shop_id) ? auth()->user()->shop_id : 1)])->whereIn('name', $my_games_stat);
             $detect = new MobileDetect;
             if( $detect->isMobile() || $detect->isTablet() ){
@@ -79,14 +67,10 @@ class GetHotNewMyGames
                 return $my_games->toArray();
             }
         }
-        if($finded){
-            return false;
-        }
-        return [0];
+        return $finded ? false : [0];
     }
 
     public static function get_hot_games($finded = false){
-
         $is_mobile = 0;
         $shop_id = (isset(auth()->user()->shop_id) ? auth()->user()->shop_id : 1);
 
@@ -98,34 +82,45 @@ class GetHotNewMyGames
         if (Cache::has('hot_games:'. $shop_id .':'.$is_mobile)) {
             $data = Cache::get('hot_games:'. $shop_id .':'.$is_mobile);
         } else {
-            $hot_games = [];
-            $hot_games_stat = StatGame::where('shop_id', $shop_id)->groupBy('game')->take(100)->pluck('game');
-            if($hot_games_stat){
-                $hot_games = Game::where(['view' => 1, 'shop_id' => $shop_id])->whereIn('name', $hot_games_stat);
-                if( $is_mobile ){
-                    $hot_games = $hot_games->whereIn('device', [0,2]);
-                }else{
-                    $hot_games = $hot_games->whereIn('device', [1,2]);
-                }
-                $hot_games = $hot_games->take(20)->pluck('id');
-                if($hot_games && count($hot_games)){
-                    $hot_games = $hot_games->toArray();
-                }
-            }
-            Cache::put('hot_games:'.$shop_id.':'.$is_mobile, $hot_games, 60*60*3);
-            $data = $hot_games;
-        }
+            $hot_ids = [];
 
+            // 1. Check for games played in stat history
+            $hot_games_stat = StatGame::where('shop_id', $shop_id)->groupBy('game')->take(100)->pluck('game');
+            if($hot_games_stat && count($hot_games_stat)){
+                $query = Game::where(['view' => 1, 'shop_id' => $shop_id])->whereIn('name', $hot_games_stat);
+                if( $is_mobile ){
+                    $query = $query->whereIn('device', [0,2]);
+                }else{
+                    $query = $query->whereIn('device', [1,2]);
+                }
+                $hot_ids = $query->take(20)->pluck('id')->toArray();
+            }
+
+            // 2. If fewer than 20 games found, randomly select from active game catalog
+            if (count($hot_ids) < 20) {
+                $needed = 20 - count($hot_ids);
+                $randomQuery = Game::where(['view' => 1, 'shop_id' => $shop_id]);
+                if ($is_mobile) {
+                    $randomQuery = $randomQuery->whereIn('device', [0, 2]);
+                } else {
+                    $randomQuery = $randomQuery->whereIn('device', [1, 2]);
+                }
+
+                if (!empty($hot_ids)) {
+                    $randomQuery = $randomQuery->whereNotIn('id', $hot_ids);
+                }
+
+                $random_ids = $randomQuery->inRandomOrder()->take($needed)->pluck('id')->toArray();
+                $hot_ids = array_merge($hot_ids, $random_ids);
+            }
+
+            Cache::put('hot_games:'.$shop_id.':'.$is_mobile, $hot_ids, 60*60*3);
+            $data = $hot_ids;
+        }
 
         if($finded){
-            if( $data && count($data) ){
-                return true;
-            }
-            return false;
+            return ( $data && count($data) );
         }
-        if( $data ){
-            return $data;
-        }
-        return [0];
+        return $data ?: [0];
     }
 }

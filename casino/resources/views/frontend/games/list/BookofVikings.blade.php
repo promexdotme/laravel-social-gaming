@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
     <title>{{ $game->title }}</title>
     <meta charset="utf-8">
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -38,7 +41,7 @@ document.location.href=exitUrl;
 
 
 
-<iframe id='game' style="margin:0px;border:0px;width:100%;height:100vh;" src='/games/BookofVikings/gs2c/html5Game.html?lang=en&cur=usd&gameSymbol=vs1dragon8&websiteUrl=&lobbyURL=' allowfullscreen>
+<iframe id='game' style="margin:0px;border:0px;width:100%;height:100vh;" src='/games/BookofVikings/gs2c/html5Game.html?lang=en&cur=usd&gameSymbol=vs10bookviking&websiteUrl=&lobbyURL=' allowfullscreen>
 
 
 </iframe>

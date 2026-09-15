@@ -1,13 +1,19 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 
 class Collect
 {
     public static function collect($user, $index, $counter, $log, $callbackUrl, $game){
         $currentLog = $log->getLog();
-        $user->increment('balance', $currentLog['TotalWin']);
+        // var_dump(array_key_exists('isCollected', $currentLog));
+        if(!array_key_exists('isCollected', $currentLog)){
+            $user->increment('balance', $currentLog['tw']);
+            // var_dump('2');
+            Log::setCollected($game->id, $user->id, 1);
+        }
+        // var_dump('3');
         $user->save();
         $game->save();
         $time = (int) round(microtime(true) * 1000);
@@ -21,7 +27,7 @@ class Collect
             'sver=5',
             'counter='.$counter
         ];
-        return implode('&', $response);
+        return '&'.implode('&', $response);
     }
 
 }

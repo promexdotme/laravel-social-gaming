@@ -5,6 +5,7 @@ namespace VanguardLTE\Console
     class Kernel extends \Illuminate\Foundation\Console\Kernel
     {
         protected $commands = [
+            Commands\SettleCedarCrash::class,
             Commands\Sports\SyncLeagues::class,
             Commands\Sports\SyncGames::class,
             Commands\Sports\SyncOdds::class,
@@ -14,10 +15,17 @@ namespace VanguardLTE\Console
             Commands\Sports\ResetSports::class,
             Commands\Sports\SyncUpcoming::class,
             Commands\Sports\SyncAll::class,
+            Commands\InjectMockWebSocket::class,
+            Commands\DrawLotto::class,
+            Commands\SyncSportsFixtures::class,
+            Commands\SettleSportsBets::class,
+            Commands\SyncSportsOdds::class,
+            Commands\SettleSportsMatches::class,
         ];
 
         protected function schedule(\Illuminate\Console\Scheduling\Schedule $schedule)
         {
+            $schedule->command('cedar:settle-crash')->everyMinute()->withoutOverlapping();
             $schedule->command('queue:work --daemon')->everyMinute()->withoutOverlapping();
             $schedule->call(function()
             {
@@ -50,6 +58,11 @@ namespace VanguardLTE\Console
             $schedule->command('sports:sync:games')->hourly();
             $schedule->command('sports:sync:leagues')->daily();
             $schedule->command('sports:sync:upcoming')->daily();
+            $schedule->command('sports:sync-odds')->everyThirtyMinutes();
+            $schedule->command('sports:settle-matches')->everyFiveMinutes();
+
+            // Automated Cedar Lotto Draw Runner (Daily at Midnight 00:00)
+            $schedule->command('casino:draw-lotto')->dailyAt('00:00');
         }
 
         protected function commands()

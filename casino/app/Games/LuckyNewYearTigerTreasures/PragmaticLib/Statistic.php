@@ -1,11 +1,12 @@
 <?php
 
-namespace VanguardLTE\Games\LuckyNewYearTigerTreasuresTigerTreasures\PragmaticLib;
+namespace VanguardLTE\Games\LuckyNewYearTigerTreasures\PragmaticLib;
 
 class Statistic
 {
-    public static function setStatistic($user, $win, $game, $bank, $bet, $toSlotBank, $toJackpot, $toProfit, $fs,$slotArea){
-        if ($fs) $addName = ' FS';
+    public static function setStatistic($user, $win, $game, $bank, $bet, $toSlotBank, $toJackpot, $toProfit, $fs,$slotArea, $fromJP){
+        if($fromJP) $addName = 'JP';
+        else if ($fs) $addName = ' FS';
         else $addName = '';
         \VanguardLTE\StatGame::create([
             'user_id' => $user->id,

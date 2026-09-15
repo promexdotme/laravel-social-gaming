@@ -1,833 +1,700 @@
 @extends('frontend.Minimal.layouts.clean')
 
-@section('page-title', 'Sportsbook')
-
-@section('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.min.css">
-<style>
-    html, body {
-        overflow-x: clip !important;
-    }
-    .sports-layout {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 30px;
-        margin-top: 20px;
-        width: 100%;
-        max-width: 100%;
-    }
-    @media (min-width: 992px) {
-        .sports-layout {
-            grid-template-columns: 280px 1fr;
-        }
-    }
-
-    /* Sidebar Column */
-    .sports-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
-    }
-    @media (min-width: 992px) {
-        .sports-sidebar {
-            position: sticky;
-            top: 100px;
-            max-height: calc(100vh - 120px);
-            overflow-y: auto;
-            align-self: start;
-            scrollbar-width: none; /* Hide scrollbar Firefox */
-            -ms-overflow-style: none; /* Hide scrollbar IE/Edge */
-            padding-right: 0;
-        }
-        .sports-sidebar::-webkit-scrollbar {
-            display: none; /* Hide scrollbar Chrome/Safari */
-        }
-    }
-
-    .sidebar-widget {
-        background-color: var(--panel-2);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 18px;
-    }
-    
-    .sidebar-label {
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 1px;
-        color: var(--muted);
-        font-weight: 600;
-        margin-bottom: 12px;
-        display: block;
-    }
-
-    /* Search widget */
-    .sidebar-search-wrapper {
-        position: relative;
-    }
-    .sidebar-search-input {
-        width: 100%;
-        background-color: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 10px 14px;
-        color: white;
-        font-family: var(--font);
-        font-size: 0.95rem;
-        transition: all 0.2s;
-    }
-    .sidebar-search-input:focus {
-        outline: none;
-        border-color: var(--accent);
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    /* Time filter options */
-    .sports-tabs-vertical {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    .sports-tab-vertical-link {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background-color: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--border);
-        color: var(--muted);
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    .sports-tab-vertical-link:hover {
-        border-color: rgba(236, 19, 128, 0.3);
-        color: white;
-    }
-    .sports-tab-vertical-link.active {
-        background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%) !important;
-        background-color: transparent !important;
-        color: #0a0512 !important;
-        border-color: transparent !important;
-        font-weight: 600;
-        box-shadow: var(--glow);
-    }
-    .sports-tab-vertical-link.active i {
-        color: #0a0512 !important;
-    }
-
-    /* Category list vertical */
-    .category-list-vertical {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    .category-list-link {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        background-color: rgba(255, 255, 255, 0.02);
-        border: 1px solid var(--border);
-        color: var(--muted);
-        padding: 11px 16px;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.2s;
-    }
-    .category-list-link:hover {
-        border-color: rgba(236, 19, 128, 0.3);
-        background-color: rgba(255, 255, 255, 0.04);
-        color: white;
-    }
-    .category-list-link.active {
-        background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%) !important;
-        background-color: transparent !important;
-        color: #0a0512 !important;
-        border-color: transparent !important;
-        font-weight: 600;
-        box-shadow: var(--glow);
-    }
-    .category-list-link.active .category-icon i {
-        color: #0a0512 !important;
-    }
-    .category-icon {
-        font-size: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 18px;
-        height: 18px;
-    }
-
-    /* Middle List Styling */
-    .sports-card {
-        background-color: var(--panel-2);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 15px;
-    }
-    .odds-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-top: 15px;
-        width: 100%;
-    }
-    .odds-row.h2h-3way {
-        grid-template-columns: 1fr 1fr 1fr;
-    }
-    @media (max-width: 576px) {
-        .odds-row, .odds-row.h2h-3way {
-            grid-template-columns: 1fr;
-        }
-    }
-    .outcome-chip {
-        flex: 1;
-        min-width: 0;
-        background-color: rgba(255,255,255,0.03);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 11px 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .outcome-chip:hover {
-        border-color: rgba(236, 19, 128, 0.4);
-        background-color: rgba(236, 19, 128, 0.05);
-    }
-    .outcome-chip.selected {
-        border-color: transparent !important;
-        background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%) !important;
-        background-color: transparent !important;
-        color: #0a0512 !important;
-        box-shadow: var(--glow);
-    }
-    .outcome-chip.selected span,
-    .outcome-chip.selected strong {
-        color: #0a0512 !important;
-    }
-
-    /* Floating Betslip Toggle Button */
-    .floating-betslip-btn {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background-image: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
-        border: none;
-        color: #0a0512;
-        font-size: 22px;
-        cursor: pointer;
-        box-shadow: var(--glow);
-        z-index: 1000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease-in-out;
-    }
-    .floating-betslip-btn:hover {
-        transform: scale(1.08);
-        box-shadow: 0 20px 45px rgba(236, 19, 128, 0.4);
-    }
-    .betslip-badge {
-        position: absolute;
-        top: -4px;
-        right: -4px;
-        background-color: var(--accent-contrast);
-        color: #0a0512;
-        font-size: 11px;
-        font-weight: 700;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border: 2px solid var(--bg);
-    }
-
-    /* Backdrop overlay */
-    .betslip-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(4px);
-        z-index: 1001;
-        display: none;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    .betslip-backdrop.open {
-        display: block;
-        opacity: 1;
-    }
-
-    /* Betslip Drawer */
-    .betslip-drawer {
-        position: fixed;
-        top: 0;
-        right: -420px;
-        width: 400px;
-        height: 100vh;
-        background-color: var(--panel-2);
-        border-left: 1px solid var(--border);
-        box-shadow: var(--shadow);
-        z-index: 1002;
-        transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-        display: flex;
-    }
-    .betslip-drawer.open {
-        right: 0;
-    }
-    .betslip-drawer-content {
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        height: 100%;
-        padding: 24px;
-    }
-    .betslip-drawer-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--border);
-        padding-bottom: 12px;
-    }
-    .betslip-drawer-header h4 {
-        margin: 0;
-        font-size: 1.25rem;
-        color: white;
-        font-weight: 700;
-    }
-    .close-betslip {
-        background: transparent;
-        border: none;
-        color: var(--muted);
-        font-size: 28px;
-        cursor: pointer;
-        line-height: 1;
-        padding: 0;
-    }
-    .close-betslip:hover {
-        color: white;
-    }
-    .betslip-drawer-body {
-        flex: 1;
-        overflow-y: auto;
-        margin: 15px 0;
-        padding-right: 5px;
-    }
-    .betslip-drawer-footer {
-        border-top: 1px solid var(--border);
-        padding-top: 15px;
-    }
-
-    .betslip-items {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-    .betslip-tabs {
-        display: flex;
-        border-bottom: 1px solid var(--border);
-        margin-bottom: 15px;
-    }
-    .betslip-tab {
-        flex: 1;
-        padding: 10px;
-        text-align: center;
-        cursor: pointer;
-        color: var(--muted);
-        font-weight: 600;
-        border-bottom: 2px solid transparent;
-    }
-    .betslip-tab.active {
-        color: var(--accent);
-        border-bottom-color: var(--accent);
-    }
-
-    /* Mobile Adaptations */
-    @media (max-width: 991px) {
-        .sports-sidebar {
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        .sidebar-widget {
-            padding: 15px;
-            width: 100%;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        .sidebar-label {
-            margin-bottom: 8px;
-        }
-        .floating-betslip-btn {
-            bottom: 20px;
-            right: 20px;
-            width: 54px;
-            height: 54px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .betslip-drawer {
-            right: -100%;
-            width: 100%;
-            border-left: none;
-        }
-        .betslip-drawer.open {
-            right: 0;
-        }
-    }
-
-    /* Sports-specific display utilities to avoid global conflicts */
-    .sports-desktop-only {
-        display: flex !important;
-    }
-    .sports-mobile-only {
-        display: none !important;
-    }
-    @media (max-width: 991px) {
-        .sports-desktop-only {
-            display: none !important;
-        }
-        .sports-mobile-only {
-            display: block !important;
-        }
-    }
-
-    /* Premium Styled Dropdowns for Mobile */
-    .sidebar-select {
-        width: 100%;
-        background-color: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 10px 14px;
-        color: white;
-        font-family: var(--font);
-        font-size: 0.95rem;
-        transition: all 0.2s;
-        cursor: pointer;
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a6a1b7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 14px center;
-        background-size: 16px;
-        padding-right: 40px;
-    }
-    .sidebar-select:focus {
-        outline: none;
-        border-color: var(--accent);
-        background-color: rgba(255, 255, 255, 0.05);
-        box-shadow: 0 0 10px rgba(236, 19, 128, 0.15);
-    }
-    .sidebar-select option {
-        background-color: var(--panel-2);
-        color: white;
-    }
-</style>
-@endsection
+@section('page-title', 'Battle Odds Sportsbook - Casino du Liban')
 
 @section('content')
-<div class="container page-shell" style="padding-top: calc(var(--header-height) + 20px);">
-    
-    <div class="sports-layout">
-        <!-- Sticky Sidebar with Search and Filters -->
-        <aside class="sports-sidebar">
-            
-            <!-- Search Widget -->
-            <div class="sidebar-widget">
-                <label class="sidebar-label">Search Match</label>
-                <div class="sidebar-search-wrapper">
-                    <form action="{{ route('frontend.sports.index') }}" method="GET">
-                        <input type="text" name="q" class="sidebar-search-input" placeholder="Search events..." value="{{ $term ?? '' }}">
-                    </form>
-                </div>
-            </div>
 
-            <!-- Time Filters Widget -->
-            <div class="sidebar-widget">
-                <label class="sidebar-label">Filter Time</label>
-                <!-- Desktop View -->
-                <div class="sports-tabs-vertical sports-desktop-only">
-                    <a href="{{ request()->fullUrlWithQuery(['tab' => 'open']) }}" class="sports-tab-vertical-link {{ $tab === 'open' ? 'active' : '' }}">
-                        <i class="far fa-clock"></i> Upcoming
-                    </a>
-                    <a href="{{ request()->fullUrlWithQuery(['tab' => 'inplay']) }}" class="sports-tab-vertical-link {{ $tab === 'inplay' ? 'active' : '' }}">
-                        <i class="fas fa-play"></i> Live / In-Play
-                    </a>
-                    <a href="{{ request()->fullUrlWithQuery(['tab' => 'today']) }}" class="sports-tab-vertical-link {{ $tab === 'today' ? 'active' : '' }}">
-                        <i class="far fa-calendar-alt"></i> Today
-                    </a>
-                </div>
-                <!-- Mobile View -->
-                <div class="sports-mobile-only">
-                    <select class="sidebar-select" onchange="location = this.value;">
-                        <option value="{{ request()->fullUrlWithQuery(['tab' => 'open']) }}" {{ $tab === 'open' ? 'selected' : '' }}>Upcoming</option>
-                        <option value="{{ request()->fullUrlWithQuery(['tab' => 'inplay']) }}" {{ $tab === 'inplay' ? 'selected' : '' }}>Live / In-Play</option>
-                        <option value="{{ request()->fullUrlWithQuery(['tab' => 'today']) }}" {{ $tab === 'today' ? 'selected' : '' }}>Today</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Sports Category Filter Widget -->
-            <div class="sidebar-widget">
-                <label class="sidebar-label">Sports Lobby</label>
-                <!-- Desktop View -->
-                <div class="category-list-vertical sports-desktop-only">
-                    <a href="{{ route('frontend.sports.category', 'all') }}" class="category-list-link {{ $categorySlug === 'all' ? 'active' : '' }}">
-                        <span class="category-icon"><i class="fas fa-globe"></i></span>
-                        All Sports
-                    </a>
-                    @foreach($categories as $cat)
-                        @php
-                            $iconClass = 'fa-trophy';
-                            $slug = strtolower($cat->slug);
-                            if ($slug === 'soccer' || $slug === 'football') {
-                                $iconClass = 'fa-futbol';
-                            } elseif ($slug === 'basketball') {
-                                $iconClass = 'fa-basketball-ball';
-                            } elseif ($slug === 'tennis') {
-                                $iconClass = 'fa-baseball-ball';
-                            } elseif ($slug === 'baseball') {
-                                $iconClass = 'fa-baseball-ball';
-                            } elseif ($slug === 'cricket') {
-                                $iconClass = 'fa-cricket';
-                            } elseif ($slug === 'ice-hockey' || $slug === 'ice_hockey') {
-                                $iconClass = 'fa-hockey-puck';
-                            }
-                        @endphp
-                        <a href="{{ route('frontend.sports.category', $cat->slug) }}" class="category-list-link {{ $categorySlug === $cat->slug ? 'active' : '' }}">
-                            <span class="category-icon"><i class="fas {{ $iconClass }}"></i></span>
-                            {{ $cat->name }}
-                        </a>
-                    @endforeach
-                </div>
-                <!-- Mobile View -->
-                <div class="sports-mobile-only">
-                    <select class="sidebar-select" onchange="location = this.value;">
-                        <option value="{{ route('frontend.sports.category', 'all') }}" {{ $categorySlug === 'all' ? 'selected' : '' }}>All Sports</option>
-                        @foreach($categories as $cat)
-                            <option value="{{ route('frontend.sports.category', $cat->slug) }}" {{ $categorySlug === $cat->slug ? 'selected' : '' }}>{{ $cat->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-        </aside>
-
-        <!-- Events List Content -->
+<!-- Header & Sports Navigation -->
+<div class="space-y-4">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-            <div class="events-list">
-                @forelse($games as $game)
-                    <div class="sports-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <span style="font-size: 0.8rem; color: var(--accent-contrast); text-transform: uppercase;">{{ $game->league->category->name }} &raquo; {{ $game->league->name }}</span>
-                                <h4 style="margin: 5px 0; color: white; font-weight: 700;">{{ $game->title }}</h4>
-                                <small style="color: var(--muted);">Starts: {{ \Carbon\Carbon::parse($game->start_time)->timezone(config('app.timezone', 'UTC'))->format('M d, H:i') }} (Local Time)</small>
-                            </div>
-                            @if($game->is_in_play)
-                                <span style="background: #ff4757; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; animation: pulse 1.5s infinite;">Live</span>
-                            @endif
-                        </div>
+            <div class="inline-flex items-center gap-2 bg-secondary/10 border border-secondary/25 px-3 py-1 rounded-full mb-1">
+                <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                <span class="text-[11px] font-bold text-secondary font-mono-jet uppercase tracking-wider">FREE SOCIAL SPORTSBOOK</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight uppercase">Battle Odds Arena</h1>
+            <p class="text-on-surface-muted text-xs sm:text-sm mt-0.5">Wager singles or multi-match parlays on global matches with 100% Free Cedar Coins.</p>
+        </div>
+        <span class="font-mono-jet text-xs text-primary font-bold bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-xl self-start sm:self-auto">
+            {{ (isset($matches) && (is_array($matches) || $matches instanceof \Countable)) ? count($matches) : 0 }} FIXTURES OPEN
+        </span>
+    </div>
 
-                        @foreach($game->markets as $market)
-                            @if($market->market_type === 'h2h' || $market->market_type === 'h2h_3way')
-                                <div class="odds-row">
-                                    @foreach($market->outcomes as $outcome)
-                                        <div class="outcome-chip {{ isset($sessionSlip[$outcome->id]) ? 'selected' : '' }}" data-outcome-id="{{ $outcome->id }}">
-                                            <span style="font-weight: 500;">{{ $outcome->name }}</span>
-                                            <strong style="color: inherit;">{{ number_format($outcome->odds, 2) }}</strong>
-                                        </div>
-                                    @endforeach
+    <!-- Sports Category Tabs -->
+    @php $cat = $selectedCategory ?? 'all'; @endphp
+    <div class="flex items-center gap-2 overflow-x-auto pb-1.5 custom-scrollbar max-w-full">
+        <a href="?sport=all" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ $cat === 'all' ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
+            ⚽ All Sports
+        </a>
+        <a href="?sport=soccer" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ str_contains($cat, 'soccer') ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
+            🏆 Football / Soccer
+        </a>
+        <a href="?sport=basketball" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ str_contains($cat, 'basketball') ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
+            🏀 Basketball
+        </a>
+        <a href="?sport=mma" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ str_contains($cat, 'mma') ? 'bg-secondary text-white shadow-md shadow-secondary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06]' }}">
+            🥊 UFC / MMA
+        </a>
+    </div>
+</div>
+
+<!-- Sportsbook Fixtures Grid & Desktop Betslip -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+    <!-- Upcoming Matches List (Left 2 Columns) -->
+    <div class="lg:col-span-2 space-y-3.5">
+        @forelse($matches as $m)
+            <div class="bg-[#121622] rounded-2xl p-4 sm:p-5 border border-white/[0.07] hover:border-white/15 transition-all shadow-md space-y-3">
+                <!-- Match Header Info -->
+                <div class="flex justify-between items-center text-xs font-mono-jet">
+                    <span class="text-secondary font-bold uppercase tracking-wider text-[11px]">{{ $m->sport_title ?? 'Sports Match' }}</span>
+                    <span class="text-on-surface-muted flex items-center gap-1.5 bg-white/[0.04] px-2.5 py-1 rounded-lg border border-white/[0.06]">
+                        <span class="material-symbols-outlined text-xs text-primary">schedule</span>
+                        <time class="local-time" datetime="{{ $m->start_time->toIso8601String() }}">{{ $m->start_time->format('H:i') }}</time>
+                    </span>
+                </div>
+
+                <!-- Match Teams Title -->
+                <div class="font-extrabold text-sm sm:text-base text-white tracking-tight flex items-center gap-2">
+                    <span class="truncate">{{ $m->home_team }}</span>
+                    <span class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded flex-shrink-0">VS</span>
+                    <span class="truncate">{{ $m->away_team }}</span>
+                </div>
+
+                <!-- "Team - Odds" Buttons Grid: 1 X 2 -->
+                <div class="grid grid-cols-3 gap-2 pt-1">
+                    <!-- Home Win Button -->
+                    <button type="button" class="btn-odd p-2.5 sm:p-3 rounded-xl bg-[#182030] border border-white/[0.08] hover:border-primary/50 text-xs font-bold text-white transition-all flex flex-col sm:flex-row justify-between items-center gap-1 cursor-pointer"
+                            data-match-id="{{ $m->match_id }}" data-home="{{ $m->home_team }}" data-away="{{ $m->away_team }}" data-selection="home" data-odds="{{ $m->odds_home }}">
+                        <span class="text-on-surface-muted text-[10px] sm:text-xs truncate max-w-[90px]">1 (Home)</span>
+                        <span class="text-primary font-mono-jet text-xs sm:text-sm font-bold">{{ number_format($m->odds_home, 2) }}</span>
+                    </button>
+
+                    <!-- Draw Button -->
+                    <button type="button" class="btn-odd p-2.5 sm:p-3 rounded-xl bg-[#182030] border border-white/[0.08] hover:border-primary/50 text-xs font-bold text-white transition-all flex flex-col sm:flex-row justify-between items-center gap-1 cursor-pointer"
+                            data-match-id="{{ $m->match_id }}" data-home="{{ $m->home_team }}" data-away="{{ $m->away_team }}" data-selection="draw" data-odds="{{ $m->odds_draw ?? 3.20 }}">
+                        <span class="text-on-surface-muted text-[10px] sm:text-xs">X (Draw)</span>
+                        <span class="text-secondary font-mono-jet text-xs sm:text-sm font-bold">{{ number_format($m->odds_draw ?? 3.20, 2) }}</span>
+                    </button>
+
+                    <!-- Away Win Button -->
+                    <button type="button" class="btn-odd p-2.5 sm:p-3 rounded-xl bg-[#182030] border border-white/[0.08] hover:border-primary/50 text-xs font-bold text-white transition-all flex flex-col sm:flex-row justify-between items-center gap-1 cursor-pointer"
+                            data-match-id="{{ $m->match_id }}" data-home="{{ $m->home_team }}" data-away="{{ $m->away_team }}" data-selection="away" data-odds="{{ $m->odds_away }}">
+                        <span class="text-on-surface-muted text-[10px] sm:text-xs truncate max-w-[90px]">2 (Away)</span>
+                        <span class="text-primary font-mono-jet text-xs sm:text-sm font-bold">{{ number_format($m->odds_away, 2) }}</span>
+                    </button>
+                </div>
+            </div>
+        @empty
+            <div class="text-center py-16 bg-[#121622] rounded-3xl border border-white/[0.06]">
+                <span class="material-symbols-outlined text-4xl text-on-surface-subtle mb-2">sports_soccer</span>
+                <p class="text-on-surface-muted text-sm font-medium">No live fixtures currently scheduled.</p>
+                <p class="text-xs text-on-surface-subtle mt-1">Check back shortly or sync fixtures via Liteback admin.</p>
+            </div>
+        @endforelse
+    </div>
+
+    <!-- Desktop Sticky Betslip Sidebar (Right Column) -->
+    <div class="hidden lg:block space-y-4">
+        <div class="sticky top-6 bg-[#121622] rounded-3xl p-5 border border-white/[0.08] shadow-xl space-y-4">
+            <div class="flex justify-between items-center pb-3 border-b border-white/[0.08]">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-xl">receipt_long</span>
+                    <h3 class="font-extrabold text-sm text-white uppercase tracking-tight">Betslip</h3>
+                </div>
+                <button type="button" id="btn-clear-slip" class="text-xs text-accent-rose hover:underline font-bold uppercase transition-colors">
+                    Clear Slip
+                </button>
+            </div>
+
+            <!-- Mode Switcher Tabs (PARLAY vs SINGLES) -->
+            <div class="grid grid-cols-2 gap-1 p-1 bg-black/40 rounded-xl border border-white/[0.08] text-xs font-bold uppercase">
+                <button type="button" id="btn-mode-parlay" class="py-2 rounded-lg transition-all text-center bg-primary text-white shadow-sm">
+                    🎟️ Parlay
+                </button>
+                <button type="button" id="btn-mode-singles" class="py-2 rounded-lg transition-all text-center text-on-surface-muted hover:text-white">
+                    🎯 Singles
+                </button>
+            </div>
+
+            <!-- Selected Match Legs List -->
+            <div id="betslip-legs" class="space-y-2 text-xs font-mono-jet max-h-[320px] overflow-y-auto custom-scrollbar pr-1">
+                <p class="text-on-surface-muted text-center py-8 text-xs">Click any odds on the left to build your betslip.</p>
+            </div>
+
+            <!-- Betslip Summary & Controls -->
+            <div class="space-y-3 pt-3 border-t border-white/[0.08]">
+                <div class="flex justify-between text-xs font-mono-jet">
+                    <span class="text-on-surface-muted">Bet Mode:</span>
+                    <span id="betslip-type" class="text-primary font-bold uppercase">PARLAY</span>
+                </div>
+                <div id="row-total-odds" class="flex justify-between text-xs font-mono-jet">
+                    <span class="text-on-surface-muted">Combined Odds:</span>
+                    <span id="betslip-total-odds" class="text-secondary font-bold text-sm">1.00</span>
+                </div>
+                <div id="row-parlay-boost" class="hidden justify-between text-xs font-mono-jet text-emerald-400 font-bold bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+                    <span>🔥 Accumulator Boost:</span>
+                    <span id="betslip-boost-val">+0%</span>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label id="lbl-stake" for="betslip-stake" class="text-[11px] font-bold text-on-surface-muted uppercase">Stake per Bet (Cedar Coins)</label>
+                    <input type="number" id="betslip-stake" value="1000" min="100" step="100" class="w-full text-sm font-mono-jet text-primary font-bold p-3 bg-black/40 border border-white/10 rounded-xl focus:border-primary focus:outline-none">
+                    
+                    <!-- Quick Stake Chips -->
+                    <div class="grid grid-cols-4 gap-1.5 pt-1">
+                        <button type="button" class="btn-quick-stake py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-bold text-on-surface-muted hover:text-white" data-amount="500">+500</button>
+                        <button type="button" class="btn-quick-stake py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-bold text-on-surface-muted hover:text-white" data-amount="1000">+1K</button>
+                        <button type="button" class="btn-quick-stake py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-bold text-on-surface-muted hover:text-white" data-amount="5000">+5K</button>
+                        <button type="button" class="btn-quick-stake py-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] text-[11px] font-bold text-accent-gold" data-amount="10000">10K</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-between text-xs font-mono-jet text-on-surface-muted pt-1">
+                    <span>Total Cost:</span>
+                    <span id="betslip-total-cost" class="text-white font-bold">1,000 CEDARS</span>
+                </div>
+
+                <div class="flex justify-between text-sm font-mono-jet font-bold pt-1">
+                    <span class="text-white">Potential Win:</span>
+                    <span id="betslip-potential" class="text-primary text-base">0 CEDARS</span>
+                </div>
+
+                <button type="button" id="btn-place-wager" class="w-full bg-primary hover:bg-primary-dark text-white py-3 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all">
+                    Place Social Wager
+                </button>
+            </div>
+        </div>
+
+        <!-- Recent Wagers Card -->
+        @if(isset($userBets) && count($userBets) > 0)
+            <div class="bg-[#121622] rounded-3xl p-5 border border-white/[0.08] space-y-3">
+                <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary text-base">history</span> Recent Wagers
+                </h3>
+                <div class="space-y-2 text-xs font-mono-jet">
+                    @foreach($userBets as $b)
+                        <div class="p-3 rounded-xl bg-[#161c2b] border border-white/[0.06] space-y-1">
+                            <div class="flex justify-between items-center">
+                                @php $legsCount = is_array($b->legs_json) ? count($b->legs_json) : (is_string($b->legs_json) ? count(json_decode($b->legs_json, true) ?? []) : 0); @endphp
+                                <span class="font-bold uppercase text-[10px] text-secondary">{{ strtoupper($b->type) }} ({{ $legsCount }} LEGS)</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase {{ $b->status === 'won' ? 'bg-primary/20 text-primary' : ($b->status === 'lost' ? 'bg-accent-rose/20 text-accent-rose' : 'bg-white/10 text-on-surface-muted') }}">
+                                    {{ $b->status }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between text-[11px] pt-1">
+                                <span class="text-on-surface-muted">Stake: {{ number_format($b->stake, 0) }}</span>
+                                <span class="text-primary font-bold">Odds: {{ number_format($b->total_odds, 2) }}</span>
+                            </div>
+                            @if($b->status === 'pending')
+                                <div class="pt-2 border-t border-white/5 flex items-center justify-between">
+                                    <button type="button" class="btn-cashout-action px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 font-bold text-[10px] border border-amber-500/40 transition-all flex items-center gap-1.5" data-bet-id="{{ $b->id }}" data-quoted="false">
+                                        <span>💰 Cash Out</span>
+                                        <span class="cashout-offer-val font-mono-jet text-white font-extrabold" id="cashout-label-{{ $b->id }}">Quote</span>
+                                    </button>
+                                    <span class="text-[9px] text-on-surface-muted">Live Fair Value</span>
                                 </div>
                             @endif
-                        @endforeach
-                    </div>
-                @empty
-                    <div style="background-color: var(--panel-2); border: 1px solid var(--border); border-radius: 12px; padding: 60px; text-align: center; color: var(--muted);">
-                        <h4>No events available.</h4>
-                        <p>Check back later or try changing filters.</p>
-                    </div>
-                @endforelse
+                        </div>
+                    @endforeach
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 </div>
 
-<!-- Floating Betslip Trigger Button -->
-<button id="floating-betslip-btn" class="floating-betslip-btn">
-    <i class="fas fa-receipt"></i>
-    <span class="betslip-badge">0</span>
+<!-- Floating Mobile Betslip Trigger Button (FAB) -->
+<button id="btn-mobile-betslip-fab" type="button" class="fixed bottom-20 right-4 z-40 lg:hidden bg-gradient-to-r from-primary to-primary-dark text-white px-4 py-3 rounded-2xl font-bold text-xs tracking-wider shadow-2xl shadow-primary/40 flex items-center gap-2 border border-white/10 transition-transform active:scale-95">
+    <span class="material-symbols-outlined text-lg">receipt_long</span>
+    <span>SLIP (<span id="mobile-betslip-count">0</span>)</span>
 </button>
 
-<!-- Backdrop Blur overlay -->
-<div id="betslip-backdrop" class="betslip-backdrop"></div>
+<!-- Mobile Betslip Slide-Up Drawer Overlay -->
+<div id="mobile-betslip-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] hidden transition-opacity duration-300 lg:hidden"></div>
 
-<!-- Betslip Slide-out Drawer -->
-<div id="betslip-drawer" class="betslip-drawer">
-    <div class="betslip-drawer-content">
-        <div class="betslip-drawer-header">
-            <div style="display: flex; align-items: baseline; gap: 15px;">
-                <h4>Betslip</h4>
-                <a href="#" id="clear-betslip-btn" style="color: var(--muted); font-size: 0.85rem; font-weight: 500; text-decoration: underline;">Clear All</a>
-            </div>
-            <button id="close-betslip-drawer" class="close-betslip">&times;</button>
-        </div>
-        
-        <div class="betslip-tabs">
-            <div class="betslip-tab active" data-type="1">Single</div>
-            <div class="betslip-tab" data-type="2">Parlay</div>
-        </div>
+<!-- Mobile Betslip Slide-Up Sheet -->
+<div id="mobile-betslip-sheet" class="fixed left-0 right-0 bottom-0 max-h-[85vh] bg-[#121622]/98 border-t border-white/10 rounded-t-3xl backdrop-blur-2xl z-[100] transform translate-y-full transition-transform duration-300 flex flex-col p-5 shadow-2xl overflow-y-auto lg:hidden custom-scrollbar">
+    <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-4 flex-shrink-0 cursor-pointer" id="betslip-drag-handle"></div>
 
-        <div class="betslip-drawer-body">
-            <div class="betslip-items">
-                @forelse($sessionSlip as $item)
-                    @include('frontend.Minimal.sports.betslip_item', ['item' => $item])
-                @empty
-                    <div class="empty-slip-msg text-center text-muted" style="padding: 30px 0;">No selections made.</div>
-                @endforelse
-            </div>
-        </div>
-
-        <div class="betslip-drawer-footer">
-            <div class="parlay-multi-wrapper" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span style="color: var(--muted);">Total Odds:</span>
-                <strong id="parlay-total-odds" style="color: var(--accent-contrast); font-size: 1.2rem;">1.00</strong>
-            </div>
-
-            <div class="parlay-stake-wrapper" style="display: none; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span style="color: var(--muted);">Stake ($):</span>
-                <input type="number" id="multi-stake-input" value="10" style="width: 80px; padding: 6px; background: #121212; border: 1px solid var(--border); border-radius: 4px; color: white; text-align: right;" min="1">
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span style="color: white; font-weight: 600;">Est. Payout:</span>
-                <strong id="betslip-est-payout" style="color: var(--accent-contrast); font-size: 1.3rem;">$0.00</strong>
-            </div>
-
-            @if(Auth::check())
-                <button id="btn-place-bet" class="btn-primary" style="width: 100%; border: none; padding: 12px; border-radius: 8px;">Place Bet</button>
-            @else
-                <button class="btn-primary open-modal" data-target="modal-login" style="width: 100%; border: none; padding: 12px; border-radius: 8px; text-align: center;">Log in to bet</button>
-            @endif
+    <div class="flex justify-between items-center pb-3 border-b border-white/[0.08] mb-4">
+        <h3 class="text-sm font-bold text-white uppercase tracking-tight flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-lg">receipt_long</span>
+            <span>Betslip (<span id="mobile-sheet-count">0</span> Legs)</span>
+        </h3>
+        <div class="flex items-center gap-3">
+            <button type="button" id="btn-clear-slip-mobile" class="text-xs text-accent-rose font-bold uppercase hover:underline">Clear</button>
+            <button id="btn-close-betslip-sheet" type="button" class="text-on-surface-subtle hover:text-white p-1 rounded-xl bg-white/[0.04]">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
         </div>
     </div>
+
+    <!-- Mode Switcher Tabs (PARLAY vs SINGLES) -->
+    <div class="grid grid-cols-2 gap-1 p-1 bg-black/40 rounded-xl border border-white/[0.08] text-xs font-bold uppercase mb-4">
+        <button type="button" id="btn-mode-parlay-mobile" class="py-2.5 rounded-lg transition-all text-center bg-primary text-white shadow-sm">
+            🎟️ Parlay
+        </button>
+        <button type="button" id="btn-mode-singles-mobile" class="py-2.5 rounded-lg transition-all text-center text-on-surface-muted hover:text-white">
+            🎯 Singles
+        </button>
+    </div>
+
+    <!-- Selected Legs Container -->
+    <div id="betslip-legs-mobile" class="space-y-2 text-xs font-mono-jet min-h-[80px] mb-4">
+        <p class="text-on-surface-muted text-center py-6 text-xs">Click any match odds to build your betslip.</p>
+    </div>
+
+    <!-- Betslip Summary -->
+    <div class="space-y-3 pt-3 border-t border-white/[0.08] mb-2">
+        <div class="flex justify-between text-xs font-mono-jet">
+            <span class="text-on-surface-muted">Bet Mode:</span>
+            <span id="betslip-type-mobile" class="text-primary font-bold uppercase">PARLAY</span>
+        </div>
+        <div id="row-total-odds-mobile" class="flex justify-between text-xs font-mono-jet">
+            <span class="text-on-surface-muted">Combined Odds:</span>
+            <span id="betslip-total-odds-mobile" class="text-secondary font-bold">1.00</span>
+        </div>
+        <div id="row-parlay-boost-mobile" class="hidden justify-between text-xs font-mono-jet text-emerald-400 font-bold bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
+            <span>🔥 Accumulator Boost:</span>
+            <span id="betslip-boost-val-mobile">+0%</span>
+        </div>
+
+        <div class="form-group space-y-1">
+            <label id="lbl-stake-mobile" for="betslip-stake-mobile" class="text-xs text-on-surface-muted uppercase">Stake per Bet (Cedar Coins)</label>
+            <input type="number" id="betslip-stake-mobile" value="1000" min="100" step="100" class="w-full text-sm font-mono-jet text-primary font-bold p-3 bg-black/40 border border-white/10 rounded-xl focus:border-primary focus:outline-none">
+        </div>
+
+        <div class="flex justify-between text-xs font-mono-jet text-on-surface-muted">
+            <span>Total Cost:</span>
+            <span id="betslip-total-cost-mobile" class="text-white font-bold">1,000 CEDARS</span>
+        </div>
+
+        <div class="flex justify-between text-sm font-mono-jet font-bold pt-1">
+            <span class="text-white">Est. Payout:</span>
+            <span id="betslip-potential-mobile" class="text-primary text-base">0 CEDARS</span>
+        </div>
+
+        <button type="button" id="btn-place-wager-mobile" class="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-primary/25 transition-all mt-2">
+            Place Social Wager
+        </button>
+    </div>
 </div>
-@endsection
 
-@section('scripts')
 <script>
-    $(document).ready(function() {
-        let currentType = 1; // 1 = Single, 2 = Parlay
+document.addEventListener('DOMContentLoaded', function() {
+    let betslip = [];
+    let activeMode = 'parlay'; // 'parlay' or 'singles'
 
-        // Drawer toggle controllers
-        $('#floating-betslip-btn').click(function() {
-            $('#betslip-drawer').addClass('open');
-            $('#betslip-backdrop').addClass('open');
-        });
-        $('#close-betslip-drawer, #betslip-backdrop').click(function() {
-            $('#betslip-drawer').removeClass('open');
-            $('#betslip-backdrop').removeClass('open');
-        });
+    const oddBtns = document.querySelectorAll('.btn-odd');
+    
+    // Desktop elements
+    const legsContainer = document.getElementById('betslip-legs');
+    const typeElem = document.getElementById('betslip-type');
+    const rowTotalOdds = document.getElementById('row-total-odds');
+    const oddsElem = document.getElementById('betslip-total-odds');
+    const potentialElem = document.getElementById('betslip-potential');
+    const costElem = document.getElementById('betslip-total-cost');
+    const stakeLabel = document.getElementById('lbl-stake');
+    const stakeInput = document.getElementById('betslip-stake');
+    const clearBtn = document.getElementById('btn-clear-slip');
+    const placeBtn = document.getElementById('btn-place-wager');
 
-        // Clear Betslip
-        $('#clear-betslip-btn').click(function(e) {
-            e.preventDefault();
-            $.ajax({
-                url: "{{ route('frontend.sports.betslip.clear') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}"
-                },
-                success: function(res) {
-                    $('.betslip-items').empty().append('<div class="empty-slip-msg text-center text-muted" style="padding: 30px 0;">No selections made.</div>');
-                    $('.outcome-chip').removeClass('selected');
-                    calculateTotals();
-                    updateBadge();
-                }
-            });
-        });
+    const btnModeParlay = document.getElementById('btn-mode-parlay');
+    const btnModeSingles = document.getElementById('btn-mode-singles');
 
-        // Switch betslip type
-        $('.betslip-tab').click(function() {
-            $('.betslip-tab').removeClass('active');
-            $(this).addClass('active');
-            currentType = parseInt($(this).data('type'));
+    // Mobile elements
+    const fabBtn = document.getElementById('btn-mobile-betslip-fab');
+    const mobileCount = document.getElementById('mobile-betslip-count');
+    const mobileSheetCount = document.getElementById('mobile-sheet-count');
+    const mobileSheet = document.getElementById('mobile-betslip-sheet');
+    const mobileOverlay = document.getElementById('mobile-betslip-overlay');
+    const closeSheetBtn = document.getElementById('btn-close-betslip-sheet');
+    const dragHandle = document.getElementById('betslip-drag-handle');
+    const clearBtnMobile = document.getElementById('btn-clear-slip-mobile');
+    const placeBtnMobile = document.getElementById('btn-place-wager-mobile');
 
-            if (currentType === 2) {
-                $('.parlay-multi-wrapper, .parlay-stake-wrapper').css('display', 'flex');
-                $('.betslip-stake').parent().hide();
-            } else {
-                $('.parlay-multi-wrapper, .parlay-stake-wrapper').hide();
-                $('.betslip-stake').parent().css('display', 'flex');
-            }
-            calculateTotals();
-        });
+    const legsContainerMobile = document.getElementById('betslip-legs-mobile');
+    const typeElemMobile = document.getElementById('betslip-type-mobile');
+    const rowTotalOddsMobile = document.getElementById('row-total-odds-mobile');
+    const oddsElemMobile = document.getElementById('betslip-total-odds-mobile');
+    const potentialElemMobile = document.getElementById('betslip-potential-mobile');
+    const costElemMobile = document.getElementById('betslip-total-cost-mobile');
+    const stakeLabelMobile = document.getElementById('lbl-stake-mobile');
+    const stakeInputMobile = document.getElementById('betslip-stake-mobile');
 
-        // Add to Betslip
-        $(document).on('click', '.outcome-chip', function() {
-            let chip = $(this);
-            if (chip.hasClass('selected')) {
-                $('#betslip-drawer').addClass('open');
-                $('#betslip-backdrop').addClass('open');
-                return;
-            }
+    const btnModeParlayMobile = document.getElementById('btn-mode-parlay-mobile');
+    const btnModeSinglesMobile = document.getElementById('btn-mode-singles-mobile');
 
-            let outcomeId = chip.data('outcome-id');
-
-            $.ajax({
-                url: "{{ route('frontend.sports.betslip.add') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    outcome_id: outcomeId
-                },
-                success: function(res) {
-                    chip.addClass('selected');
-                    $('.empty-slip-msg').hide();
-                    $('.betslip-items').append(res.html);
-                    
-                    if (currentType === 2) {
-                        $('.betslip-stake').parent().hide();
-                    }
-                    calculateTotals();
-                    updateBadge();
-                    
-                    // Auto-open drawer when a selection is added so user gets instant visual confirmation
-                    $('#betslip-drawer').addClass('open');
-                    $('#betslip-backdrop').addClass('open');
-                },
-                error: function(xhr) {
-                    alert(xhr.responseJSON?.error || 'Failed to add selection.');
-                }
-            });
-        });
-
-        // Remove from Betslip
-        $(document).on('click', '.remove-betslip-item', function() {
-            let btn = $(this);
-            let outcomeId = btn.data('outcome-id');
-
-            $.ajax({
-                url: "{{ route('frontend.sports.betslip.remove') }}",
-                method: "POST",
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    outcome_id: outcomeId
-                },
-                success: function(res) {
-                    $(`.betslip-item[data-outcome-id="${outcomeId}"]`).remove();
-                    $(`.outcome-chip[data-outcome-id="${outcomeId}"]`).removeClass('selected');
-
-                    if (res.slipCount === 0) {
-                        $('.empty-slip-msg').show();
-                    }
-                    calculateTotals();
-                    updateBadge();
-                }
-            });
-        });
-
-        // Update Parlay totals when stakes change
-        $(document).on('input', '.betslip-stake, #multi-stake-input', function() {
-            calculateTotals();
-        });
-
-        function calculateTotals() {
-            let items = $('.betslip-item');
-            if (items.length === 0) {
-                $('#parlay-total-odds').text('1.00');
-                $('#betslip-est-payout').text('$0.00');
-                return;
-            }
-
-            if (currentType === 1) {
-                // Singles
-                let totalPayout = 0.0;
-                items.each(function() {
-                    let stake = parseFloat($(this).find('.betslip-stake').val()) || 0.0;
-                    let odds = parseFloat($(this).find('.outcome-odds').text());
-                    totalPayout += stake * odds;
-                });
-                $('#betslip-est-payout').text('$' + totalPayout.toFixed(2));
-            } else {
-                // Parlay
-                let totalOdds = 1.0;
-                items.each(function() {
-                    let odds = parseFloat($(this).find('.outcome-odds').text());
-                    totalOdds *= odds;
-                });
-                let stake = parseFloat($('#multi-stake-input').val()) || 0.0;
-                let payout = totalOdds * stake;
-
-                $('#parlay-total-odds').text(totalOdds.toFixed(2));
-                $('#betslip-est-payout').text('$' + payout.toFixed(2));
-            }
+    function openMobileBetslip() {
+        if (mobileOverlay && mobileSheet) {
+            mobileOverlay.classList.remove('hidden');
+            setTimeout(() => {
+                mobileSheet.classList.remove('translate-y-full');
+            }, 10);
         }
+    }
 
-        function updateBadge() {
-            let count = $('.betslip-item').length;
-            $('.betslip-badge').text(count);
-            if (count > 0) {
-                $('.betslip-badge').css('display', 'flex');
-            } else {
-                $('.betslip-badge').hide();
-            }
+    function closeMobileBetslip() {
+        if (mobileOverlay && mobileSheet) {
+            mobileSheet.classList.add('translate-y-full');
+            setTimeout(() => {
+                mobileOverlay.classList.add('hidden');
+            }, 300);
         }
+    }
 
-        // Place Bet
-        $('#btn-place-bet').click(function() {
-            let stakes = {};
-            $('.betslip-stake').each(function() {
-                stakes[$(this).data('outcome-id')] = $(this).val();
-            });
+    if (fabBtn) fabBtn.addEventListener('click', openMobileBetslip);
+    if (closeSheetBtn) closeSheetBtn.addEventListener('click', closeMobileBetslip);
+    if (dragHandle) dragHandle.addEventListener('click', closeMobileBetslip);
+    if (mobileOverlay) mobileOverlay.addEventListener('click', closeMobileBetslip);
 
-            let data = {
-                _token: "{{ csrf_token() }}",
-                type: currentType,
-                multi_stake: $('#multi-stake-input').val(),
-                stakes: stakes
-            };
-
-            $.ajax({
-                url: "{{ route('frontend.sports.bet.place') }}",
-                method: "POST",
-                data: data,
-                success: function(res) {
-                    alert('Bet placed successfully!');
-                    $('.betslip-items').empty().append('<div class="empty-slip-msg text-center text-muted" style="padding: 30px 0;">No selections made.</div>');
-                    $('.outcome-chip').removeClass('selected');
-                    updateBadge();
-                    $('#betslip-drawer').removeClass('open');
-                    $('#betslip-backdrop').removeClass('open');
-                    
-                    if ($('.member-sub').length) {
-                        location.reload();
-                    }
-                },
-                error: function(xhr) {
-                    alert(xhr.responseJSON?.error || 'Failed to place bet.');
-                }
-            });
+    // Quick Stake Chips
+    document.querySelectorAll('.btn-quick-stake').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const addAmt = parseInt(this.dataset.amount);
+            const current = parseInt(stakeInput.value) || 0;
+            if (this.dataset.amount === '10000') {
+                stakeInput.value = 10000;
+            } else {
+                stakeInput.value = current + addAmt;
+            }
+            if (stakeInputMobile) stakeInputMobile.value = stakeInput.value;
+            renderBetslip();
         });
-
-        // Initialize payouts & badges
-        calculateTotals();
-        updateBadge();
     });
+
+    // Mode Switching Handler
+    function setMode(mode) {
+        activeMode = mode;
+        const activeCls = "py-2 sm:py-2.5 rounded-lg transition-all text-center bg-primary text-white shadow-sm";
+        const inactiveCls = "py-2 sm:py-2.5 rounded-lg transition-all text-center text-on-surface-muted hover:text-white";
+
+        if (mode === 'parlay') {
+            if (btnModeParlay) btnModeParlay.className = activeCls;
+            if (btnModeSingles) btnModeSingles.className = inactiveCls;
+            if (btnModeParlayMobile) btnModeParlayMobile.className = activeCls;
+            if (btnModeSinglesMobile) btnModeSinglesMobile.className = inactiveCls;
+            if (typeElem) typeElem.innerText = "PARLAY";
+            if (typeElemMobile) typeElemMobile.innerText = "PARLAY";
+            if (rowTotalOdds) rowTotalOdds.style.display = "flex";
+            if (rowTotalOddsMobile) rowTotalOddsMobile.style.display = "flex";
+            if (stakeLabel) stakeLabel.innerText = "Parlay Stake (Cedar Coins)";
+            if (stakeLabelMobile) stakeLabelMobile.innerText = "Parlay Stake (Cedar Coins)";
+        } else {
+            if (btnModeSingles) btnModeSingles.className = activeCls;
+            if (btnModeParlay) btnModeParlay.className = inactiveCls;
+            if (btnModeSinglesMobile) btnModeSinglesMobile.className = activeCls;
+            if (btnModeParlayMobile) btnModeParlayMobile.className = inactiveCls;
+            if (typeElem) typeElem.innerText = "SINGLES";
+            if (typeElemMobile) typeElemMobile.innerText = "SINGLES";
+            if (rowTotalOdds) rowTotalOdds.style.display = "none";
+            if (rowTotalOddsMobile) rowTotalOddsMobile.style.display = "none";
+            if (stakeLabel) stakeLabel.innerText = "Stake Per Leg (Cedar Coins)";
+            if (stakeLabelMobile) stakeLabelMobile.innerText = "Stake Per Leg (Cedar Coins)";
+        }
+        renderBetslip();
+    }
+
+    if (btnModeParlay) btnModeParlay.addEventListener('click', () => setMode('parlay'));
+    if (btnModeSingles) btnModeSingles.addEventListener('click', () => setMode('singles'));
+    if (btnModeParlayMobile) btnModeParlayMobile.addEventListener('click', () => setMode('parlay'));
+    if (btnModeSinglesMobile) btnModeSinglesMobile.addEventListener('click', () => setMode('singles'));
+
+    // Handle Odds Button Click
+    oddBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const matchId = this.dataset.matchId;
+            const home = this.dataset.home;
+            const away = this.dataset.away;
+            const selection = this.dataset.selection;
+            const odds = parseFloat(this.dataset.odds);
+
+            const existingIdx = betslip.findIndex(item => item.matchId === matchId);
+            if (existingIdx !== -1) {
+                if (betslip[existingIdx].selection === selection) {
+                    betslip.splice(existingIdx, 1);
+                } else {
+                    betslip[existingIdx].selection = selection;
+                    betslip[existingIdx].odds = odds;
+                }
+            } else {
+                betslip.push({
+                    matchId: matchId,
+                    home: home,
+                    away: away,
+                    selection: selection,
+                    odds: odds
+                });
+            }
+
+            renderBetslip();
+            updateButtonStyles();
+        });
+    });
+
+    function updateButtonStyles() {
+        oddBtns.forEach(btn => {
+            const matchId = btn.dataset.matchId;
+            const selection = btn.dataset.selection;
+            const isSelected = betslip.some(item => item.matchId === matchId && item.selection === selection);
+
+            if (isSelected) {
+                btn.classList.add('border-primary', 'bg-primary/20', 'text-primary');
+                btn.classList.remove('bg-[#182030]', 'border-white/[0.08]');
+            } else {
+                btn.classList.remove('border-primary', 'bg-primary/20', 'text-primary');
+                btn.classList.add('bg-[#182030]', 'border-white/[0.08]');
+            }
+        });
+    }
+
+    function renderBetslip() {
+        const count = betslip.length;
+        if (mobileCount) mobileCount.innerText = count;
+        if (mobileSheetCount) mobileSheetCount.innerText = count;
+
+        let legsHtml = '';
+        if (count === 0) {
+            legsHtml = '<p class="text-on-surface-muted text-center py-6 text-xs">Click any match odds to build your betslip.</p>';
+        } else {
+            betslip.forEach((item, idx) => {
+                let pickLabel = item.selection === 'home' ? item.home : (item.selection === 'away' ? item.away : 'Draw');
+                legsHtml += `
+                    <div class="p-2.5 rounded-xl bg-[#161c2b] border border-white/[0.06] flex justify-between items-center text-xs">
+                        <div class="flex-1 pr-2">
+                            <span class="text-white font-bold block truncate text-xs">${item.home} vs ${item.away}</span>
+                            <span class="text-on-surface-muted text-[11px]">Pick: <strong class="text-primary font-bold">${pickLabel}</strong></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-secondary font-mono-jet">${item.odds.toFixed(2)}</span>
+                            <button type="button" class="btn-remove-leg text-on-surface-subtle hover:text-accent-rose p-1" data-index="${idx}">
+                                <span class="material-symbols-outlined text-sm">close</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        if (legsContainer) legsContainer.innerHTML = legsHtml;
+        if (legsContainerMobile) legsContainerMobile.innerHTML = legsHtml;
+
+        // Add remove handlers
+        document.querySelectorAll('.btn-remove-leg').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const idx = parseInt(this.dataset.index);
+                betslip.splice(idx, 1);
+                renderBetslip();
+                updateButtonStyles();
+            });
+        });
+
+        // Calculate Totals & Dynamic Accumulator Boost
+        const stake = parseFloat(stakeInput ? stakeInput.value : (stakeInputMobile ? stakeInputMobile.value : 1000)) || 0;
+
+        let boostPercent = 0;
+        if (activeMode === 'parlay' && count >= 3) {
+            if (count >= 8) boostPercent = 50;
+            else if (count === 7) boostPercent = 30;
+            else if (count === 6) boostPercent = 20;
+            else if (count === 5) boostPercent = 15;
+            else if (count === 4) boostPercent = 10;
+            else boostPercent = 5;
+        }
+
+        const rowBoost = document.getElementById('row-parlay-boost');
+        const valBoost = document.getElementById('betslip-boost-val');
+        const rowBoostMobile = document.getElementById('row-parlay-boost-mobile');
+        const valBoostMobile = document.getElementById('betslip-boost-val-mobile');
+
+        if (boostPercent > 0) {
+            if (rowBoost) { rowBoost.classList.remove('hidden'); rowBoost.classList.add('flex'); }
+            if (valBoost) valBoost.innerText = `+${boostPercent}% (${count} Legs)`;
+            if (rowBoostMobile) { rowBoostMobile.classList.remove('hidden'); rowBoostMobile.classList.add('flex'); }
+            if (valBoostMobile) valBoostMobile.innerText = `+${boostPercent}% (${count} Legs)`;
+        } else {
+            if (rowBoost) { rowBoost.classList.add('hidden'); rowBoost.classList.remove('flex'); }
+            if (rowBoostMobile) { rowBoostMobile.classList.add('hidden'); rowBoostMobile.classList.remove('flex'); }
+        }
+
+        let totalOdds = 1.0;
+        let totalCost = 0;
+        let potentialWin = 0;
+
+        if (count > 0) {
+            if (activeMode === 'parlay') {
+                totalOdds = betslip.reduce((acc, item) => acc * item.odds, 1.0);
+                const boostMultiplier = 1 + (boostPercent / 100);
+                totalCost = stake;
+                potentialWin = Math.floor(totalCost * totalOdds * boostMultiplier);
+            } else {
+                totalCost = stake * count;
+                potentialWin = betslip.reduce((acc, item) => acc + Math.floor(stake * item.odds), 0);
+                totalOdds = betslip.length > 0 ? (potentialWin / totalCost) : 1.0;
+            }
+        }
+
+        if (oddsElem) oddsElem.innerText = totalOdds.toFixed(2);
+        if (oddsElemMobile) oddsElemMobile.innerText = totalOdds.toFixed(2);
+
+        if (costElem) costElem.innerText = totalCost.toLocaleString() + ' CEDARS';
+        if (costElemMobile) costElemMobile.innerText = totalCost.toLocaleString() + ' CEDARS';
+
+        if (potentialElem) potentialElem.innerText = potentialWin.toLocaleString() + ' CEDARS';
+        if (potentialElemMobile) potentialElemMobile.innerText = potentialWin.toLocaleString() + ' CEDARS';
+    }
+
+    if (stakeInput) stakeInput.addEventListener('input', () => {
+        if (stakeInputMobile) stakeInputMobile.value = stakeInput.value;
+        renderBetslip();
+    });
+    if (stakeInputMobile) stakeInputMobile.addEventListener('input', () => {
+        if (stakeInput) stakeInput.value = stakeInputMobile.value;
+        renderBetslip();
+    });
+
+    if (clearBtn) clearBtn.addEventListener('click', () => {
+        betslip = [];
+        renderBetslip();
+        updateButtonStyles();
+    });
+    if (clearBtnMobile) clearBtnMobile.addEventListener('click', () => {
+        betslip = [];
+        renderBetslip();
+        updateButtonStyles();
+    });
+
+    // Place Bet Action
+    function placeBet() {
+        if (betslip.length === 0) {
+            alert('Your betslip is empty! Select at least one match odd.');
+            return;
+        }
+
+        const stake = parseFloat(stakeInput ? stakeInput.value : stakeInputMobile.value);
+        if (!stake || stake <= 0) {
+            alert('Please enter a valid stake amount.');
+            return;
+        }
+
+        const payload = {
+            type: activeMode,
+            stake: stake,
+            legs: betslip.map(item => ({
+                match_id: item.matchId,
+                home: item.home,
+                away: item.away,
+                selection: item.selection,
+                odds: item.odds
+            }))
+        };
+
+        const currentBtn = placeBtn || placeBtnMobile;
+        if (currentBtn) currentBtn.disabled = true;
+
+        fetch('/sports/bet', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (currentBtn) currentBtn.disabled = false;
+            if (data.success) {
+                alert('🎉 ' + data.message);
+                betslip = [];
+                renderBetslip();
+                updateButtonStyles();
+                closeMobileBetslip();
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                alert('❌ ' + data.message);
+            }
+        })
+        .catch(err => {
+            if (currentBtn) currentBtn.disabled = false;
+            alert('Error placing bet: ' + err.message);
+        });
+    }
+
+    if (placeBtn) placeBtn.addEventListener('click', placeBet);
+    if (placeBtnMobile) placeBtnMobile.addEventListener('click', placeBet);
+
+    // Early Cashout Handlers
+    document.querySelectorAll('.btn-cashout-action').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const betId = this.dataset.betId;
+            const isQuoted = this.dataset.quoted === 'true';
+            const labelEl = document.getElementById(`cashout-label-${betId}`);
+
+            if (!isQuoted) {
+                // Step 1: Fetch live quote
+                if (labelEl) labelEl.innerText = 'Calculating...';
+                this.disabled = true;
+
+                try {
+                    const res = await fetch(`/sports/cashout-quote/${betId}`);
+                    const data = await res.json();
+                    this.disabled = false;
+
+                    if (data.success && data.can_cashout && data.cashout_value > 0) {
+                        this.dataset.quoted = 'true';
+                        this.dataset.cashoutVal = data.cashout_value;
+                        if (labelEl) labelEl.innerText = `${data.cashout_value.toLocaleString()} CED (Confirm)`;
+                        this.classList.remove('bg-amber-500/20', 'text-amber-300');
+                        this.classList.add('bg-emerald-500', 'text-black', 'animate-pulse');
+                    } else {
+                        alert(data.message || 'Cashout is not available for this wager.');
+                        if (labelEl) labelEl.innerText = 'Unavailable';
+                        this.disabled = true;
+                    }
+                } catch (e) {
+                    this.disabled = false;
+                    if (labelEl) labelEl.innerText = 'Error';
+                }
+            } else {
+                // Step 2: Confirm cashout execution
+                const cashoutVal = parseFloat(this.dataset.cashoutVal);
+                if (!confirm(`Confirm Early Cash Out for ${cashoutVal.toLocaleString()} Cedar Coins?`)) {
+                    return;
+                }
+
+                this.disabled = true;
+                if (labelEl) labelEl.innerText = 'Processing...';
+
+                try {
+                    const res = await fetch('/sports/cashout', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ bet_id: betId })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        alert('🎉 ' + data.message);
+                        if (labelEl) labelEl.innerText = 'Cashed Out';
+                        this.className = 'px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-[10px] border border-emerald-500/40 cursor-default';
+                        this.innerHTML = '<span>✓ Cashed Out</span>';
+                        setTimeout(() => window.location.reload(), 1200);
+                    } else {
+                        alert('❌ ' + data.message);
+                        this.disabled = false;
+                        if (labelEl) labelEl.innerText = 'Retry';
+                    }
+                } catch (e) {
+                    this.disabled = false;
+                    alert('Cashout request failed: ' + e.message);
+                }
+            }
+        });
+    });
+});
 </script>
+
 @endsection

@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\RingsOfFortuneGTM
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

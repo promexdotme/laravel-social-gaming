@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\TreasureIslandMN
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

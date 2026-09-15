@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\PurpleHot2CT
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

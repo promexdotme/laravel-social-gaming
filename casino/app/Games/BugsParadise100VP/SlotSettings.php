@@ -1,7 +1,8 @@
 <?php 
 namespace VanguardLTE\Games\BugsParadise100VP
 {
-    class SlotSettings
+    #[\AllowDynamicProperties]
+class SlotSettings
     {
         public $playerId = null;
         public $splitScreen = null;

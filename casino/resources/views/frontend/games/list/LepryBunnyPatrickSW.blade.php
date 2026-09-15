@@ -2,6 +2,9 @@
 <html>
 
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
     <meta charset="UTF-8" />
 <base href="/games/LepryBunnyPatrickSW/leprybunnypatrick/afc/7/">
 <title>{{ $game->title }}</title>

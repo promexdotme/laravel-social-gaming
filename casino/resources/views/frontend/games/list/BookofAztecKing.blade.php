@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<!-- Mock WebSocket Bridge Injection -->
+	<script src="/js/mock-websocket.js"></script>
+
     <title>{{ $game->name }}</title>
     <meta id="metaToken" name="csrf-token" content="VPB4XRBUqmjcJlKQsL46EU913fLg6XMOokxyfJho">
     <meta charset="utf-8">
@@ -52,7 +55,7 @@
 <body style="margin:0px;width:100%;background-color:black;overflow:hidden">
 
 <iframe id='game' style="margin:0px;border:0px;width:100%;height:100vh;"
-        src='/games/BookofAztecKing/gs2c/html5Game.html?lang=en&cur=usd&gameSymbol=vs1dragon8&websiteUrl=&lobbyURL='
+        src='/games/BookofAztecKing/gs2c/html5Game.html?lang=en&cur=usd&gameSymbol=vs10bookazteck&websiteUrl=&lobbyURL='
         allowfullscreen>
 
 
