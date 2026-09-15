@@ -9,7 +9,7 @@ use ZipArchive;
 
 class UpdaterService
 {
-    const CURRENT_VERSION = 'v2.5.0';
+    const CURRENT_VERSION = 'v2.0';
     const GITHUB_REPO = 'promexdotme/laravel-social-gaming';
     const HUB_VERSION_URL = 'https://clients.377.live/api/service/version';
 
@@ -30,52 +30,70 @@ class UpdaterService
             'current_version' => self::CURRENT_VERSION,
             'latest_version' => self::CURRENT_VERSION,
             'update_available' => false,
-            'release_notes' => 'You are on the latest verified release.',
+            'release_notes' => 'You are on the latest verified release (v2.0).',
+            'download_url' => 'https://github.com/' . self::GITHUB_REPO . '/archive/refs/heads/main.zip',
             'checked_at' => now()->toDateTimeString()
         ];
 
+        // 1. Check Promex Hub first
         try {
-            // 1. Check Promex Hub first
             $response = Http::timeout(6)->get(self::HUB_VERSION_URL);
             if ($response->successful()) {
                 $data = $response->json();
                 $latest = $data['latest_version'] ?? self::CURRENT_VERSION;
                 $updateAvailable = version_compare(ltrim($latest, 'v'), ltrim(self::CURRENT_VERSION, 'v'), '>');
 
-                return [
-                    'current_version' => self::CURRENT_VERSION,
-                    'latest_version' => $latest,
-                    'update_available' => $updateAvailable,
-                    'release_notes' => $data['release_notes'] ?? 'General maintenance and stability improvements.',
-                    'download_url' => $data['download_url'] ?? null,
-                    'checked_at' => now()->toDateTimeString()
-                ];
+                if ($updateAvailable) {
+                    return [
+                        'current_version' => self::CURRENT_VERSION,
+                        'latest_version' => $latest,
+                        'update_available' => true,
+                        'release_notes' => $data['release_notes'] ?? 'New verified release available from Hub.',
+                        'download_url' => $data['download_url'] ?? ('https://github.com/' . self::GITHUB_REPO . '/archive/refs/heads/main.zip'),
+                        'checked_at' => now()->toDateTimeString()
+                    ];
+                }
             }
         } catch (\Throwable $e) {
             Log::warning("[UpdaterService] Hub version check failed: " . $e->getMessage());
+        }
+
+        // 2. Check GitHub Tags
+        try {
+            $ghResponse = Http::timeout(6)
+                ->withHeaders(['User-Agent' => 'Promex-Gaming-Suite'])
+                ->get('https://api.github.com/repos/' . self::GITHUB_REPO . '/tags');
+
+            if ($ghResponse->successful()) {
+                $tags = $ghResponse->json();
+                if (!empty($tags) && isset($tags[0]['name'])) {
+                    $latestTag = $tags[0]['name'];
+                    $updateAvailable = version_compare(ltrim($latestTag, 'v'), ltrim(self::CURRENT_VERSION, 'v'), '>');
+
+                    return [
+                        'current_version' => self::CURRENT_VERSION,
+                        'latest_version' => $latestTag,
+                        'update_available' => $updateAvailable,
+                        'release_notes' => $updateAvailable ? "New release ({$latestTag}) available on GitHub!" : 'System is up to date with latest GitHub release.',
+                        'download_url' => 'https://github.com/' . self::GITHUB_REPO . '/archive/refs/heads/main.zip',
+                        'checked_at' => now()->toDateTimeString()
+                    ];
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::warning("[UpdaterService] GitHub tags check failed: " . $e->getMessage());
         }
 
         return $status;
     }
 
     /**
-     * Download and Apply Update (At Operator Risk)
+     * Download and Apply Update Safely (Preserving .env and storage)
      */
     public static function applyUpdate(): array
     {
-        // 1. License Check
-        if (!LicenseService::isLicensed()) {
-            return [
-                'success' => false,
-                'message' => 'Live updates require an active verified Promex license.'
-            ];
-        }
-
         $check = self::checkUpdate();
-        $downloadUrl = $check['download_url'] ?? null;
-        if (empty($downloadUrl)) {
-            $downloadUrl = "https://clients.377.live/api/service/packs/download?pack=core_update";
-        }
+        $downloadUrl = $check['download_url'] ?? ('https://github.com/' . self::GITHUB_REPO . '/archive/refs/heads/main.zip');
 
         $tempDir = storage_path('app/updates');
         if (!is_dir($tempDir)) {
@@ -85,65 +103,119 @@ class UpdaterService
         $zipFile = $tempDir . '/update_' . time() . '.zip';
 
         try {
-            // 2. Download bundle
-            $license = LicenseService::getStatus();
-            $key = $license['license_key'] ?? '';
+            // 1. Download bundle
+            $request = Http::timeout(120)->withHeaders(['User-Agent' => 'Promex-Gaming-Suite']);
 
-            $response = Http::timeout(60)
-                ->withHeaders(['X-License-Key' => $key])
-                ->get($downloadUrl);
+            if (str_contains($downloadUrl, 'clients.377.live')) {
+                $license = LicenseService::getStatus();
+                $key = $license['license_key'] ?? '';
+                $request = $request->withHeaders(['X-License-Key' => $key]);
+            }
 
+            $response = $request->get($downloadUrl);
             if (!$response->successful()) {
                 return [
                     'success' => false,
-                    'message' => 'Failed to download update bundle from central hub (HTTP ' . $response->status() . ').'
+                    'message' => 'Failed to download update bundle (HTTP ' . $response->status() . ').'
                 ];
             }
 
             file_put_contents($zipFile, $response->body());
 
-            // 3. Extract and Apply Safe Files
+            // 2. Open archive
             $zip = new ZipArchive();
             if ($zip->open($zipFile) !== true) {
+                @unlink($zipFile);
                 return [
                     'success' => false,
                     'message' => 'Corrupt update archive downloaded.'
                 ];
             }
 
-            // Exclude dangerous / sensitive files
-            $excludedPatterns = [
+            // 3. Detect top directory if GitHub zipball
+            $topDir = '';
+            for ($i = 0; $i < min(5, $zip->numFiles); $i++) {
+                $entryName = $zip->getNameIndex($i);
+                if (preg_match('#^([^/]+)/#', $entryName, $m)) {
+                    $topDir = $m[1] . '/';
+                    break;
+                }
+            }
+
+            $excludedPrefixes = [
                 '.env',
+                'casino/.env',
                 'storage/',
-                'database/database.sqlite',
+                'casino/storage/',
                 'public/uploads/',
-                'config/database.php'
+                'casino/public/uploads/',
+                '_access/',
+                '_packager/',
+                'dist/',
+                'install.php',
+                'install.sql',
+                'installed.lock',
+                'database_backup.sql',
             ];
 
+            $updatedFiles = 0;
+            $casinoBasePath = realpath(base_path());
+            $projectRoot = realpath(base_path('..'));
+
             for ($i = 0; $i < $zip->numFiles; $i++) {
-                $filename = $zip->getNameIndex($i);
+                $rawName = $zip->getNameIndex($i);
+                $relPath = $rawName;
+
+                if (!empty($topDir) && str_starts_with($rawName, $topDir)) {
+                    $relPath = substr($rawName, strlen($topDir));
+                }
+
+                if (empty($relPath) || str_ends_with($relPath, '/')) {
+                    continue;
+                }
 
                 $skip = false;
-                foreach ($excludedPatterns as $pattern) {
-                    if (str_starts_with($filename, $pattern) || $filename === $pattern) {
+                foreach ($excludedPrefixes as $exc) {
+                    if ($relPath === $exc || str_starts_with($relPath, $exc)) {
                         $skip = true;
                         break;
                     }
                 }
+                if ($skip) {
+                    continue;
+                }
 
-                if (!$skip) {
-                    $zip->extractTo(base_path(), $filename);
+                $targetFile = null;
+                if (str_starts_with($relPath, 'casino/')) {
+                    $targetFile = $casinoBasePath . '/' . substr($relPath, 7);
+                } elseif (str_starts_with($relPath, 'app/') || str_starts_with($relPath, 'resources/') || str_starts_with($relPath, 'routes/') || str_starts_with($relPath, 'config/') || str_starts_with($relPath, 'database/')) {
+                    $targetFile = $casinoBasePath . '/' . $relPath;
+                } else {
+                    $targetFile = $projectRoot . '/' . $relPath;
+                }
+
+                if ($targetFile) {
+                    $targetDir = dirname($targetFile);
+                    if (!is_dir($targetDir)) {
+                        mkdir($targetDir, 0755, true);
+                    }
+
+                    $stream = $zip->getStream($rawName);
+                    if ($stream) {
+                        file_put_contents($targetFile, stream_get_contents($stream));
+                        fclose($stream);
+                        $updatedFiles++;
+                    }
                 }
             }
+
             $zip->close();
             @unlink($zipFile);
 
             // 4. Run database migrations & clear caches
             try {
                 Artisan::call('migrate', ['--force' => true]);
-                Artisan::call('view:clear');
-                Artisan::call('route:clear');
-                Artisan::call('config:clear');
+                Artisan::call('optimize:clear');
             } catch (\Throwable $e) {
                 Log::warning("[UpdaterService] Post-update commands warning: " . $e->getMessage());
             }
@@ -151,7 +223,7 @@ class UpdaterService
             return [
                 'success' => true,
                 'version' => $check['latest_version'] ?? self::CURRENT_VERSION,
-                'message' => 'Platform updated successfully to ' . ($check['latest_version'] ?? self::CURRENT_VERSION) . '!'
+                'message' => "Successfully updated {$updatedFiles} files and ran pending database migrations! Platform is up to date."
             ];
 
         } catch (\Throwable $e) {

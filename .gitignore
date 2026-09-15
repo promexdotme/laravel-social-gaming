@@ -43,6 +43,10 @@ Shared.md
 Collaborated_Tasks.md
 customSlotsContext.md
 designSlots.md
+_packager/
+dist/
+install.sql
+installed.lock
 
 /output/playwright/
 /.playwright-cli/
