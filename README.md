@@ -1,183 +1,164 @@
-# 🕹️ Laravel Social Gaming Engine (Lite 13)
+﻿# 🎰 Promex Gaming Suite v2.0
 
-### The Lightweight Open Source RNG Platform (Laravel 11 / PHP 8.4)
+### Next-Gen Turnkey Social Gaming, Sportsbook & Prediction Platform
+**Built with Laravel 12 & PHP 8.2+**
 
-![Laravel 11](https://img.shields.io/badge/Laravel-11.x-red?style=for-the-badge\&logo=laravel) ![PHP 8.4](https://img.shields.io/badge/PHP-8.4-blue?style=for-the-badge\&logo=php) ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge) ![Status](https://img.shields.io/badge/Status-Active_Dev-brightgreen?style=for-the-badge)
+[![Laravel 12](https://img.shields.io/badge/Laravel-12.x-red?style=for-the-badge&logo=laravel)](https://laravel.com)
+[![PHP 8.2+](https://img.shields.io/badge/PHP-8.2%20%7C%208.4-blue?style=for-the-badge&logo=php)](https://php.net)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Release](https://img.shields.io/badge/Release-v2.0-orange?style=for-the-badge)](https://github.com/promexdotme/laravel-social-gaming/releases/tag/v2.0)
+[![Live Demo](https://img.shields.io/badge/Demo-casinoduliban.com-blueviolet?style=for-the-badge)](https://casinoduliban.com)
 
-> **FORMERLY KNOWN AS:** *opensource-casino-v10*. This repository has been rebranded to focus on Social Gaming Architecture and RNG Logic.
+---
 
-## 📖 About This Version (Lite 13)
+## 🌐 Live Interactive Demo
 
-This is the **Lite Edition** of the GDM Gaming Engine. It is a re-architected version of the legacy platform, stripped down to the essentials for developers building **Social Arcade** and **Amusement** platforms. It now includes a fully integrated Sportsbook engine and robust payment gateways infrastructure. [DEMO](https://one.377.live)
+Experience the full frontend player experience, sportsbook lobby, and provably fair games:
+👉 **[https://casinoduliban.com](https://casinoduliban.com)**
 
-> ⚠️ **Support Policy**
->
-> * No support is included with free use **or** any sponsorship/purchase.
-> * Discord is community-only: no guaranteed replies, no DMs, no SLA.
-> * If you need 1:1 help, **paid hourly consulting may be available** only if I have availability and after a quote is agreed.
+---
 
-## 💎 Optional Access Perks (Sponsorship)
+## 📖 Overview
 
-The Lite version is free for testing and self-hosting. Sponsorship tiers only provide **access perks** (CDN/whitelisting/private downloads/private repos) — **no support is included**.
+**Promex Gaming Suite v2.0** is an enterprise-grade, modular social gaming engine built on **Laravel 12**. Re-architected from the ground up for extreme performance and effortless deployment, v2.0 shifts heavy assets to high-speed cloud infrastructure while giving you total control over user management, virtual ledger economies, sports odds feeds, and game logic.
 
-# SPONSORS AUTOMATICALLY GET A PRIVATE REPO WITH A PREPACKED -ANYHOST- ONE PAGE INSTALL SCRIPT.
+### 💡 Open-Source Philosophy: 100% Free Core Engine
+The platform engine is **completely free and open-source**. 
+* **Self-Host & Build**: You can download, deploy, self-host, and inspect 100% of the core backend and frontend code.
+* **Your Own Games**: Add your own custom HTML5 games, build bespoke RNG slots, or integrate third-party game providers with **zero licensing fees or platform lock-in**.
+
+---
+
+## 💎 Cloud Ecosystem & Pricing Plans
+
+While the core platform is free for your own games and custom development, we provide managed high-speed cloud infrastructure so you can launch a production-ready casino in minutes without managing 40GB+ of local storage or real-time sports feed parsers.
+
+👉 **Get Your License & Cloud Access:** **[promex.me/platforms/promex-gaming-suite/](https://promex.me/platforms/promex-gaming-suite/)**
+
+| Plan | Price | What's Included |
+| :--- | :--- | :--- |
+| **Free / Open Source** | **$0** | Complete Laravel 12 source code, Liteback admin console, virtual economy, user management, and ability to add unlimited custom games. |
+| **Cloud CDN Monthly** | **$10 / mo** | Instant access to our hosted Games CDN (hundreds of top-tier slots streamed on demand), automated live sports odds feeds, central licensor sync, and ongoing cloud patches. |
+| **Cloud CDN Annual** | **$100 / yr** | All Cloud CDN features with 2 months free ($20 savings), priority cloud node routing, and store add-on compatibility. |
+| **Full Studio Lifetime Access** | **$499 one-time** | **Total Ownership:** Complete direct Google Drive download access to the entire **40GB+ raw offline game asset pack**, offline websocket server source code, legacy editions, and **all future releases & updates included forever**. |
+
+> 🛠️ **Custom Development Available:**  
+> Need a bespoke frontend theme, proprietary custom mini-games, specialized crypto gateway integrations, or custom sports/prediction market feeds? We offer custom development and white-label turnkey deployments upon request. Inquire at [promex.me](https://promex.me).
+
+---
+
+## 🚀 Key Features in v2.0
+
+### 1. ⚡ Laravel 12 Modernized Engine
+* **Clean Architecture:** Upgraded to **Laravel 12** on PHP 8.2+ / 8.4 with streamlined migrations and strict typing.
+* **Single Tenant Simplicity:** Focused shop-first architecture (`shop_id = 1`) eliminating legacy multi-tier distributor/agent bloat for blistering fast SQL query execution.
+* **Dark-Mode Liteback Admin:** Modern, responsive operator console at `/liteback` with live dashboard analytics, game activation toggles, user balance adjustment tools, and audit logs.
+
+### 2. ☁️ Hosted Games CDN (Zero Local Storage Required)
+* **No 40GB Downloads:** Heavy game binaries, sound stems, and sprite sheets are streamed instantly from our global CDN or reverse-proxied seamlessly via your web server (`/games/`).
+* **Instant Deployments:** Launch your entire platform on a low-cost VPS or standard server in under 5 minutes without exhausting disk space.
+
+### 3. ⚽ Real-Time Sportsbook & Prediction Markets
+* **Live Odds Feeds:** Automated fixture sync and real-time odds parsing powered by Redis caching.
+* **Dynamic Odds Formatting:** Automatic American to Decimal odds conversion with automatic kickoff-time match expirations.
+* **Single & Multi-Selection Betslips:** Interactive floating betslip drawer with real-time payout calculators and automated settlement engines.
+* **Polymarket Prediction Markets:** Integrated real-world event predictions, crypto milestones, and political outcome markets.
+
+### 4. 🎲 Provably Fair Mini-Games
+* Built-in instant arcade games powered by provably fair cryptographic RNG algorithms:
+  * **Plinko**, **Crash**, **Mines**, **Dice**, and **Wheel of Fortune**.
+  * Players can verify seed hashes directly in their client for complete transparency.
+
+### 5. 💳 Web3 & Virtual Economy Gateways
+* Native integrations with **CryptoGateway**, **BTCPay Server**, **Stripe Checkout**, and **PayPal**.
+* Multi-chain cryptocurrency support (USDT, USDC, BTC, ETH, SOL, MATIC, TRX).
+* Manual bank transfer receipts review queue with instant operator balance credit.
+
+---
+
+## 🔮 Roadmap: Upcoming Features
+
+* 📈 **Simulated Stocks & Equities Trading:** Virtual stock market sandbox with real-time candlestick charts and order executions.
+* 🪙 **Crypto Spot & Futures Trading:** Live crypto pair trading engine with virtual leverage, stop-loss, and simulated order books.
+* 📱 **PWA 2.0 Mobile Experience:** Enhanced installable Progressive Web App with haptic feedback and offline caching.
+
+---
+
+## 📦 Quick Installation
+
+For full production deployment and Nginx reverse proxy instructions, see [INSTALL.md](INSTALL.md) and [REVERSE_PROXY_GAMES.md](REVERSE_PROXY_GAMES.md).
+
+### 1. Clone & Install
+```bash
+# Clone the repository
+git clone https://github.com/promexdotme/laravel-social-gaming.git /var/www/casino
+cd /var/www/casino/casino
+
+# Install Composer dependencies
+composer install --no-dev --optimize-autoloader
+
+# Environment configuration
+cp .env.example .env
+php artisan key:generate
+```
+
+### 2. Database & Setup
+Configure your MySQL database in `casino/.env`:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=casino
+DB_USERNAME=your_db_user
+DB_PASSWORD=your_db_password
+APP_URL=https://yourdomain.com
+```
+
+Run database migrations:
+```bash
+php artisan migrate --seed
+```
+
+### 3. Nginx Reverse Proxy for CDN Games
+Add the following block to your Nginx site configuration so your players load cloud games seamlessly from your own domain:
+```nginx
+location /games/ {
+    proxy_pass https://clients.377.live/games/;
+    proxy_set_header Host clients.377.live;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_ssl_server_name on;
+    proxy_buffering off;
+}
+```
+
+### 4. Activate License Key
+1. Obtain your key from [promex.me/platforms/promex-gaming-suite/](https://promex.me/platforms/promex-gaming-suite/).
+2. Navigate to your operator console: `https://yourdomain.com/liteback`.
+3. Go to **Store & License** (`/liteback/store`), input your key (`PROMEX-XXXX-XXXX-XXXX`), and click **Activate**.
+
+---
+
+## 🏛️ Legacy Versions & Lite 13
+Need access to the legacy standalone Lite 13 release or earlier v10 monolithic distributions?
+* You can switch to the archived branch:
+  ```bash
+  git checkout lite-13
+  ```
+* Or download the [Lite 13 Release](https://github.com/promexdotme/laravel-social-gaming/releases/tag/lite-13).
+
+---
+
+## ⚠️ Compliance & Legal Disclaimer
+
+This software is designed strictly for **Social Gaming**, **Virtual Currency**, and **Amusement** purposes.
+* It does not process real-money wagering natively.
+* It is provided as-is for educational, amusement, and sandbox platform development under the MIT License.
+* Operators are solely responsible for ensuring compliance with all local laws and regulations in their respective jurisdictions.
+
+---
 
 <div align="center">
-  <h3>
-    <a href="https://github.com/sponsors/promexdotme">
-      🚀 Click Here to Sponsor & Upgrade
-    </a>
-  </h3>
+  <sub>Developed & Maintained by <a href="https://promex.me">Promex.me</a> • Built with ❤️ for the global gaming community</sub>
 </div>
-
-| Feature            |    🆓 Free / Public   |     🥉 $10 Backer     |      🥈 $25 Builder     |       🥇 $99 Enterprise      |
-| :----------------- | :-------------------: | :-------------------: | :---------------------: | :--------------------------: |
-| **Discord Access** |  🆓 Community/Public  |  🆓 Community/Public  |   🆓 Community/Public   |      🆓 Community/Public     |
-| **Infrastructure** | Public (Rate Limited) | Public (Rate Limited) |   **CDN Whitelist** ✅   | **Self-Hosted** (You own it) |
-| **Websockets**     |         Shared        |         Shared        | **Private Repo Access** |        **Source Code**       |
-| **Game Assets**    |       Cloud Only      |       Cloud Only      |        Cloud Only       |   **40GB Download (Drive)**  |
-| **Versions**       |      Lite-13 Only     |      Lite-13 Only     |       Lite-13 Only      |  **Full + Legacy Packaged**  |
-
-### ⚡ Tier Breakdown (Perks Only — No Support Included)
-
-* **$10 (Backer):** Helps fund infrastructure. Optional access to community chat (community discussion only; no guarantees).
-* **$25 (Builder):** **CDN Whitelist.** We authorize your domain on our High-Speed Game CDN & Cloud Sockets. Plus, private repo access (reference/automation).
-* **$99 (SaaS Studio):** **Total Ownership.** Google Drive link to download all **40GB of Assets** to your own server. Includes Legacy v10 versions, AI scripts.
-
-**Major Upgrade: Hybrid Cloud Architecture**
-Unlike previous versions, Lite 13 is designed to run on **Shared Hosting (CPanel)** without root access.
-
-* **Websockets:** Hosted on a dedicated external instance (No local Node/PM2 required).
-* **Game Assets:** Served via CDN (Saves you 40GB+ of storage space).
-* **Proxying:** The included `.htaccess` handles the traffic seamlessly.
-
-## 🚀 Architecture Changes (The "Minify" Plan)
-
-### 1. Zero-Config Deployment (Shared Hosting Ready)
-
-We have removed the requirement for VPS root access.
-
-* **No PM2/Node.js Required:** The client connects to our public socket instance by default.
-* **No Huge Downloads:** The `/games/` directory is served remotely via CDN, making this repo lightweight and fast to deploy.
-* **Easy Overrides:** If you prefer to self-host everything, you can simply point `socket_config.json` and `.htaccess` to your own infrastructure.
-
-### 2. Database & Role Simplification
-
-* **Single Tenant:** Multi-shop tables (`w_shops_countries`, etc.) dropped. Enforces `shop_id=1` via `ForceShopOne` middleware.
-* **Roles:** Reduced to `Admin` and `User` only (No complex Agent trees).
-* **Clean Code:** Removed legacy bloat (SMS, Pincodes, HappyHours) to focus on performance.
-
-## 🛠️ Key Features
-
-### ⚽ Sportsbook Integration *(New in Lite 13)*
-
-* **Multi-Provider Engine**: Native integration with both **The Odds API** (`the_odds_api`) and **Polyapp Parlay API** (`parlay_api`) to sync fixtures, markets, and odds.
-* **Pinnacle Filter & Credit Optimization**: Supports filtering Odds requests specifically to Pinnacle bookmakers when using the Parlay API, saving credit usage.
-* **Timezone Matching & Expiration**: Automatically parses UTC commence times and converts them to the application's timezone (`app.timezone`) before saving, ensuring kickoff times match the system's timezone and games correctly vanish from the lobby right at kickoff.
-* **American to Decimal Conversion**: Auto-converts American odds formats (e.g. -110, +250) to standardized decimal odds (e.g. 1.91, 3.50) dynamically.
-* **Single & Parlay Bet Logic**: Full betslip logic supporting both single and multi-selection (parlay) bets with auto-calculators.
-* **Ops Control Console**: Admin dashboard panel to toggle categories/leagues/games status, run manual sync triggers, and declare winning outcomes (settlement engine) with auto-ledger adjustments.
-
-### 💳 Virtual Economy & Payment Gateways *(New in Lite 13)*
-
-* **Crypto & Fiat Gateways**: Support for multi-gateways payments (Stripe Checkout sessions, PayPal Orders v2, and BTCPay Server crypto).
-* **XtoPay Crypto Integration**: Native driver for the XtoPay Cryptocurrency gateway (`https://xto.377.live`), handling USDT/USDC deposits over various blockchain networks (TRON, Polygon, BSC, Ethereum) with automated webhook status callbacks.
-* **Manual Bank Transfers**: User submission form to upload transaction proofs and receipts.
-* **Review Queue**: Dedicated Liteback Admin Deposits Review panel for validating and crediting player balances.
-* **Extensibility**: Implement `VanguardLTE\Services\Payments\PaymentDriverInterface` to add new payment gateways.
-
-### 📱 Responsive Sportsbook UI *(New in Lite 13)*
-
-* **Sticky Sidebar Filters**: Scroll-locked search input and compact categories list.
-* **Adaptive Mobile Elements**: Links dynamically convert to custom dark-themed selects on mobile viewports to prevent cut-off scroll pill layouts.
-* **Floating Betslip Drawer**: Sliding bet drawer with backdrop blurs, active selection counts, and clear-all actions.
-
-### 🔒 Security & Credential Isolation *(New in Lite 13)*
-
-* **Environment-Based Configs**: All sensitive API keys and tokens (e.g., `PARLAY_API_KEY`, `ODS_API_KEY`, `XTO_PAY_TOKEN`) are prioritized and resolved from the local `.env` configuration file.
-* **Automatic Database Cleansing**: When keys are modified or saved from the Admin panel settings, they are automatically written to the root `.env` file, and their database settings table records are purged. This prevents credentials from leaking into database dumps or public repositories.
-* **Prepack Script helper**: Includes a gitignored packing script `prepack.php` that automates database exports (`lite13.sql`) and packages the project directory into a distribution zip, excluding `.env` credentials, git histories, and temporary scratch scripts.
-
-### 🎮 Game Management (Liteback)
-
-* **Active/Inactive Logic:** Seamlessly move games between active and inactive states.
-* **RNG Engine:** Certifiable logic for game outcomes.
-* **Visual Management:** Auto-generates icons from `/frontend/Default/ico/{name}.jpg`.
-
-### 🎨 Customizable Hero Section
-
-The frontend features a dynamic hero banner configurable via filesystem:
-
-* **Location:** `/public/minimal/hero/`
-* **Desktop Video:** `hero.mp4` (1920x1080, <10MB, Muted Loop).
-* **Images:** `hero-desktop.jpg` and `hero-mobile.jpg`.
-* *Note:* Enable by setting `$showHero = true` in `resources/views/frontend/Minimal/games/list.blade.php`.
-
----
-
-## 📦 Installation
-
-1. **Clone the repo:**
-
-   ```bash
-   git clone -b lite-13 https://github.com/gamingdotme/laravel-social-gaming.git
-   ```
-2. **Install Dependencies:**
-
-   ```bash
-   composer install
-   npm install && npm run build
-   ```
-3. **Environment Setup (Important):**
-
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-   * **Configure DB:** Set your MySQL credentials.
-   * **Configure Domain:** You **MUST** set your app domain in `.env`:
-
-     ```env
-     APP_URL=https://your-domain.com
-     ```
-4. **Migrate & Seed:**
-
-   ```bash
-    php artisan migrate
-    ```
-
-### ⚡ Quick Installer Hosting Modes *(New in Lite 13)*
-
-If deploying using the quick installer (`SimpleInstall.php`), you will be prompted for a **Hosting Mode**:
-* **Self-Hosted Mode**: Comments out the VPS CDN rewrite rules inside `.htaccess`, keeping all traffic local.
-* **CDN Hosted Mode**: Keeps the rules active (`RewriteRule ^games/(.*)$ ...`) to route game requests to our VPS CDN to save local storage, whitelisting your domain.
-
-### ☁️ How the Hybrid Connection Works
-
-You do not need to install a socket server. The system uses:
-
-1. **`socket_config.json`**: Defines the connection to the external websocket instance.
-2. **`.htaccess`**: Acts as a reverse proxy to route traffic correctly on shared hosting.
-3. **CDN**: Loads heavy game assets from our cloud, saving your disk space.
-
----
-
-## 💎 Premium Assets & Self-Hosting
-
-This Lite version relies on cloud assets to keep your deployment simple and cheap.
-
-**Want to self-host everything?**
-If you have your own dedicated server (VPS) and want the full **40GB Game Asset Pack** + **Local Websocket Source Code**:
-
-* **[Subscribe for Shared Hosting Access / Google Drive Link]** - Get the full asset dump + access perks (no support included).
-* **[Join our Discord Community](https://discord.gg/nYHGyQ5q)** - Community discussion (no guaranteed replies).
-
----
-
-## ⚠️ Compliance & Disclaimer
-
-This software is designed for **Social Gaming** and **Amusement** purposes using virtual credits.
-
-* **No Real Money:** This engine is not a gambling product. It processes virtual currency for entertainment.
-* **Open Source:** Provided as-is for educational and development purposes.

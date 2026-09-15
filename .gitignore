@@ -38,11 +38,11 @@ fix-game-symbols.php
 
 # Local agent contexts & design notes
 *Context.md
-*.md
-!README.md
 context/
 Shared.md
 Collaborated_Tasks.md
+customSlotsContext.md
+designSlots.md
 
 /output/playwright/
 /.playwright-cli/
