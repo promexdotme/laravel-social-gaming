@@ -15,6 +15,21 @@ $message = '';
 $messageType = '';
 $isInstalled = file_exists($lockFile);
 
+// Ensure required storage structure exists
+$requiredDirs = [
+    __DIR__ . '/casino/storage/app/public',
+    __DIR__ . '/casino/storage/framework/cache/data',
+    __DIR__ . '/casino/storage/framework/sessions',
+    __DIR__ . '/casino/storage/framework/views',
+    __DIR__ . '/casino/storage/logs',
+    __DIR__ . '/casino/bootstrap/cache',
+];
+foreach ($requiredDirs as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0777, true);
+    }
+}
+
 // Requirements Check
 $requirements = [
     'PHP >= 8.2' => version_compare(PHP_VERSION, '8.2.0', '>='),
