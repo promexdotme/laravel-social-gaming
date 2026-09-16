@@ -70,7 +70,8 @@
                     <label for="login-password">Password</label>
                     <input type="password" id="login-password" name="password" required placeholder="••••••••">
                 </div>
-                <button type="submit" class="btn-primary">Sign In</button>
+                <button type="submit" id="btn-login-submit" class="btn-primary">Sign In</button>
+                <div id="login-status-msg" class="text-xs font-bold text-center mt-2 min-h-[18px]"></div>
             </form>
             <p class="text-xs text-on-surface-muted text-center pt-2">
                 Need an account? <a href="#" class="text-primary open-modal font-bold hover:underline" data-target="modal-register">Register Free</a>
@@ -101,7 +102,8 @@
                 <label for="reg-password-confirm">Confirm Password</label>
                 <input type="password" id="reg-password-confirm" name="password_confirmation" required placeholder="••••••••">
             </div>
-            <button type="submit" class="btn-primary">Create Account & Claim Coins</button>
+            <button type="submit" id="btn-register-submit" class="btn-primary">Create Account & Claim Coins</button>
+            <div id="register-status-msg" class="text-xs font-bold text-center mt-2 min-h-[18px]"></div>
         </form>
         <p class="text-xs text-on-surface-muted text-center pt-2">
             Already registered? <a href="#" class="text-primary open-modal font-bold hover:underline" data-target="modal-login">Sign In</a>
@@ -591,6 +593,177 @@ document.addEventListener('DOMContentLoaded', function() {
             .catch(err => {
                 statusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
                 statusMsg.innerText = "Server Error: " + err.message;
+            });
+        });
+    }
+
+    // Standard Login Form Handler
+    const loginForm = document.getElementById('login-form');
+    const loginStatusMsg = document.getElementById('login-status-msg');
+    const loginBtn = document.getElementById('btn-login-submit');
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const usernameInput = document.getElementById('login-username').value.trim();
+            const passwordInput = document.getElementById('login-password').value;
+
+            if (!usernameInput || !passwordInput) {
+                if (loginStatusMsg) {
+                    loginStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                    loginStatusMsg.innerText = "Please enter both username and password.";
+                }
+                return;
+            }
+
+            if (loginBtn) {
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⏳</span> Signing In...';
+            }
+            if (loginStatusMsg) {
+                loginStatusMsg.className = "text-xs font-bold text-center mt-2 text-secondary";
+                loginStatusMsg.innerText = "Verifying credentials...";
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const formData = new URLSearchParams();
+            formData.append('_token', csrfToken);
+            formData.append('username', usernameInput);
+            formData.append('password', passwordInput);
+            formData.append('is_ajax', '1');
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: formData.toString()
+            })
+            .then(async (res) => {
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && (data.link || res.status === 200)) {
+                    if (loginStatusMsg) {
+                        loginStatusMsg.className = "text-xs font-bold text-center mt-2 text-primary";
+                        loginStatusMsg.innerText = "✓ Login successful! Entering arena...";
+                    }
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 400);
+                } else {
+                    if (loginBtn) {
+                        loginBtn.disabled = false;
+                        loginBtn.innerHTML = 'Sign In';
+                    }
+                    let err = "Invalid username or password.";
+                    if (res.status === 419) {
+                        err = "Session expired. Please refresh the page.";
+                    } else if (data.error) {
+                        err = data.error;
+                    } else if (data.message && data.message !== 'CSRF token mismatch.') {
+                        err = data.message;
+                    } else if (Array.isArray(data) && data[0] && !data[0].includes('Unknown')) {
+                        err = data[0];
+                    }
+                    if (loginStatusMsg) {
+                        loginStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                        loginStatusMsg.innerText = err;
+                    }
+                }
+            })
+            .catch((err) => {
+                if (loginBtn) {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = 'Sign In';
+                }
+                if (loginStatusMsg) {
+                    loginStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                    loginStatusMsg.innerText = "Connection error. Please try again.";
+                }
+            });
+        });
+    }
+
+    // Fast Register Form Handler
+    const registerForm = document.getElementById('register-form');
+    const registerStatusMsg = document.getElementById('register-status-msg');
+    const registerBtn = document.getElementById('btn-register-submit');
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const regUser = document.getElementById('reg-username').value.trim();
+            const regPass = document.getElementById('reg-password').value;
+            const regPassConf = document.getElementById('reg-password-confirm').value;
+
+            if (regPass !== regPassConf) {
+                if (registerStatusMsg) {
+                    registerStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                    registerStatusMsg.innerText = "Passwords do not match.";
+                }
+                return;
+            }
+
+            if (registerBtn) {
+                registerBtn.disabled = true;
+                registerBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⏳</span> Creating Account...';
+            }
+            if (registerStatusMsg) {
+                registerStatusMsg.className = "text-xs font-bold text-center mt-2 text-secondary";
+                registerStatusMsg.innerText = "Setting up account & 50,000 Free Coins...";
+            }
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+            const formData = new URLSearchParams();
+            formData.append('_token', csrfToken);
+            formData.append('username', regUser);
+            formData.append('password', regPass);
+            formData.append('password_confirmation', regPassConf);
+            formData.append('is_ajax', '1');
+
+            fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: formData.toString()
+            })
+            .then(async (res) => {
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && (data.success || res.status === 200)) {
+                    if (registerStatusMsg) {
+                        registerStatusMsg.className = "text-xs font-bold text-center mt-2 text-primary";
+                        registerStatusMsg.innerText = "✓ Account created! Welcome!";
+                    }
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 400);
+                } else {
+                    if (registerBtn) {
+                        registerBtn.disabled = false;
+                        registerBtn.innerHTML = 'Create Account & Claim Coins';
+                    }
+                    let err = data.error || (data.errors ? Object.values(data.errors).flat()[0] : null) || "Registration failed. Please check inputs.";
+                    if (registerStatusMsg) {
+                        registerStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                        registerStatusMsg.innerText = err;
+                    }
+                }
+            })
+            .catch(() => {
+                if (registerBtn) {
+                    registerBtn.disabled = false;
+                    registerBtn.innerHTML = 'Create Account & Claim Coins';
+                }
+                if (registerStatusMsg) {
+                    registerStatusMsg.className = "text-xs font-bold text-center mt-2 text-accent-rose";
+                    registerStatusMsg.innerText = "Connection error. Please try again.";
+                }
             });
         });
     }

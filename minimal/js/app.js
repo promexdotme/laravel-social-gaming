@@ -61,55 +61,7 @@ $(document).ready(function () {
         }
     });
 
-    // Login Form Submission
-    $('#login-form').on('submit', function (e) {
-        e.preventDefault();
-        const form = $(this);
-        const messageDiv = form.find('.form-message');
-
-        $.ajax({
-            url: '/login',
-            method: 'POST',
-            data: form.serialize() + '&is_ajax=1',
-            success: function (response) {
-                location.reload();
-            },
-            error: function (xhr) {
-                let errorMsg = 'Login failed';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    errorMsg = xhr.responseJSON.error;
-                } else if (xhr.responseJSON && xhr.responseJSON[0]) {
-                    errorMsg = xhr.responseJSON[0];
-                }
-                messageDiv.text(errorMsg).show();
-            }
-        });
-    });
-
-    // Register Form Submission
-    $('#register-form').on('submit', function (e) {
-        e.preventDefault();
-        const form = $(this);
-        const messageDiv = form.find('.form-message');
-
-        $.ajax({
-            url: '/register',
-            method: 'POST',
-            data: form.serialize() + '&is_ajax=1',
-            success: function (response) {
-                location.reload();
-            },
-            error: function (xhr) {
-                let errorMsg = 'Registration failed';
-                if (xhr.responseJSON && xhr.responseJSON.error) {
-                    errorMsg = xhr.responseJSON.error;
-                } else if (xhr.responseJSON && xhr.responseJSON[0]) {
-                    errorMsg = xhr.responseJSON[0];
-                }
-                messageDiv.text(errorMsg).show();
-            }
-        });
-    });
+    // (Login & Register are handled natively in modals.blade.php with real-time UI feedback)
 
     // Load Profile Data
     function loadProfileData() {
