@@ -36,3 +36,8 @@ _access/
 
 # Reproducible development tools (dependencies stay local)
 tools/wasm/node_modules/
+
+# Socket release hold: retain local files, exclude from public source
+/js/ws-bridge.js
+/js/ws-bridge.wasm
+/tools/wasm/
