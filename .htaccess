@@ -1,3 +1,10 @@
+Options -Indexes
+
+# Block direct downloads even when a file exists and Laravel is bypassed.
+<FilesMatch "(?i)(^\.|\.(?:sql(?:\.gz)?|zip|bak|old|orig|save|swp|log|key|pem|cert(?:\..*)?)$|^installed\.lock$)">
+    Require all denied
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
@@ -8,13 +15,25 @@
     # Deny access to any files with a . prefix
     RewriteRule (^\.|/\.) - [F]
 
+    # PHP may read these locally; browsers must never access application source or runtime state.
+    RewriteRule ^(?:_access|localscripts|tools|context)(?:/|$) - [F,L,NC]
+    RewriteRule ^casino/(?:app|bootstrap|config|database|resources|routes|storage|tests|vendor)(?:/|$) - [F,L,NC]
+    RewriteRule ^casino/.*\.php(?:/|$) - [F,L,NC]
+    RewriteRule ^(?:casino/)?(?:artisan|composer\.(?:json|lock)|package(?:-lock)?\.json|phpunit\.xml|server\.php)(?:/|$) - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # Route clean URLs for installers
+    RewriteCond %{DOCUMENT_ROOT}/install.php -f
     RewriteRule ^install$ install.php [L]
     RewriteRule ^simple-install$ SimpleInstall.php [L]
+
+    # Proxy all /games/* requests to Hosted Games CDN (Apache mod_proxy reverse proxy)
+    RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/[^/]+/(desktop|mobile)/(.*)$ https://clients.377.live/games/$1/gs2c/$2/$3 [P,L]
+    RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/(desktop|mobile)/(.*)$ https://clients.377.live/games/$1/gs2c/$2/$3 [P,L]
+    RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L]
 
 
 

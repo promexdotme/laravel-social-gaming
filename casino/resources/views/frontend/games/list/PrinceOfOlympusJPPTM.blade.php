@@ -4,7 +4,7 @@
 <html>
 <head>
 	<!-- Mock WebSocket Bridge Injection -->
-	<script src="/js/mock-websocket.js"></script>
+	<script src="/js/ws-bridge.js"></script>
 
 	<base href="/games/PrinceOfOlympusJPPTM/platform/">
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>

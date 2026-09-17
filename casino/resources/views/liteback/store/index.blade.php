@@ -173,7 +173,7 @@
                     Check License Now
                 </button>
             </form>
-            <a href="https://promex.me" target="_blank" class="btn btn-sm btn-success font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 10px; padding: 7px 16px;">
+            <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-sm btn-success font-weight-bold d-flex align-items-center shadow-sm" style="border-radius: 10px; padding: 7px 16px;">
                 <i class="fas fa-external-link-alt mr-1.5"></i>
                 Promex Store
             </a>
@@ -283,7 +283,7 @@
                             <button type="submit" class="btn btn-primary font-weight-bold flex-fill" style="border-radius: 8px; font-size: 12px; padding: 8px 14px;">
                                 <i class="fas fa-save mr-1"></i> Save & Activate
                             </button>
-                            <a href="https://promex.me" target="_blank" class="btn btn-outline-light font-weight-bold ml-2" style="border-radius: 8px; font-size: 12px; padding: 8px 14px;">
+                            <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-outline-light font-weight-bold ml-2" style="border-radius: 8px; font-size: 12px; padding: 8px 14px;">
                                 Get Key &nearr;
                             </a>
                         </div>
@@ -379,65 +379,5 @@
             @endforeach
         </div>
     </div>
-
-    <!-- 3. Game Packages Downloader -->
-    <div class="mb-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3">
-            <div class="mb-2 mb-md-0">
-                <h2 class="h5 font-weight-bold text-white mb-1 d-flex align-items-center">
-                    <i class="fas fa-gamepad text-success mr-2"></i>
-                    Game Packs & Content Repository
-                </h2>
-                <p class="store-sub">
-                    Download and extract high-definition slot bundles and provably fair mini-games.
-                </p>
-            </div>
-            <div class="store-sub px-3 py-1.5 rounded" style="background: #141e30; border: 1px solid #23334d; font-size: 11px;">
-                Storage: <strong class="text-white">Domain/games/</strong>
-            </div>
-        </div>
-
-        <div class="store-grid-2">
-            @foreach($catalog['game_packs'] as $pack)
-                <div class="gamepack-item">
-                    <div>
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <span class="font-mono-jet text-info font-weight-bold text-uppercase" style="font-size: 11px;">
-                                {{ $pack['count'] }} Games • {{ $pack['size'] }}
-                            </span>
-                            @if(!empty($pack['installed']))
-                                <span class="badge badge-success px-2 py-1 font-mono-jet" style="background: rgba(16, 185, 129, 0.2); border: 1px solid #10b981; color: #34d399; font-size: 10px;">
-                                    <i class="fas fa-check-circle mr-1"></i> Installed
-                                </span>
-                            @else
-                                <span class="badge badge-secondary px-2 py-1 font-mono-jet" style="background: #23334d; color: #cbd5e1; font-size: 10px;">
-                                    Available
-                                </span>
-                            @endif
-                        </div>
-                        <h3 class="h6 font-weight-bold text-white mb-1">{{ $pack['name'] }}</h3>
-                        <p class="store-sub" style="font-size: 12px; line-height: 1.5; color: #94a3b8 !important;">
-                            {{ $pack['description'] }}
-                        </p>
-                    </div>
-
-                    <div class="pt-3 mt-3 border-top border-secondary d-flex justify-content-between align-items-center" style="border-color: #23334d !important;">
-                        <span class="font-mono-jet" style="font-size: 11px; color: #64748b;">
-                            {{ $pack['id'] }}
-                        </span>
-                        <form action="{{ route('liteback.store.install_pack') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="pack_id" value="{{ $pack['id'] }}">
-                            <button type="submit" class="btn btn-sm {{ !empty($pack['installed']) ? 'btn-outline-light' : 'btn-success' }} font-weight-bold shadow-sm d-flex align-items-center" style="border-radius: 8px; font-size: 11px; padding: 6px 14px;">
-                                <i class="fas {{ !empty($pack['installed']) ? 'fa-redo' : 'fa-download' }} mr-1.5"></i>
-                                {{ !empty($pack['installed']) ? 'Verify Assets' : 'Download Pack' }}
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-    </div>
-
 </div>
 @endsection

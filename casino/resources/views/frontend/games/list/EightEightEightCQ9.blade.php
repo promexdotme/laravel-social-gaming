@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<!-- Mock WebSocket Bridge Injection -->
-	<script src="/js/mock-websocket.js"></script>
+	<script src="/js/ws-bridge.js"></script>
 
  <title>{{ $game->title }}</title>
 <base href="/games/{{ $game->name }}/20/">

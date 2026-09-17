@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<!-- Mock WebSocket Bridge Injection -->
-	<script src="/js/mock-websocket.js"></script>
+	<script src="/js/ws-bridge.js"></script>
 
  <title>{{ $game->title }}</title>
 <base href="/games/{{ $game->name }}/amarent/">
@@ -12,10 +12,6 @@ var date = new Date ( );
 date.setTime (date.getTime() - 1 );
 document.cookie = 'PHPSESSID' + "=; expires=" + date.toGMTString();
 document.cookie = 'phpsessid' + "=; expires=" + date.toGMTString();
-
-
- , error:function(){} };       
- 
 
     if( !sessionStorage.getItem('sessionId') ){
         sessionStorage.setItem('sessionId', parseInt(Math.random() * 1000000));

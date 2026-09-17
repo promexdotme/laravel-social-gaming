@@ -13,6 +13,14 @@ Deploy your full-featured iGaming platform (Slots, Live Sportsbook, Prediction M
 
 ---
 
+## Prepacked Apache installer
+
+On Apache 2.4, enable `.htaccess` overrides and `mod_rewrite`, then open `/install`. After a successful installation writes `installed.lock`, the final step removes `install.sql`, `database_backup.sql`, `promex-gaming-suite-v2.0-cpanel.zip` (if present), and `install.php`. Configuration, the installation lock, and runtime license certificates remain intact.
+
+If filesystem permissions prevent cleanup, the locked installer displays the remaining filenames and a cleanup retry button. Correct their permissions and retry. The development checkout retains its installer source so future packages can be built.
+
+The root `.htaccess` denies direct access to SQL dumps, ZIP archives, backups, keys, certificates, internal Laravel directories, and development tools. These rules require Apache; Nginx does not read `.htaccess`. The Nginx example below uses Laravel's `public` directory as its document root rather than the prepacked repository root.
+
 ## 1. Quick Automated Setup
 
 Run the following commands on your server:
@@ -113,7 +121,7 @@ sudo nginx -t && sudo systemctl reload nginx
 4. Paste your License Key (`PROMEX-XXXX-XXXX-XXXX`) into the box.
 5. Click **Save & Activate**.
 
-Your domain will automatically bind on first activation, immediately unlocking:
+The license must be provisioned for your domain. The features available depend on your purchased entitlements:
 - 🎰 **Hosted Games CDN**: High-speed slots and provably fair games
 - ⚽ **Central Odds Feed**: Real-time sports events and automated bet settlements
 - 📦 **Store Add-ons**: 1-click modular extensions and game pack downloads

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<!-- Mock WebSocket Bridge Injection -->
-	<script src="/js/mock-websocket.js"></script>
+	<script src="/js/ws-bridge.js"></script>
 
  <title>{{ $game->title }}</title>
 <base href="/games/{{ $game->name }}/amarent/">
@@ -10,9 +10,6 @@
 
 document.cookie = 'phpsessid=; Max-Age=0; path=/; domain=' + location.host; 
 document.cookie = 'PHPSESSID=; Max-Age=0; path=/; domain=' + location.host;
-
- , error:function(){} };       
- 
 
     if( !sessionStorage.getItem('sessionId') ){
         sessionStorage.setItem('sessionId', parseInt(Math.random() * 1000000));

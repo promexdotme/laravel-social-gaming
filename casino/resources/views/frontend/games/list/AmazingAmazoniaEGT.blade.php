@@ -4,7 +4,7 @@
 <html>
 <head>
 	<!-- Mock WebSocket Bridge Injection -->
-	<script src="/js/mock-websocket.js?v={{ time() }}"></script>
+	<script src="/js/ws-bridge.js?v={{ time() }}"></script>
 
 	<meta charset="utf-8" />
 	<title>{{ $game->title }}</title>

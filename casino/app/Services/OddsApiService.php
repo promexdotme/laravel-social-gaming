@@ -34,10 +34,14 @@ class OddsApiService
 
         $totalSynced = 0;
         $provider = env('SPORTSBOOK_PROVIDER', 'clients_377');
-        $hubUrl = function_exists('settings') ? settings('license_server_url', 'https://clients.377.live/api/service') : 'https://clients.377.live/api/service';
+        $hubUrl = LicenseService::DEFAULT_SERVER;
 
         // 1. Try Central Service Hub (Pre-cached odds via Redis)
         if ($provider === 'clients_377' || empty($this->apiKey)) {
+            if (!LicenseService::canUseCentralOdds()) {
+                Log::info("[OddsApiService] Sportsbook hub feed skipped: license inactive or sportsbook module not included.");
+                return ['success' => false, 'message' => 'Sportsbook hub access not licensed', 'synced' => 0];
+            }
             try {
                 $license = LicenseService::getStatus();
                 $domain = $license['domain'] ?? request()->getHost();

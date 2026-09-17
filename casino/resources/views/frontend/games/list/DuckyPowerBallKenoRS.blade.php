@@ -2,7 +2,7 @@
 <html lang="ru">
   <head>
 	<!-- Mock WebSocket Bridge Injection -->
-	<script src="/js/mock-websocket.js"></script>
+	<script src="/js/ws-bridge.js"></script>
 
     <meta charset="utf-8" content="text/html" http-equiv="Content-Type">
     <meta content="initial-scale=1, maximum-scale=1" name="viewport">

@@ -1,4 +1,4 @@
-﻿.env
+.env
 *.env*
 casino/.env
 casino/.env.*
@@ -11,6 +11,10 @@ casino/public/games/
 *.sql
 *.sql.gz
 *.zip
+*.bak
+*.old
+*.orig
+*.swp
 
 # Runtime logs
 *.log
@@ -18,3 +22,17 @@ casino/storage/logs/*.log
 
 # Installation lock
 installed.lock
+
+# Protected Source Exclusion
+js/mock-websocket.js
+# Local WASM compiler dependencies
+localscripts/wasm-build/node_modules/
+
+# Private task context and local recovery
+.context/
+*_Context.md
+.skills-backup/
+_access/
+
+# Reproducible development tools (dependencies stay local)
+tools/wasm/node_modules/

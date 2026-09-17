@@ -3,9 +3,16 @@ namespace VanguardLTE\Http\Middleware
 {
     class VerifyCsrfToken extends \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken
     {
+        protected function inExceptArray($request)
+        {
+            // Store/license mutations must not inherit the legacy blanket Liteback exemption.
+            if ($request->is('liteback/store/*')) {
+                return false;
+            }
+            return parent::inExceptArray($request);
+        }
+
         protected $except = [
-            '/game/*/server', 
-            'game/*/server',
             '/payment/interkassa/result', 
             '/payment/coinbase/result', 
             '/payment/btcpayserver/result', 

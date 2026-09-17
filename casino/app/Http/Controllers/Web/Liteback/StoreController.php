@@ -28,18 +28,12 @@ class StoreController extends Controller
     {
         $request->validate([
             'license_key' => 'nullable|string|max:255',
-            'license_domain' => 'nullable|string|max:255',
-            'license_server_url' => 'nullable|url|max:255',
         ]);
 
         $key = trim($request->input('license_key', ''));
-        $domain = trim($request->input('license_domain', ''));
-        $server = trim($request->input('license_server_url', ''));
 
         if (function_exists('settings')) {
             settings()->set('license_key', $key);
-            settings()->set('license_domain', $domain);
-            settings()->set('license_server_url', !empty($server) ? $server : LicenseService::DEFAULT_SERVER);
             settings()->save();
         }
 

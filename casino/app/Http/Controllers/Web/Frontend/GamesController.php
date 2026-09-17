@@ -766,6 +766,14 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             if (!\Auth::check()) {
                 return redirect()->route('frontend.game.list')->with('modal', 'modal-login');
             }
+
+            if (!\VanguardLTE\Services\LicenseService::canPlayGame((string)$game)) {
+                if (\Auth::user()->hasRole('admin')) {
+                    return redirect()->route('liteback.store.index')->with('error', 'Active Promex license required to launch casino games.');
+                }
+                abort(403, 'Gaming service is temporarily suspended. Please contact platform operator.');
+            }
+
             // Demo URLs must never adopt or reset another user's account.
             $userId = \Auth::id();
             $request->session()->put('freeUserID', 0);
@@ -787,24 +795,29 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             $game = $gameObj;
             $is_api = false;
 
-            // Handle Custom Folder or External URL source types
+
             if ($game->source_type === 'external_url' && !empty($game->custom_path)) {
                 $externalUrl = $game->custom_path;
-                return view('frontend.games.external', compact('game', 'externalUrl'));
+                return response()
+                    ->view('frontend.games.external', compact('game', 'externalUrl'));
             }
 
             if ($game->source_type === 'custom_folder' && !empty($game->custom_path)) {
                 $externalUrl = $game->custom_path;
-                if (str_starts_with($externalUrl, 'http://') || str_starts_with($externalUrl, 'https://')) {
-                    return view('frontend.games.external', compact('game', 'externalUrl'));
-                }
-                return view('frontend.games.external', [
-                    'game' => $game,
-                    'externalUrl' => url($externalUrl)
-                ]);
+                $url = (str_starts_with($externalUrl, 'http://') || str_starts_with($externalUrl, 'https://')) ? $externalUrl : url($externalUrl);
+                return response()
+                    ->view('frontend.games.external', ['game' => $game, 'externalUrl' => $url]);
             }
 
-            return view('frontend.games.list.' . $game->name, compact('slot', 'game', 'is_api'));
+            if (view()->exists('frontend.games.list.' . $game->name)) {
+                return response()
+                    ->view('frontend.games.list.' . $game->name, compact('slot', 'game', 'is_api'));
+            }
+
+            // Hosted CDN / static folder games fallback (e.g. Cedar Originals)
+            $url = url('/games/' . $game->name . '/index.html');
+            return response()
+                ->view('frontend.games.external', ['game' => $game, 'externalUrl' => $url]);
         }
         public function progress()
         {

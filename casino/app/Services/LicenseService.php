@@ -10,126 +10,152 @@ class LicenseService
 {
     const DEFAULT_SERVER = 'https://clients.377.live/api/service';
     const CACHE_KEY = 'cedar_system_license_status';
-    const CACHE_TTL = 43200; // 12 hours in seconds
 
     /**
-     * Get Current License Status (Cached for 12 hours)
+     * Promex Central Authority RSA-2048 Public Key
+     * Verifies cryptographic claims signed exclusively by clients.377.live private key.
      */
+    const PROMEX_PUBLIC_KEY = "-----BEGIN PUBLIC KEY-----\n"
+        . "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA93DVNVelYPiqOMEZjoHO\n"
+        . "BvcADoTX4gTo+aV19fEGMjmCEu+wWdr5CHJmp/mC1fuXmZlxjsOxgPr6KdWHln9t\n"
+        . "Rbr9H0z73Ysggcw8Jf94KKYbZc7KeUkKAjGuW1oCVvt4Hi59UYX27d2wDF86U89x\n"
+        . "cUPWLyK70ORAQ5cumYV3R7PVUoLIhYKiDwcz1SHW1qi/FwQd+YT9x9TjiMfeOOdG\n"
+        . "1eVxzQfqpS5FFMdyorTwuRNxuRvQKndNGsLQIMShOxpvOXf/2z27toE5A99RM8zJ\n"
+        . "J8Sp+yPOG3QFYodbpYO+cV+RhTiGF0ljTYP+GQJKFNnKNREN8pS1+8Wkbm9f779H\n"
+        . "AQIDAQAB\n"
+        . "-----END PUBLIC KEY-----";
+
+    /** Cache signed envelopes, never a mutable "active" flag. Revalidate every read. */
     public static function getStatus(bool $forceRefresh = false): array
     {
+        $key = (string)(function_exists('settings') ? settings('license_key', '') : '');
+        $key = trim($key !== '' ? $key : (string)env('LICENSE_KEY', ''));
+        $domain = self::licensedDomain();
+        $cacheKey = self::CACHE_KEY . ':v2:' . hash('sha256', $domain . '|' . $key);
+        if ($key === '' || $domain === '') {
+            return self::denied($key, $domain, 'License key and a valid APP_URL are required.');
+        }
         if ($forceRefresh) {
-            Cache::forget(self::CACHE_KEY);
+            Cache::forget($cacheKey);
         }
-
-        return Cache::remember(self::CACHE_KEY, self::CACHE_TTL, function () {
-            return self::fetchStatusFromHub();
-        });
-    }
-
-    /**
-     * Perform Handshake with Central License Hub (clients.377.live)
-     */
-    protected static function fetchStatusFromHub(): array
-    {
-        $key = function_exists('settings') ? settings('license_key', '') : '';
-        if (empty($key)) {
-            $key = env('LICENSE_KEY', '');
+        $cached = Cache::get($cacheKey);
+        if (is_array($cached)) {
+            $claims = SignedLicenseCertificate::verify($cached, (string)config('licensing.public_key', self::PROMEX_PUBLIC_KEY), $key, $domain, time(), !empty($cached['_offline']));
+            if ($claims !== null) {
+                return self::present($claims, $key, !empty($cached['_offline']));
+            }
+            Cache::forget($cacheKey);
         }
-
-        $domain = function_exists('settings') ? settings('license_domain', '') : '';
-        if (empty($domain)) {
-            $domain = request() ? request()->getHost() : env('APP_URL', 'localhost');
-            $domain = preg_replace('#^https?://#', '', rtrim($domain, '/'));
-        }
-
-        if (empty($key)) {
-            return [
-                'status' => 'unregistered',
-                'plan' => 'Community / Trial Edition',
-                'license_key' => '',
-                'domain' => $domain,
-                'valid_until' => null,
-                'days_left' => 0,
-                'features' => ['core', 'local_slots', 'affiliates', 'vip'],
-                'has_full_pack' => false,
-                'message' => 'No license key configured. Enter your license key from promex.me to activate full live services.',
-                'renew_url' => 'https://promex.me',
-                'checked_at' => now()->toIso8601String()
-            ];
-        }
-
-        $hubUrl = function_exists('settings') 
-            ? settings('license_server_url', self::DEFAULT_SERVER) 
-            : self::DEFAULT_SERVER;
-
         try {
-            $response = Http::timeout(6)
-                ->withHeaders([
-                    'X-License-Key' => $key,
-                    'X-Domain' => $domain,
-                    'Accept' => 'application/json'
-                ])
-                ->post("{$hubUrl}/license/check", [
-                    'license_key' => $key,
-                    'domain' => $domain,
-                    'app_version' => '2.5.0'
-                ]);
-
+            $response = Http::timeout(6)->withOptions(['allow_redirects' => false])->withHeaders([
+                'X-License-Key' => $key, 'X-Domain' => $domain, 'Accept' => 'application/json',
+            ])->post(self::DEFAULT_SERVER . '/license/check', [
+                'license_key' => $key, 'domain' => $domain, 'app_version' => '2.5.0', 'certificate_version' => 1,
+            ]);
             if ($response->successful()) {
                 $data = $response->json();
-                $data['domain'] = $domain;
-                $data['license_key'] = $key;
-                $data['checked_at'] = now()->toIso8601String();
-                return $data;
+                $claims = is_array($data) ? SignedLicenseCertificate::verify($data, (string)config('licensing.public_key', self::PROMEX_PUBLIC_KEY), $key, $domain, time()) : null;
+                if ($claims !== null) {
+                    $envelope = ['signed_payload' => $data['signed_payload'], 'signature' => $data['signature']];
+                    self::saveLocalCert($envelope);
+                    Cache::put($cacheKey, $envelope, max(1, $claims['refresh_after'] - time()));
+                    return self::present($claims, $key, false);
+                }
+                self::deleteLocalCert();
+                return self::denied($key, $domain, 'Invalid, expired, or mismatched signed license certificate.');
             }
-
-            if ($response->status() === 403 || $response->status() === 401) {
-                return [
-                    'status' => 'suspended',
-                    'plan' => 'Suspended / Expired',
-                    'license_key' => $key,
-                    'domain' => $domain,
-                    'valid_until' => null,
-                    'days_left' => 0,
-                    'features' => ['core'],
-                    'has_full_pack' => false,
-                    'message' => 'Subscription expired or suspended. Please renew to restore live services.',
-                    'renew_url' => 'https://promex.me',
-                    'checked_at' => now()->toIso8601String()
-                ];
+            // Only genuine availability failures qualify for previously signed offline grace.
+            if ($response->status() !== 429 && $response->status() < 500) {
+                self::deleteLocalCert();
+                return self::denied($key, $domain, 'License authority denied verification.');
             }
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::warning('[LicenseService] License authority unavailable.');
         } catch (\Throwable $e) {
-            Log::warning("[LicenseService] Handshake error: " . $e->getMessage());
+            Log::error('[LicenseService] License verification failed.');
+            return self::denied($key, $domain, 'License verification failed.');
         }
-
-        // Offline Fallback Tolerance: if server was active, maintain temporary offline grace
-        return [
-            'status' => 'active',
-            'plan' => 'Enterprise (Offline Mode)',
-            'license_key' => $key,
-            'domain' => $domain,
-            'valid_until' => now()->addDays(3)->toIso8601String(),
-            'days_left' => 3,
-            'features' => ['all'],
-            'has_full_pack' => true,
-            'message' => 'License verification server unreachable; operating in offline tolerance mode.',
-            'renew_url' => 'https://promex.me',
-            'checked_at' => now()->toIso8601String()
-        ];
+        $path = self::getCertPath();
+        $envelope = is_file($path) ? json_decode((string)file_get_contents($path), true) : null;
+        $claims = is_array($envelope) ? SignedLicenseCertificate::verify($envelope, (string)config('licensing.public_key', self::PROMEX_PUBLIC_KEY), $key, $domain, time(), true) : null;
+        if ($claims === null) {
+            return self::denied($key, $domain, 'No valid offline certificate; reconnect to verify your license.');
+        }
+        $envelope['_offline'] = true;
+        Cache::put($cacheKey, $envelope, min(60, max(1, $claims['grace_deadline'] - time())));
+        return self::present($claims, $key, true);
     }
 
-    /**
-     * Check if a specific feature or pack is licensed
-     */
+    public static function licensedDomain(): string
+    {
+        $host = parse_url((string)config('app.url', ''), PHP_URL_HOST);
+        return is_string($host) ? strtolower(rtrim($host, '.')) : '';
+    }
+
+    protected static function getCertPath(): string
+    {
+        return storage_path('framework/license.cert');
+    }
+
+    protected static function saveLocalCert(array $envelope): void
+    {
+        $path = self::getCertPath();
+        $temp = $path . '.' . bin2hex(random_bytes(8)) . '.tmp';
+        try {
+            if (file_put_contents($temp, json_encode($envelope, JSON_THROW_ON_ERROR), LOCK_EX) === false) {
+                throw new \RuntimeException('Certificate write failed');
+            }
+            @chmod($temp, 0600);
+            if (!rename($temp, $path)) {
+                throw new \RuntimeException('Certificate replacement failed');
+            }
+        } finally {
+            if (is_file($temp)) { @unlink($temp); }
+        }
+    }
+
+    protected static function deleteLocalCert(): void
+    {
+        $path = self::getCertPath();
+        if (is_file($path)) { @unlink($path); }
+    }
+
+    private static function present(array $claims, string $key, bool $offline): array
+    {
+        $deadline = $offline ? $claims['grace_deadline'] : $claims['refresh_after'];
+        return array_merge($claims, [
+            'license_key' => $key, 'valid_until' => gmdate('c', $claims['expires_at']),
+            'days_left' => max(0, (int)ceil(($claims['expires_at'] - time()) / 86400)),
+            'access_deadline' => $deadline, 'offline' => $offline,
+            'plan' => (string)($claims['plan'] ?? 'Licensed') . ($offline ? ' (Offline Grace)' : ''),
+            'has_full_pack' => in_array('all', $claims['features'], true) || in_array('full_pack', $claims['features'], true),
+            'message' => $offline ? 'Using verified, fixed offline grace.' : 'Signed license verified.',
+            'renew_url' => 'https://promex.me', 'checked_at' => gmdate('c'),
+        ]);
+    }
+
+    private static function denied(string $key, string $domain, string $message): array
+    {
+        return ['status' => 'unverified', 'plan' => 'Verification Required', 'license_key' => $key,
+            'domain' => $domain, 'valid_until' => null, 'days_left' => 0, 'features' => [],
+            'has_full_pack' => false, 'message' => $message, 'renew_url' => 'https://promex.me', 'checked_at' => gmdate('c')];
+    }
+
     public static function hasFeature(string $feature): bool
     {
         $status = self::getStatus();
-        if ($status['status'] === 'suspended') {
-            return false;
-        }
+        return ($status['status'] ?? '') === 'active'
+            && (in_array('all', $status['features'] ?? [], true) || in_array($feature, $status['features'] ?? [], true));
+    }
 
+    public static function canPlayGame(string $game): bool
+    {
+        if (!preg_match('/^[A-Za-z0-9_]+$/D', $game)) { return false; }
+        $status = self::getStatus();
         $features = $status['features'] ?? [];
-        return in_array('all', $features) || in_array($feature, $features);
+        return ($status['status'] ?? '') === 'active'
+            && (!isset($status['games']) || in_array($game, $status['games'], true))
+            && (in_array('all', $features, true) || in_array('local_slots', $features, true) || in_array('full_pack', $features, true));
     }
 
     /**
@@ -272,57 +298,4 @@ class LicenseService
         return self::isLicensed() && self::hasFeature('sportsbook_hub');
     }
 
-    /**
-     * Generate a cryptographically signed Game Session Token (valid for 2 hours)
-     * Used so spins run locally with 0 external network latency to the hub!
-     */
-    public static function generateGameSessionToken(string $gameName): string
-    {
-        $status = self::getStatus();
-        $isOk = ($status['status'] ?? '') === 'active';
-        $domain = $status['domain'] ?? (request() ? request()->getHost() : 'localhost');
-        $exp = time() + 7200; // 2 hours validity
-
-        $secret = config('app.key', 'cedar_default_session_secret');
-        $payload = json_encode([
-            'd' => $domain,
-            'g' => $gameName,
-            'exp' => $exp,
-            'act' => $isOk ? 1 : 0
-        ]);
-
-        $sig = hash_hmac('sha256', $payload, $secret);
-        return base64_encode($payload) . '.' . $sig;
-    }
-
-    /**
-     * Verify a Game Session Token locally in memory
-     */
-    public static function verifyGameSessionToken(string $token): array
-    {
-        $parts = explode('.', $token);
-        if (count($parts) !== 2) {
-            return ['valid' => false, 'reason' => 'malformed_token'];
-        }
-
-        [$encodedPayload, $sig] = $parts;
-        $secret = config('app.key', 'cedar_default_session_secret');
-        $payload = base64_decode($encodedPayload);
-
-        $expectedSig = hash_hmac('sha256', $payload, $secret);
-        if (!hash_equals($expectedSig, $sig)) {
-            return ['valid' => false, 'reason' => 'invalid_signature'];
-        }
-
-        $data = json_decode($payload, true);
-        if (!$data || !isset($data['exp']) || time() > $data['exp']) {
-            return ['valid' => false, 'reason' => 'token_expired'];
-        }
-
-        if (empty($data['act'])) {
-            return ['valid' => false, 'reason' => 'license_inactive'];
-        }
-
-        return ['valid' => true, 'domain' => $data['d'] ?? '', 'game' => $data['g'] ?? ''];
-    }
 }

@@ -208,7 +208,7 @@
                             <i class="fas fa-shield-alt mr-1.5 text-dark"></i>
                             <span>COMMUNITY EDITION (UNREGISTERED)</span>
                         </a>
-                        <a href="https://promex.me" target="_blank" class="btn btn-sm btn-dark font-weight-bold text-white shadow-sm" style="border-radius: 20px; margin-left: 2px;" title="Buy License on Promex.me">
+                        <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-sm btn-dark font-weight-bold text-white shadow-sm" style="border-radius: 20px; margin-left: 2px;" title="Buy License on Promex.me">
                             <span>BUY &nearr;</span>
                         </a>
                     </div>
@@ -410,7 +410,7 @@
                                 <a href="{{ route('liteback.store.index') }}" class="btn btn-sm btn-warning font-weight-bold text-dark shadow-sm px-3 py-1.5" style="border-radius: 8px;">
                                     <i class="fas fa-key mr-1"></i> Enter License Key
                                 </a>
-                                <a href="https://promex.me" target="_blank" class="btn btn-sm btn-outline-light font-weight-bold shadow-sm px-3 py-1.5 ml-2" style="border-radius: 8px;">
+                                <a href="https://promex.me/platforms/promex-gaming-suite/" target="_blank" class="btn btn-sm btn-outline-light font-weight-bold shadow-sm px-3 py-1.5 ml-2" style="border-radius: 8px;">
                                     <i class="fas fa-shopping-cart mr-1 text-warning"></i> Buy License on Promex.me &nearr;
                                 </a>
                             </div>

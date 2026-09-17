@@ -4,6 +4,13 @@
  * Easy 1-click database initialization, admin setup, and environment config.
  */
 
+require_once __DIR__ . '/casino/app/Support/InstallerCleanup.php';
+header('Cache-Control: no-store');
+session_name('PROMEX_INSTALLER');
+session_set_cookie_params(['httponly' => true, 'samesite' => 'Strict', 'secure' => (($_SERVER['HTTPS'] ?? 'off') === 'on')]);
+session_start();
+$_SESSION['installer_csrf'] ??= bin2hex(random_bytes(32));
+
 $lockFile = __DIR__ . '/installed.lock';
 $dumpFiles = [__DIR__ . '/install.sql', __DIR__ . '/database_backup.sql'];
 $envFile = __DIR__ . '/casino/.env';
@@ -14,6 +21,18 @@ if (!file_exists($envFile) && file_exists(__DIR__ . '/.env')) {
 $message = '';
 $messageType = '';
 $isInstalled = file_exists($lockFile);
+$cleanupResult = null;
+$isPost = ($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST';
+if ($isPost && (!is_string($_POST['installer_csrf'] ?? null)
+    || !hash_equals($_SESSION['installer_csrf'], $_POST['installer_csrf']))) {
+    http_response_code(419);
+    $message = 'Your installer session expired. Reload this page and try again.';
+    $messageType = 'error';
+    $isPost = false;
+}
+if ($isPost && $isInstalled && ($_POST['action'] ?? '') === 'finish_cleanup') {
+    $cleanupResult = \VanguardLTE\Support\InstallerCleanup::run(__DIR__);
+}
 
 // Ensure required storage structure exists
 $requiredDirs = [
@@ -42,7 +61,11 @@ $requirements = [
 ];
 $allRequirementsMet = !in_array(false, $requirements, true);
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isInstalled) {
+if ($isPost && !$isInstalled && !$allRequirementsMet) {
+    $message = 'Fix the server requirements before installing.';
+    $messageType = 'error';
+}
+if ($isPost && !$isInstalled && $allRequirementsMet) {
     $dbHost = trim($_POST['db_host'] ?? '127.0.0.1');
     $dbPort = trim($_POST['db_port'] ?? '3306');
     $dbName = trim($_POST['db_name'] ?? 'casino');
@@ -155,16 +178,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isInstalled) {
                 }
             }
 
-            file_put_contents(__DIR__ . '/casino/.env', trim($baseEnv) . "\n");
+            if (file_put_contents(__DIR__ . '/casino/.env', trim($baseEnv) . "\n", LOCK_EX) === false) {
+                throw new Exception('Unable to save application configuration. Check folder permissions.');
+            }
             if (file_exists(__DIR__ . '/.env')) {
-                file_put_contents(__DIR__ . '/.env', trim($baseEnv) . "\n");
+                if (file_put_contents(__DIR__ . '/.env', trim($baseEnv) . "\n", LOCK_EX) === false) {
+                    throw new Exception('Unable to update root application configuration.');
+                }
             }
 
             // 8. Create Lock File
-            file_put_contents($lockFile, "Installed on " . date('Y-m-d H:i:s') . " for " . $appUrl . "\n");
+            if (file_put_contents($lockFile, "Installed on " . date('Y-m-d H:i:s') . " for " . $appUrl . "\n", LOCK_EX) === false) {
+                throw new Exception('Unable to lock the installation. Check folder permissions.');
+            }
             $isInstalled = true;
             $message = "Installation completed successfully! Your platform is ready.";
             $messageType = "success";
+
+            // 9. Remove installation-only files after configuration and lock are safely written.
+            $cleanupResult = \VanguardLTE\Support\InstallerCleanup::run(__DIR__);
 
         } catch (Exception $e) {
             $message = "Installation Error: " . $e->getMessage();
@@ -236,9 +268,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isInstalled) {
                 <a href="/" class="btn-link btn-primary">Visit Casino Lobby &rarr;</a>
             </div>
 
-            <p style="font-size: 12px; color: #64748b; margin-top: 24px;">
-                Security Note: Delete <code>install.php</code> and <code>install.sql</code> from your hosting root now that setup is complete.
-            </p>
+            <?php if ($cleanupResult !== null && empty($cleanupResult['failed'])): ?>
+                <p style="font-size: 13px; color: #34d399; margin-top: 24px;">
+                    Final cleanup complete: installer, SQL templates and installation ZIP removed.
+                </p>
+            <?php else: ?>
+                <p style="font-size: 13px; color: #fbbf24; margin-top: 24px;">
+                    Installation is locked. Finish removing the installer and setup files.
+                    <?php if (!empty($cleanupResult['failed'])): ?>
+                        Could not remove: <?= htmlspecialchars(implode(', ', $cleanupResult['failed']), ENT_QUOTES, 'UTF-8') ?>.
+                        Check file permissions, then retry or remove these files through your hosting file manager.
+                    <?php endif; ?>
+                </p>
+                <?php if (is_file(__FILE__)): ?>
+                    <form method="POST">
+                        <input type="hidden" name="installer_csrf" value="<?= htmlspecialchars($_SESSION['installer_csrf'], ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="hidden" name="action" value="finish_cleanup">
+                        <button type="submit" class="btn-submit">Finish installation cleanup</button>
+                    </form>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
     <?php else: ?>
 
@@ -254,6 +303,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$isInstalled) {
         </div>
 
         <form method="POST" action="">
+            <input type="hidden" name="installer_csrf" value="<?= htmlspecialchars($_SESSION['installer_csrf'], ENT_QUOTES, 'UTF-8') ?>">
             <!-- Application Config -->
             <div class="section-title"><span>🌐</span> Site Settings</div>
             <div class="grid-2">

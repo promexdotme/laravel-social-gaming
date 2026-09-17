@@ -11,7 +11,7 @@
 <html>
 <head>
 	<!-- Mock WebSocket Bridge Injection -->
-	<script src="/js/mock-websocket.js"></script>
+	<script src="/js/ws-bridge.js"></script>
 
 <meta charset="UTF-8">
 
