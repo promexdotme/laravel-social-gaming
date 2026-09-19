@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use VanguardLTE\Services\LicenseService;
+use VanguardLTE\Services\GameRuntimeSession;
 
 /** Session/CSRF authentication is handled by Laravel's web middleware. */
 class ProtectGameRequests
@@ -34,6 +35,9 @@ class ProtectGameRequests
             || !is_string($sentAt) || !preg_match('/^[0-9]{10}$/D', $sentAt)
             || abs(time() - (int)$sentAt) > 120) {
             return response()->json(['error' => 'invalid_request_identity'], 400);
+        }
+        if (!GameRuntimeSession::verify($request, $game)) {
+            return response()->json(['error' => 'runtime_required'], 403);
         }
         $scope = $request->user()->getAuthIdentifier() . '|' . $request->session()->getId() . '|' . $game . '|' . $id;
         try {

@@ -88,8 +88,12 @@
         <a href="/categories/cedar_games" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ request()->is('categories/cedar_games*') ? 'bg-accent-gold text-black shadow-md shadow-accent-gold/25' : 'bg-surface-card text-accent-gold hover:text-yellow-300 border border-accent-gold/20' }}">
             🚀 CEDAR Games
         </a>
+        <a href="/categories/cedar_cards" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ request()->is('categories/cedar_cards*') ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card text-primary hover:text-primary-light border border-primary/20' }}">
+            ♠ CEDAR Cards
+        </a>
         @if(is_iterable($categories))
             @foreach($categories as $cat)
+                @continue(in_array($cat->href, ['cedar_games', 'cedar_cards'], true))
                 <a href="{{ route('frontend.game.list.category', $cat->href) }}" class="px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap uppercase tracking-wider no-underline {{ ($category1 ?? '') == $cat->href ? 'bg-primary text-white shadow-md shadow-primary/25' : 'bg-surface-card text-on-surface-muted hover:text-white border border-white/[0.06] hover:border-white/15' }}">
                     {{ $cat->title }}
                 </a>
@@ -100,9 +104,10 @@
     <!-- Games Grid: 2-col mobile, 3-col tablet, 4-col laptop, 5-col wide -->
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
         @forelse($games as $game)
+            @php($isCedarProvider = str_starts_with($game->name, 'Cedar') || $game->name === 'RoyalSteps')
             <div class="group relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#161c2b] border border-white/[0.07] hover:border-primary/50 shadow-md hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 flex flex-col justify-end">
                 <!-- Cover Image -->
-                <img src="/frontend/Default/ico/{{ $game->name }}.jpg" 
+                <img src="/frontend/Default/ico/{{ $game->name }}.jpg{{ $isCedarProvider ? '?v=cedar-provider-1' : '' }}"
                      onerror="this.src='/frontend/Default/ico/DayofDead.jpg'"
                      alt="{{ $game->title }}" 
                      class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
@@ -114,7 +119,7 @@
                 <!-- Game Info & Action -->
                 <div class="relative z-10 p-3 sm:p-4 space-y-1.5">
                     <span class="text-[9px] text-primary font-mono-jet font-bold uppercase tracking-wider block">
-                        {{ strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT')) }}
+                        {{ $isCedarProvider ? (in_array($game->name, ['CedarHiLo', 'CedarBlackjack'], true) ? 'CEDAR CARDS' : 'CEDAR ORIGINAL') : strtoupper(substr($game->name, -2) === 'AM' ? 'AMATIC' : (substr($game->name, -3) === 'PGD' ? 'PGD' : 'SLOT')) }}
                     </span>
                     <h4 class="text-xs sm:text-sm font-bold text-white leading-tight truncate" title="{{ $game->title }}">
                         {{ $game->title }}

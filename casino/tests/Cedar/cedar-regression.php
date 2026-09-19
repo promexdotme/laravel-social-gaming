@@ -38,13 +38,13 @@ $auth->userId = null;
 check(callGame('CedarDice', ['action' => 'init'])['status'] === 'error', 'guest rejected');
 $auth->userId = 1;
 foreach (CedarMath::wheel() as $n => $risks) foreach ($risks as $risk => $table) {
-    check(count($table) === $n && array_sum($table) / $n <= 0.99000001 && array_sum($table) / $n >= 0.9499, "Wheel $n $risk RTP");
+    check(count($table) === $n && array_sum($table) / $n <= 0.95000001 && array_sum($table) / $n >= 0.9499, "Wheel $n $risk RTP");
 }
-for ($rows = 8; $rows <= 16; $rows++) foreach (['low', 'medium', 'high'] as $risk) check(CedarMath::plinkoRtp($rows, $risk) <= 1, "Plinko $rows $risk RTP");
+for ($rows = 8; $rows <= 16; $rows++) foreach (['low', 'medium', 'high'] as $risk) check(CedarMath::plinkoRtp($rows, $risk) <= 0.95000001, "Plinko $rows $risk RTP");
 $initial = callGame('CedarDice', ['action' => 'init']);
 $payload = ['action' => 'roll', 'wager' => 1000, 'target' => 98.99, 'condition' => 'over', 'request_id' => str_repeat('a', 32), 'server_seed_hash' => $initial['server_seed_hash']];
 $a = callGame('CedarDice', $payload);
-check($a['status'] === 'success' && in_array($a['multiplier'], [95.0, 99.0], true), 'Dice exact over probability');
+check($a['status'] === 'success' && $a['multiplier'] === 95.0, 'Dice exact over probability capped at 95% RTP');
 $balance = User::find(1)->balance;
 $b = callGame('CedarDice', $payload);
 check($a == $b && User::find(1)->balance === $balance, 'request replay pays once');
@@ -142,7 +142,7 @@ function stepsRound(int $trap): array {
     $init = callGame('RoyalSteps', ['action' => 'init']);
     for ($i = 0; ; $i++) {
         $seed = hash('sha256', 'royal-regression-' . $i);
-        if (CedarMath::stepsTrap($seed, 'royal-test', 1, 3) === $trap) break;
+        if (CedarMath::stepsTrap($seed, 'royal-test', 1, 5) === $trap) break;
     }
     DB::table('cedar_states')->where('user_id', 1)->where('game', 'RoyalSteps')->update(['state' => json_encode([
         'server_seed' => $seed, 'client_seed' => 'royal-test', 'nonce' => 1, 'active' => null])]);
@@ -169,10 +169,55 @@ check(callGame('RoyalSteps', ['action' => 'cashout', 'bet_id' => $royal['bet_id'
 $royal = stepsRound(11);
 for ($i = 1; $i <= 10; $i++) $top = callGame('RoyalSteps', ['action' => 'step', 'step' => $i, 'bet_id' => $royal['bet_id']]);
 check($top['status'] === 'cashed_out' && (float) $top['win_amount'] === 10000.0, 'surviving tower automatically pays top prize');
-check(CedarMath::stepsTrap($top['proof']['server_seed'], $top['proof']['client_seed'], $top['proof']['nonce'], 3) === $top['proof']['outcome']['trap_step'], 'Royal Steps proof reproduces outcome');
+check(CedarMath::stepsTrap($top['proof']['server_seed'], $top['proof']['client_seed'], $top['proof']['nonce'], 5) === $top['proof']['outcome']['trap_step'], 'Royal Steps proof reproduces outcome');
 foreach (CedarMath::STEPS as $mult) {
-    $rtp = floor(9700 / $mult) / 10000 * $mult;
-    check($rtp <= 0.97000001 && $rtp >= 0.967, 'Royal Steps stopping-point RTP bounded');
+    $rtp = floor(9500 / $mult) / 10000 * $mult;
+    check($rtp <= 0.95000001 && $rtp >= 0.947, 'Royal Steps stopping-point RTP capped at 95%');
+}
+
+// Additional Cedar Originals: instant games settle atomically with proofs.
+$limbo = bet('CedarLimbo', ['action' => 'play', 'wager' => 100, 'target' => 2]);
+check($limbo['status'] === 'success' && isset($limbo['proof']['outcome']['draw']), 'Limbo settles with reproducible draw');
+$coin = bet('CedarCoinFlip', ['action' => 'flip', 'wager' => 100, 'choice' => 'heads']);
+check($coin['status'] === 'success' && in_array($coin['outcome'], ['heads', 'tails'], true) && isset($coin['proof']), 'Coin Flip settles with proof');
+$keno = bet('CedarKeno', ['action' => 'play', 'wager' => 100, 'picks' => [1, 2, 3, 4, 5]]);
+check($keno['status'] === 'success' && count($keno['drawn']) === 10 && isset($keno['proof']), 'Keno draws ten unique numbers with proof');
+check(count(array_unique($keno['drawn'])) === 10, 'Keno draw has no duplicates');
+$table = CedarMath::kenoTable(5); $kenoRtp = 0;
+for ($hits = 0; $hits <= 5; $hits++) $kenoRtp += (function($n,$k){if($k<0||$k>$n)return 0;$v=1;$k=min($k,$n-$k);for($i=1;$i<=$k;$i++)$v*=($n-$k+$i)/$i;return $v;})(5,$hits)
+    * (function($n,$k){if($k<0||$k>$n)return 0;$v=1;$k=min($k,$n-$k);for($i=1;$i<=$k;$i++)$v*=($n-$k+$i)/$i;return $v;})(35,10-$hits)
+    / (function($n,$k){$v=1;$k=min($k,$n-$k);for($i=1;$i<=$k;$i++)$v*=($n-$k+$i)/$i;return $v;})(40,10) * $table[$hits];
+check($kenoRtp <= 0.95000001 && $kenoRtp >= 0.9499, 'Keno RTP capped at 95%');
+
+// Cedar Cards: committed card draws, recoverable hands and conservative payouts.
+$hiInit = callGame('CedarHiLo', ['action' => 'init']);
+$hiChoice = $hiInit['preview_card']['rank'] === 12 ? 'lower' : 'higher';
+$hi = callGame('CedarHiLo', ['action' => 'bet', 'wager' => 100, 'choice' => $hiChoice,
+    'request_id' => bin2hex(random_bytes(16)), 'server_seed_hash' => $hiInit['server_seed_hash'], 'client_seed' => 'cards']);
+check($hi['status'] === 'success' && isset($hi['proof']['outcome']['up_card'], $hi['proof']['outcome']['draw_card']), 'Hi-Lo settles with both committed cards');
+$rank = $hi['up_card']['rank']; $winning = $hiChoice === 'higher' ? 12 - $rank : $rank;
+check(abs(($winning / 13) * $hi['multiplier'] - 0.95) < 0.0001, 'Hi-Lo chosen direction RTP is 95% or less');
+$blackjack = bet('CedarBlackjack', ['action' => 'bet', 'wager' => 100]);
+check($blackjack['status'] === 'active' && count($blackjack['player_cards']) === 2 && count($blackjack['dealer_cards']) === 1, 'Blackjack conceals dealer hole card');
+$recover = callGame('CedarBlackjack', ['action' => 'init']);
+check($recover['active_game']['bet_id'] === $blackjack['bet_id'], 'Blackjack hand recovers after reload');
+$blackjackEnd = callGame('CedarBlackjack', ['action' => 'stand', 'bet_id' => $blackjack['bet_id']]);
+check(in_array($blackjackEnd['status'], ['won','lost','push'], true) && isset($blackjackEnd['proof']['outcome']['deck']), 'Blackjack settles with reproducible deck proof');
+check((float) $blackjackEnd['multiplier'] <= 1.9, 'Blackjack payout remains below even-money 95% cap');
+
+foreach (['CedarTower' => [3,7], 'CedarGoal' => [3,5], 'CedarTreasure' => [4,8]] as $pathGame => [$choices,$levels]) {
+    $round = bet($pathGame, ['action' => 'bet', 'wager' => 100]);
+    $row = DB::table('cedar_rounds')->where('id', $round['bet_id'])->first(); $pathData = json_decode($row->data, true);
+    $safeChoice = ($pathData['hazards'][0] + 1) % $choices;
+    $safeResult = callGame($pathGame, ['action' => 'choose', 'choice' => $safeChoice, 'bet_id' => $round['bet_id']]);
+    check($safeResult['status'] === 'safe' && $safeResult['level'] === 1, "$pathGame accepts safe choice");
+    $recover = callGame($pathGame, ['action' => 'init']);
+    check($recover['active_game']['level'] === 1 && !isset($recover['active_game']['hazards']), "$pathGame recovers without revealing hazards");
+    $cashout = callGame($pathGame, ['action' => 'cashout', 'bet_id' => $round['bet_id']]);
+    check($cashout['status'] === 'cashed_out' && isset($cashout['proof']['outcome']['hazards']), "$pathGame cashes out with proof");
+    foreach (CedarMath::pathLadder($choices, $levels, 5) as $i => $mult) {
+        check((($choices - 1) / $choices) ** ($i + 1) * $mult <= 0.95000001, "$pathGame level RTP capped");
+    }
 }
 
 echo "PASS: $checks Cedar regression checks (isolated " . (defined('CEDAR_TEST_CONNECTION') ? 'MySQL' : 'SQLite') . ").\n";

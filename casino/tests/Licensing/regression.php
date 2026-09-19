@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Http;
 use VanguardLTE\Services\LicenseService;
 use VanguardLTE\Services\SignedLicenseCertificate as Certificate;
 use VanguardLTE\Http\Middleware\ProtectGameRequests;
+use VanguardLTE\Services\GameRuntimeSession;
 
 $checks = 0;
 function check($condition, string $label): void {
@@ -52,6 +53,7 @@ foreach (['status' => 'suspended', 'product' => 'other', 'version' => 2, 'issued
     'grace_deadline' => $now + 259201, 'expires_at' => $now - 1, 'features' => ['all', 42]] as $field => $value) {
     check($verify(signed(array_replace($claims, [$field => $value])), null, true) === null, 'invalid signed ' . $field . ' rejected');
 }
+check($verify(signed(array_replace($claims, ['runtime_seed' => 'invalid']))) === null, 'invalid signed runtime seed rejected');
 
 $temp = sys_get_temp_dir() . '/promex-license-test-' . bin2hex(random_bytes(8));
 mkdir($temp . '/framework', 0700, true);
@@ -114,8 +116,8 @@ try {
     hub(Http::response($envelope, 200)); LicenseService::getStatus(true);
 
     $session = new Store('test', new ArraySessionHandler(120)); $session->start();
-    $makeRequest = function ($id = null, $host = 'audit.invalid', $authenticated = true) use ($session) {
-        $r = Request::create('https://' . $host . '/game/AuditGame/server', 'POST', [], [], [], [], '{"bet":10}');
+    $makeRequest = function ($id = null, $host = 'audit.invalid', $authenticated = true, $body = '{"bet":10}', $signedBody = null) use ($session) {
+        $r = Request::create('https://' . $host . '/game/AuditGame/server', 'POST', [], [], [], [], $body);
         $r->setLaravelSession($session);
         $r->setUserResolver(fn () => $authenticated ? new Illuminate\Auth\GenericUser(['id' => 42]) : null);
         $route = new Illuminate\Routing\Route('POST', 'game/{game}/server', fn () => null); $route->bind($r);
@@ -123,6 +125,16 @@ try {
         $r->headers->set('X-Promex-Request', $id ?? bin2hex(random_bytes(16)));
         $r->headers->set('X-Promex-Time', (string)time());
         $r->headers->set('X-CSRF-TOKEN', $session->token());
+        if ($authenticated && $host === 'audit.invalid') {
+            $runtime = GameRuntimeSession::issue($r, 'AuditGame');
+            $sequence = '1';
+            $canonical = "POST\n/game/AuditGame/server\n" . $r->headers->get('X-Promex-Request') . "\n"
+                . $r->headers->get('X-Promex-Time') . "\n{$sequence}\n" . ($signedBody ?? $r->getContent());
+            $r->headers->set('X-Promex-Protocol', '2');
+            $r->headers->set('X-Promex-Expires', (string)$runtime['expires']);
+            $r->headers->set('X-Promex-Sequence', $sequence);
+            $r->headers->set('X-Promex-Proof', hash_hmac('sha256', $canonical, base64_decode($runtime['key'], true)));
+        }
         return $r;
     };
     $guard = new ProtectGameRequests();
@@ -130,6 +142,10 @@ try {
     $r = $makeRequest();
     check($guard->handle($r, $next)->getStatusCode() === 200, 'authenticated entitled request reaches engine');
     check($guard->handle($r, $next)->getStatusCode() === 409, 'duplicate blocked before engine');
+    $r = $makeRequest(); $r->headers->remove('X-Promex-Proof');
+    check($guard->handle($r, $next)->getStatusCode() === 403, 'request without compiled runtime proof rejected');
+    $r = $makeRequest(null, 'audit.invalid', true, '{"bet":11}', '{"bet":10}');
+    check($guard->handle($r, $next)->getStatusCode() === 403, 'body tampering after runtime signing rejected');
     $r = $makeRequest(); $r->headers->set('X-Promex-Time', (string)(time() - 121));
     check($guard->handle($r, $next)->getStatusCode() === 400, 'old request rejected');
     $r = $makeRequest(); $r->headers->set('Origin', 'https://evil.invalid');

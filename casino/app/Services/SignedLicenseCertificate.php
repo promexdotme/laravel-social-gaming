@@ -48,6 +48,10 @@ final class SignedLicenseCertificate
                 return null;
             }
         }
+        $runtimeSeed = is_string($c['runtime_seed'] ?? null) ? base64_decode($c['runtime_seed'], true) : false;
+        if ($runtimeSeed === false || strlen($runtimeSeed) !== 32) {
+            return null;
+        }
         if (isset($c['games']) && (!is_array($c['games']) || !array_is_list($c['games']))) {
             return null;
         }

@@ -1,6 +1,5 @@
-const CACHE_NAME = 'casinoduliban-pwa-v1';
+const CACHE_NAME = 'casinoduliban-pwa-v3';
 const ASSETS_TO_CACHE = [
-  '/',
   '/manifest.json',
   '/logo.png',
   '/favicon.ico'
@@ -34,11 +33,20 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
+  if (event.request.method !== 'GET' || event.request.mode === 'navigate') return;
+
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
   
-  event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
-  );
+  event.respondWith((async () => {
+    try {
+      return await fetch(event.request);
+    } catch (_) {
+      const cached = await caches.match(event.request);
+      return cached || new Response('', {
+        status: 503,
+        statusText: 'Service Unavailable'
+      });
+    }
+  })());
 });

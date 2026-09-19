@@ -3,7 +3,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const root = path.resolve(__dirname, '../../..');
 let checked = 0;
-for (const name of ['CedarDice', 'CedarWheel', 'CedarPlinko', 'CedarMines', 'CedarCrash', 'RoyalSteps']) {
+for (const name of ['CedarDice', 'CedarWheel', 'CedarPlinko', 'CedarMines', 'CedarCrash', 'RoyalSteps','CedarLimbo','CedarTower','CedarKeno','CedarCoinFlip','CedarGoal','CedarTreasure','CedarHiLo','CedarBlackjack']) {
   const html = fs.readFileSync(path.join(root, 'output/playwright/cedar', name + '.html'), 'utf8');
   for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
     if (/\bsrc=/.test(match[1]) || /application\/ld\+json/.test(match[1])) continue;
@@ -12,4 +12,5 @@ for (const name of ['CedarDice', 'CedarWheel', 'CedarPlinko', 'CedarMines', 'Ced
   }
 }
 new vm.Script(fs.readFileSync(path.join(root, 'js/cedar-client.js'), 'utf8'), {filename: 'cedar-client.js'});
+new vm.Script(fs.readFileSync(path.join(root, 'games/cedar-new.js'), 'utf8'), {filename: 'cedar-new.js'});
 console.log(`PASS: ${checked} rendered inline scripts and Cedar transport parse successfully.`);

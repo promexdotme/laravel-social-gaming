@@ -17,8 +17,8 @@
 
         <!-- Casino Lobby -->
         @if(settings('enable_casino_slots', '1') == '1')
-        <a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group no-underline {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' : 'text-on-surface-muted hover:text-white hover:bg-white/[0.04]' }}" href="{{ route('frontend.game.list') }}">
-            <span class="material-symbols-outlined text-xl {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') ? 'text-primary' : 'text-on-surface-subtle group-hover:text-white' }} transition-colors" style="font-variation-settings: 'FILL' 1;">casino</span>
+        <a class="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group no-underline {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_cards*') ? 'bg-primary/10 text-primary border border-primary/20 shadow-sm' : 'text-on-surface-muted hover:text-white hover:bg-white/[0.04]' }}" href="{{ route('frontend.game.list') }}">
+            <span class="material-symbols-outlined text-xl {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_cards*') ? 'text-primary' : 'text-on-surface-subtle group-hover:text-white' }} transition-colors" style="font-variation-settings: 'FILL' 1;">casino</span>
             <span>Casino Slots</span>
         </a>
         @endif
@@ -31,6 +31,13 @@
                 <span>CEDAR Games</span>
             </div>
             <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-accent-gold/20 text-accent-gold uppercase tracking-wider">HOT</span>
+        </a>
+        <a class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all group no-underline {{ request()->is('categories/cedar_cards*') ? 'bg-primary/10 text-primary border border-primary/25 shadow-sm' : 'text-on-surface-muted hover:text-white hover:bg-white/[0.04]' }}" href="/categories/cedar_cards">
+            <div class="flex items-center gap-3.5">
+                <span class="material-symbols-outlined text-xl text-primary" style="font-variation-settings: 'FILL' 1;">style</span>
+                <span>CEDAR Cards</span>
+            </div>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/20 text-primary uppercase tracking-wider">NEW</span>
         </a>
         @endif
 
@@ -237,7 +244,7 @@
 
     <!-- Navigation Hub Grid -->
     <div class="grid grid-cols-2 gap-2.5 mb-5">
-        <a href="{{ route('frontend.game.list') }}" class="p-3.5 rounded-xl flex items-center gap-3 no-underline border transition-all {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
+        <a href="{{ route('frontend.game.list') }}" class="p-3.5 rounded-xl flex items-center gap-3 no-underline border transition-all {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_cards*') ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
             <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                 <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">casino</span>
             </div>
@@ -245,6 +252,12 @@
                 <span class="text-xs font-bold">Casino</span>
                 <span class="text-[10px] text-on-surface-subtle">1,000+ Slots</span>
             </div>
+        </a>
+        <a href="/categories/cedar_cards" class="p-3.5 rounded-xl flex items-center gap-3 no-underline border transition-all {{ request()->is('categories/cedar_cards*') ? 'bg-primary/10 border-primary/30 text-primary' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
+            <div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                <span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">style</span>
+            </div>
+            <div class="flex flex-col"><span class="text-xs font-bold">CEDAR Cards</span><span class="text-[10px] text-primary/80">Hi-Lo & Blackjack</span></div>
         </a>
 
         <a href="/categories/cedar_games" class="p-3.5 rounded-xl flex items-center gap-3 no-underline border transition-all {{ request()->is('categories/cedar_games*') ? 'bg-accent-gold/10 border-accent-gold/30 text-accent-gold' : 'bg-white/[0.02] border-white/[0.06] text-white hover:bg-white/[0.05]' }}">
@@ -338,8 +351,8 @@
 <nav class="lg:hidden fixed bottom-3 inset-x-3 sm:inset-x-6 z-40 bg-[#121622]/95 border border-white/[0.12] rounded-2xl shadow-2xl backdrop-blur-2xl px-2 py-1.5 flex items-center justify-around">
     <!-- 1. Casino -->
     @if(settings('enable_casino_slots', '1') == '1')
-    <a href="{{ route('frontend.game.list') }}" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all no-underline {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') ? 'text-primary' : 'text-on-surface-subtle hover:text-white' }}">
-        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') ? '1' : '0' }};">casino</span>
+    <a href="{{ route('frontend.game.list') }}" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-all no-underline {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_cards*') ? 'text-primary' : 'text-on-surface-subtle hover:text-white' }}">
+        <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' {{ Route::is('frontend.game.list*') && !request()->is('categories/cedar_games*') && !request()->is('categories/cedar_cards*') ? '1' : '0' }};">casino</span>
         <span class="text-[10px] font-bold tracking-tight">Casino</span>
     </a>
     @endif

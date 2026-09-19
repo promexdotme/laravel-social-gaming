@@ -145,6 +145,7 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
     Route::get('setpage.json', ['as' => 'frontend.category.setpage', 'uses' => 'GamesController@setpage']);
 
     Route::get('game/{game}', ['as' => 'frontend.game.go', 'uses' => 'GamesController@go'])->middleware('game.homebutton');
+    Route::post('game/{game}/runtime-session', ['as' => 'frontend.game.runtime', 'uses' => 'GamesController@runtimeSession']);
     Route::post('game/{game}/server', ['as' => 'frontend.game.server', 'uses' => 'GamesController@server'])->middleware(\VanguardLTE\Http\Middleware\ProtectGameRequests::class);
 
     Route::get('game/{game}/{prego}', ['as' => 'frontend.game.go.prego', 'uses' => 'GamesController@go'])->middleware('game.homebutton');

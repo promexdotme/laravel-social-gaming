@@ -222,11 +222,13 @@ class LicenseService
                 [
                     'id' => 'cedar_originals',
                     'name' => 'Cedar Provably-Fair Mini Games Pack',
-                    'count' => 5,
+                    'count' => 14,
                     'installed' => true,
                     'size' => '12 MB',
-                    'games' => ['CedarCrash', 'CedarDice', 'CedarMines', 'CedarPlinko', 'CedarWheel'],
-                    'description' => 'Built-in provably fair high-RTP instant mini games.'
+                    'games' => ['CedarCrash', 'CedarDice', 'CedarMines', 'CedarPlinko', 'CedarWheel', 'RoyalSteps',
+                        'CedarLimbo', 'CedarTower', 'CedarKeno', 'CedarCoinFlip', 'CedarGoal', 'CedarTreasure',
+                        'CedarHiLo', 'CedarBlackjack'],
+                    'description' => 'Built-in provably fair Cedar Originals with server-authoritative RTP controls.'
                 ],
                 [
                     'id' => 'custom_slots_v1',

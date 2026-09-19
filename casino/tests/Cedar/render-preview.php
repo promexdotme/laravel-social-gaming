@@ -10,9 +10,7 @@ Illuminate\Support\Facades\Auth::setUser($user);
 $output = dirname(__DIR__, 3) . '/output/playwright/cedar';
 if (!is_dir($output)) mkdir($output, 0777, true);
 foreach (VanguardLTE\Services\CedarGameService::GAMES as $name) {
-    $game = new VanguardLTE\Game();
-    $game->forceFill(['name' => $name, 'title' => $name, 'id' => 0]);
-    $html = view('frontend.games.list.' . $name, ['game' => $game, 'slot' => null, 'is_api' => false])->render();
+    $html = file_get_contents(dirname(__DIR__, 3) . '/games/' . $name . '/index.html');
     file_put_contents($output . '/' . $name . '.html', $html);
     echo $name . ' rendered.' . PHP_EOL;
 }

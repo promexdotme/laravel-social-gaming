@@ -17,12 +17,19 @@ try {
         'email' => bin2hex(random_bytes(8)) . '@example.invalid', 'password' => password_hash(bin2hex(random_bytes(32)), PASSWORD_DEFAULT),
         'balance' => 100000, 'shop_id' => 1, 'status' => 'Active', 'is_demo_agent' => 0, 'parent_id' => 0]);
     Auth::setUser(VanguardLTE\User::findOrFail($id));
-    foreach (['CedarDice' => 'roll', 'CedarWheel' => 'spin', 'CedarPlinko' => 'drop', 'CedarMines' => 'bet', 'CedarCrash' => 'bet', 'RoyalSteps' => 'bet'] as $game => $action) {
+    $games = ['CedarDice' => ['roll', []], 'CedarWheel' => ['spin', []], 'CedarPlinko' => ['drop', []],
+        'CedarMines' => ['bet', []], 'CedarCrash' => ['bet', []], 'RoyalSteps' => ['bet', []],
+        'CedarLimbo' => ['play', ['target' => 2]], 'CedarTower' => ['bet', []],
+        'CedarKeno' => ['play', ['picks' => [1,2,3,4,5]]], 'CedarCoinFlip' => ['flip', ['choice' => 'heads']],
+        'CedarGoal' => ['bet', []], 'CedarTreasure' => ['bet', []],
+        'CedarHiLo' => ['bet', ['choice' => 'higher']], 'CedarBlackjack' => ['bet', []]];
+    foreach ($games as $game => [$action, $extra]) {
         $service = new CedarGameService();
         $init = $service->handle(new Illuminate\Http\Request(['action' => 'init']), $game);
-        $result = $service->handle(new Illuminate\Http\Request(['action' => $action, 'wager' => 10, 'target' => 50,
+        if ($game === 'CedarHiLo') $extra['choice'] = $init['preview_card']['rank'] === 12 ? 'lower' : 'higher';
+        $result = $service->handle(new Illuminate\Http\Request($extra + ['action' => $action, 'wager' => 10, 'target' => 50,
             'server_seed_hash' => $init['server_seed_hash'], 'request_id' => bin2hex(random_bytes(16))]), $game);
-        if ($result['status'] !== 'success') throw new RuntimeException($game . ': ' . ($result['message'] ?? 'failed'));
+        if (!in_array($result['status'], $game === 'CedarBlackjack' ? ['active'] : ['success'], true)) throw new RuntimeException($game . ': ' . ($result['message'] ?? 'failed'));
         echo $game . ': real schema accepted round.' . PHP_EOL;
     }
 } finally {

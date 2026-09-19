@@ -819,6 +819,18 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             return response()
                 ->view('frontend.games.external', ['game' => $game, 'externalUrl' => $url]);
         }
+        public function runtimeSession(\Illuminate\Http\Request $request, $game)
+        {
+            if (!\Auth::check()) {
+                return response()->json(['error' => 'authentication_required'], 401);
+            }
+            try {
+                $runtime = \VanguardLTE\Services\GameRuntimeSession::issue($request, (string)$game);
+            } catch (\RuntimeException $e) {
+                return response()->json(['error' => 'license_required'], 403);
+            }
+            return response()->json($runtime)->header('Cache-Control', 'private, no-store');
+        }
         public function progress()
         {
             if (\Illuminate\Support\Facades\Auth::check() && !auth()->user()->hasRole('user')) {

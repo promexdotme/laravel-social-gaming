@@ -51,6 +51,27 @@
             const point = Math.max(1, Math.min(p.rules.max_multiplier, Math.floor((1 - p.rules.house_edge / 100) / (1 - u) * 100) / 100));
             valid = point === Number(o.crash_multiplier);
         }
+        if (p.game === 'CedarLimbo') valid = await sample(p, 10000) === Number(o.draw);
+        if (p.game === 'CedarCoinFlip') valid = (await sample(p, 2) ? 'tails' : 'heads') === o.outcome;
+        const cardAt = async index => ({rank: await sample(p, 13, index * 2), suit: await sample(p, 4, index * 2 + 1)});
+        if (p.game === 'CedarHiLo') {
+            valid = JSON.stringify(await cardAt(0)) === JSON.stringify(o.up_card)
+                && JSON.stringify(await cardAt(1)) === JSON.stringify(o.draw_card);
+        }
+        if (p.game === 'CedarBlackjack') {
+            const deck = [];
+            for (let i = 0; i < p.parameters.deck_size; i++) deck.push(await cardAt(i));
+            valid = JSON.stringify(deck) === JSON.stringify(o.deck);
+        }
+        if (p.game === 'CedarKeno') {
+            const pool = Array.from({length: 40}, (_, i) => i + 1), drawn = [];
+            for (let i = 0; i < 10; i++) { const j = await sample(p, 40 - i, i); drawn.push(pool[j]); pool.splice(j, 1); }
+            drawn.sort((a,b)=>a-b); valid = JSON.stringify(drawn) === JSON.stringify(o.drawn);
+        }
+        if (['CedarTower','CedarGoal','CedarTreasure'].includes(p.game)) {
+            const hazards=[]; for(let i=0;i<p.parameters.levels;i++) hazards.push(await sample(p,p.parameters.choices,i));
+            valid = JSON.stringify(hazards) === JSON.stringify(o.hazards);
+        }
         if (!valid) throw new Error('Outcome does not match the seed.');
         return 'Seed and outcome verified locally. Payout rules are included in the round record.';
     }
@@ -58,20 +79,20 @@
 
     window.fetch = async function (input, options = {}) {
         const url = typeof input === 'string' ? new URL(input, location.href) : null;
-        const match = url && url.origin === location.origin && url.pathname.match(/^\/game\/(CedarDice|CedarWheel|CedarPlinko|CedarMines|CedarCrash|RoyalSteps)\/server$/);
+        const match = url && url.origin === location.origin && url.pathname.match(/^\/game\/(CedarDice|CedarWheel|CedarPlinko|CedarMines|CedarCrash|RoyalSteps|CedarLimbo|CedarTower|CedarKeno|CedarCoinFlip|CedarGoal|CedarTreasure|CedarHiLo|CedarBlackjack)\/server$/);
         if (!match || typeof options.body !== 'string') return nativeFetch(input, options);
         const game = match[1];
         let body;
         try { body = JSON.parse(options.body); } catch (_) { return nativeFetch(input, options); }
         const state = states.get(game) || {commitment: null, betId: null, pending: null, commitments: {}};
         states.set(game, state);
-        const isBet = ['bet', 'roll', 'spin', 'drop'].includes(body.action);
+        const isBet = ['bet', 'roll', 'spin', 'drop', 'play', 'flip'].includes(body.action);
         if (isBet) {
             if (state.pending) throw new Error('Previous wager unresolved. Reload to recover its result.');
             body.request_id = typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : hex(crypto.getRandomValues(new Uint8Array(16)));
             body.server_seed_hash = state.commitment;
             state.pending = body.request_id;
-        } else if (['cashout', 'step', 'reveal', 'status', 'crash', 'verify'].includes(body.action)) {
+        } else if (['cashout', 'step', 'reveal', 'status', 'crash', 'verify', 'hit', 'stand'].includes(body.action)) {
             body.bet_id = body.bet_id || state.betId;
         }
         const opts = {...options, body: JSON.stringify(body)};
@@ -100,6 +121,9 @@
         if (data.proof || data.active_game?.proof) {
             lastProof = data.proof || data.active_game.proof;
             lastProof.observed_commitment = state.commitments[lastProof.bet_id] || lastProof.observed_commitment;
+            // A proof is only returned for a settled round. Do not let later
+            // actions inherit its ID or make a finished game look active.
+            state.betId = null;
             try { sessionStorage.setItem(`cedar-proof-${game}`, JSON.stringify(lastProof)); } catch (_) {}
         }
         window.dispatchEvent(new CustomEvent('cedar:response', {detail: {game, data}}));
@@ -107,7 +131,7 @@
     };
 
     document.addEventListener('DOMContentLoaded', () => {
-        const game = location.pathname.match(/(?:Cedar(?:Dice|Wheel|Plinko|Mines|Crash)|RoyalSteps)/)?.[0];
+        const game = location.pathname.match(/(?:Cedar(?:Dice|Wheel|Plinko|Mines|Crash|Limbo|Tower|Keno|CoinFlip|Goal|Treasure|HiLo|Blackjack)|RoyalSteps)/)?.[0];
         if (!game) return;
         try { lastProof = JSON.parse(sessionStorage.getItem(`cedar-proof-${game}`)) || lastProof; } catch (_) {}
         const panel = document.createElement('details');

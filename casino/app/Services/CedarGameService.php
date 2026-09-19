@@ -16,7 +16,9 @@ use VanguardLTE\User;
 /** All state transitions share the wallet lock and the database transaction. */
 class CedarGameService
 {
-    public const GAMES = ['CedarDice', 'CedarWheel', 'CedarPlinko', 'CedarMines', 'CedarCrash', 'RoyalSteps'];
+    public const GAMES = ['CedarDice', 'CedarWheel', 'CedarPlinko', 'CedarMines', 'CedarCrash', 'RoyalSteps',
+        'CedarLimbo', 'CedarTower', 'CedarKeno', 'CedarCoinFlip', 'CedarGoal', 'CedarTreasure',
+        'CedarHiLo', 'CedarBlackjack'];
     private User $user;
     private string $game;
     private array $state;
@@ -82,7 +84,9 @@ class CedarGameService
         return [
             'min_bet' => max(0.01, (float) $this->setting("cedar_{$slug}_min_bet", 10)),
             'max_bet' => max(0.01, min(1000000, (float) $this->setting("cedar_{$slug}_max_bet", 50000))),
-            'house_edge' => max(0.1, min(20, (float) $this->setting("cedar_{$slug}_house_edge", $edge))),
+            // Cedar Originals are deliberately capped at 95% RTP. Clamp legacy
+            // 1%/3% settings during reads so an old database cannot raise RTP.
+            'house_edge' => max(5.0, min(20, (float) $this->setting("cedar_{$slug}_house_edge", $edge))),
             'max_multiplier' => max(2, min(10000, (float) $this->setting('cedar_crash_max_multiplier', 1000))),
             'max_payout' => max(1, min(100000000, (float) $this->setting('cedar_max_payout', 1000000))),
         ];
@@ -123,8 +127,10 @@ class CedarGameService
             $active = $this->active();
             $activeData = null;
             if ($active) {
-                $activeData = $this->game === 'CedarCrash'
-                    ? $this->crashAction($active, 'status') : ($this->game === 'RoyalSteps' ? $this->stepsView($active) : $this->minesView($active));
+                $activeData = $this->game === 'CedarCrash' ? $this->crashAction($active, 'status')
+                    : ($this->game === 'RoyalSteps' ? $this->stepsView($active)
+                    : ($this->game === 'CedarBlackjack' ? $this->blackjackView($active)
+                    : (in_array($this->game, ['CedarTower', 'CedarGoal', 'CedarTreasure'], true) ? $this->pathView($active) : $this->minesView($active))));
             }
             $history = DB::table('cedar_rounds')->where('user_id', $this->user->id)->where('game', $this->game)
                 ->where('status', 'settled')->orderByDesc('created_at')->limit(20)->get();
@@ -133,11 +139,15 @@ class CedarGameService
                 $d = json_decode($row->data, true);
                 return $this->game === 'CedarCrash' ? ($d['crash_multiplier'] ?? 1) : ($d['result'] ?? []);
             })->all();
+            $gameData = [];
+            if ($this->game === 'CedarHiLo') {
+                $gameData['preview_card'] = $this->card($this->state['server_seed'], $this->state['client_seed'], $this->state['nonce'], 0);
+            }
             return array_merge(['status' => 'success', 'balance' => $this->balance(), 'currency' => 'CEDARS',
                 'configurations' => CedarMath::wheel(), 'multipliers' => CedarTables::PLINKO,
                 'step_ladder' => CedarMath::STEPS, 'default_rows' => 16, 'default_risk' => 'medium', 'history' => $history, 'last_proof' => $lastProof,
                 'has_active_game' => (bool) $this->state['active'], 'active_game' => $activeData,
-                'math_version' => CedarMath::VERSION], $this->rules, $this->commitment());
+                'math_version' => CedarMath::VERSION], $gameData, $this->rules, $this->commitment());
         }
         if ($action === 'verify') {
             // The supplied round must belong to this account and already be settled.
@@ -145,7 +155,7 @@ class CedarGameService
             if (!$round || $round['status'] !== 'settled') throw new \DomainException('Select a completed round to verify.');
             return ['status' => 'success', 'proof' => $this->proof($round)];
         }
-        if (in_array($action, ['roll', 'spin', 'drop', 'bet'], true)) return $this->bet($request, $action);
+        if (in_array($action, ['roll', 'spin', 'drop', 'bet', 'play', 'flip'], true)) return $this->bet($request, $action);
         $round = $this->findRound($this->roundId($request));
         if (!$round) throw new \DomainException('Round not found. Reload the game to recover your round.');
         if ($round['status'] === 'settled') return $round['data']['result'];
@@ -156,12 +166,20 @@ class CedarGameService
             return $this->minesAction($round, $request, $action);
         }
         if ($this->game === 'RoyalSteps' && in_array($action, ['step', 'cashout', 'status'], true)) return $this->stepsAction($round, $request, $action);
+        if (in_array($this->game, ['CedarTower', 'CedarGoal', 'CedarTreasure'], true) && in_array($action, ['choose', 'cashout', 'status'], true)) {
+            return $this->pathAction($round, $request, $action);
+        }
+        if ($this->game === 'CedarBlackjack' && in_array($action, ['hit', 'stand', 'status'], true)) {
+            return $this->blackjackAction($round, $action);
+        }
         throw new \DomainException('Invalid action.');
     }
 
     private function bet(Request $request, string $action): array
     {
-        $expected = ['CedarDice' => 'roll', 'CedarWheel' => 'spin', 'CedarPlinko' => 'drop', 'CedarMines' => 'bet', 'CedarCrash' => 'bet', 'RoyalSteps' => 'bet'];
+        $expected = ['CedarDice' => 'roll', 'CedarWheel' => 'spin', 'CedarPlinko' => 'drop', 'CedarMines' => 'bet', 'CedarCrash' => 'bet', 'RoyalSteps' => 'bet',
+            'CedarLimbo' => 'play', 'CedarKeno' => 'play', 'CedarCoinFlip' => 'flip', 'CedarTower' => 'bet', 'CedarGoal' => 'bet', 'CedarTreasure' => 'bet',
+            'CedarHiLo' => 'bet', 'CedarBlackjack' => 'bet'];
         if ($expected[$this->game] !== $action) throw new \DomainException('Invalid bet action.');
         $id = $request->input('request_id');
         if (!is_string($id) || !preg_match('/^[a-zA-Z0-9_-]{16,64}$/D', $id)) throw new \DomainException('Missing request ID. Reload the game.');
@@ -191,6 +209,66 @@ class CedarGameService
         $win = 0;
         $edge = $this->rules['house_edge'];
         switch ($this->game) {
+            case 'CedarHiLo':
+                $choice = $request->input('choice', 'higher');
+                if (!in_array($choice, ['higher', 'lower'], true)) throw new \DomainException('Choose higher or lower.');
+                $up = $this->card($d['server_seed'], $client, $d['nonce'], 0);
+                $draw = $this->card($d['server_seed'], $client, $d['nonce'], 1);
+                $winningRanks = $choice === 'higher' ? 12 - $up['rank'] : $up['rank'];
+                if ($winningRanks < 1) throw new \DomainException('That choice cannot win from this card.');
+                $probability = $winningRanks / 13;
+                $multiplier = floor(((1 - $edge / 100) / $probability + 1e-10) * 10000) / 10000;
+                $won = $choice === 'higher' ? $draw['rank'] > $up['rank'] : $draw['rank'] < $up['rank'];
+                $win = $won ? $this->payout($wager, $multiplier) : 0;
+                $result += ['choice' => $choice, 'up_card' => $up, 'draw_card' => $draw, 'is_win' => $won, 'multiplier' => $multiplier];
+                $d['parameters'] = ['choice' => $choice];
+                break;
+            case 'CedarBlackjack':
+                $deck = [];
+                for ($i = 0; $i < 16; $i++) $deck[] = $this->card($d['server_seed'], $client, $d['nonce'], $i);
+                $d += ['deck' => $deck, 'deck_cursor' => 4, 'player_cards' => [$deck[0], $deck[2]], 'dealer_cards' => [$deck[1], $deck[3]]];
+                $d['parameters'] = ['deck_size' => 16, 'dealer_hits' => 16, 'win_multiplier' => 1.9, 'push_multiplier' => 1.0];
+                $result = array_merge($result, $this->blackjackViewData($d, false));
+                break;
+            case 'CedarTower':
+            case 'CedarGoal':
+            case 'CedarTreasure':
+                $choices = $this->game === 'CedarTreasure' ? 4 : 3;
+                $levels = $this->game === 'CedarTreasure' ? 8 : ($this->game === 'CedarGoal' ? 5 : 7);
+                $hazards = [];
+                for ($i = 0; $i < $levels; $i++) $hazards[] = $sample($choices, $i);
+                $ladder = CedarMath::pathLadder($choices, $levels, $edge);
+                $d += ['level' => 0, 'choices' => $choices, 'levels' => $levels, 'hazards' => $hazards, 'ladder' => $ladder];
+                $d['parameters'] = ['choices' => $choices, 'levels' => $levels, 'ladder' => $ladder];
+                $result += ['level' => 0, 'choices' => $choices, 'levels' => $levels, 'multiplier' => 1, 'current_win' => 0];
+                break;
+            case 'CedarLimbo':
+                $target = $this->number($request->input('target', 2), 1.01, 1000);
+                if (abs($target * 100 - round($target * 100)) > 0.00001) throw new \DomainException('Target requires two decimal places.');
+                $draw = $sample(10000); $threshold = (int) floor((100 - $edge) * 100 / $target);
+                $won = $draw < $threshold; $win = $won ? $this->payout($wager, $target) : 0;
+                $result += ['target' => $target, 'draw' => $draw, 'is_win' => $won, 'multiplier' => $won ? $target : 0];
+                $d['parameters'] = ['target' => $target];
+                break;
+            case 'CedarCoinFlip':
+                $choice = $request->input('choice', 'heads');
+                if (!in_array($choice, ['heads', 'tails'], true)) throw new \DomainException('Choose heads or tails.');
+                $outcome = $sample(2) ? 'tails' : 'heads'; $multiplier = floor((2 * (1 - $edge / 100)) * 10000) / 10000;
+                $won = $choice === $outcome; $win = $won ? $this->payout($wager, $multiplier) : 0;
+                $result += ['choice' => $choice, 'outcome' => $outcome, 'is_win' => $won, 'multiplier' => $multiplier];
+                $d['parameters'] = ['choice' => $choice];
+                break;
+            case 'CedarKeno':
+                $picks = $request->input('picks', []);
+                if (!is_array($picks) || count($picks) !== 5) throw new \DomainException('Choose exactly five numbers.');
+                $picks = array_values(array_unique(array_map(fn ($v) => $this->integer($v, 1, 40), $picks)));
+                if (count($picks) !== 5) throw new \DomainException('Choose five different numbers.');
+                $pool = range(1, 40); $drawn = [];
+                for ($i = 0; $i < 10; $i++) { $j = $sample(40 - $i, $i); $drawn[] = $pool[$j]; array_splice($pool, $j, 1); }
+                sort($drawn); sort($picks); $hits = count(array_intersect($picks, $drawn)); $table = CedarMath::kenoTable($edge); $multiplier = $table[$hits];
+                $win = $this->payout($wager, $multiplier); $result += ['picks' => $picks, 'drawn' => $drawn, 'hits' => $hits, 'multiplier' => $multiplier];
+                $d['parameters'] = ['picks' => $picks, 'draws' => 10, 'table' => $table];
+                break;
             case 'RoyalSteps':
                 $d += ['step' => 0, 'trap_step' => CedarMath::stepsTrap($d['server_seed'], $client, $d['nonce'], $edge)];
                 $d['parameters'] = ['ladder' => CedarMath::STEPS];
@@ -267,7 +345,7 @@ class CedarGameService
             'balance' => $this->balance(), 'new_balance' => $this->balance(), 'max_payout' => $d['rules']['max_payout']];
         $round['data']['bet_result'] = $result;
         $this->saveRound($round, true);
-        if (in_array($this->game, ['CedarMines', 'CedarCrash', 'RoyalSteps'])) return $result;
+        if (in_array($this->game, ['CedarMines', 'CedarCrash', 'RoyalSteps', 'CedarTower', 'CedarGoal', 'CedarTreasure', 'CedarBlackjack'])) return $result;
         return $this->settle($round, $win, $result);
     }
 
@@ -355,7 +433,68 @@ class CedarGameService
             'server_seed' => $d['server_seed'], 'server_seed_hash' => hash('sha256', $d['server_seed']),
             'client_seed' => $d['client_seed'], 'nonce' => $d['nonce'], 'parameters' => $d['parameters'],
             'rules' => $d['rules'], 'wager' => (float) $round['wager'], 'win' => (float) $round['win'],
-            'outcome' => array_intersect_key($d['result'] ?? [], array_flip(['roll', 'winning_index', 'slot_index', 'directions', 'multiplier', 'mine_positions', 'crash_multiplier', 'trap_step', 'step']))];
+            'outcome' => array_intersect_key($d['result'] ?? [], array_flip(['roll', 'winning_index', 'slot_index', 'directions', 'multiplier', 'mine_positions', 'crash_multiplier', 'trap_step', 'step',
+                'draw', 'outcome', 'drawn', 'hits', 'hazards', 'level', 'choice', 'up_card', 'draw_card', 'deck', 'player_cards', 'dealer_cards']))];
+    }
+
+    private function card(string $server, string $client, int $nonce, int $index): array
+    {
+        $rank = CedarMath::integer($server, $client, $nonce, 13, $index * 2);
+        $suit = CedarMath::integer($server, $client, $nonce, 4, $index * 2 + 1);
+        return ['rank' => $rank, 'suit' => $suit];
+    }
+
+    private function blackjackTotal(array $cards): int
+    {
+        $total = 0; $aces = 0;
+        foreach ($cards as $card) {
+            $rank = (int) $card['rank'];
+            if ($rank === 12) { $total += 11; $aces++; }
+            else $total += min(10, $rank + 2);
+        }
+        while ($total > 21 && $aces-- > 0) $total -= 10;
+        return $total;
+    }
+
+    private function blackjackViewData(array $d, bool $revealDealer): array
+    {
+        return ['status' => 'active', 'player_cards' => $d['player_cards'],
+            'dealer_cards' => $revealDealer ? $d['dealer_cards'] : [$d['dealer_cards'][0]],
+            'player_total' => $this->blackjackTotal($d['player_cards']),
+            'dealer_total' => $revealDealer ? $this->blackjackTotal($d['dealer_cards']) : null];
+    }
+
+    private function blackjackView(array $round): array
+    {
+        return array_merge(['bet_id' => $round['id'], 'wager' => (float) $round['wager'], 'balance' => $this->balance()],
+            $this->blackjackViewData($round['data'], false));
+    }
+
+    private function blackjackAction(array $round, string $action): array
+    {
+        if ($action === 'status') return $this->blackjackView($round);
+        $d = $round['data'];
+        if ($action === 'hit') {
+            if ($d['deck_cursor'] >= count($d['deck'])) throw new \DomainException('Deck exhausted. Stand to finish the hand.');
+            $round['data']['player_cards'][] = $d['deck'][$d['deck_cursor']];
+            $round['data']['deck_cursor']++;
+            $total = $this->blackjackTotal($round['data']['player_cards']);
+            if ($total < 21) { $this->saveRound($round); return $this->blackjackView($round); }
+            if ($total > 21) return $this->settle($round, 0, array_merge($this->blackjackViewData($round['data'], true),
+                ['status' => 'bust', 'deck' => $d['deck'], 'multiplier' => 0]));
+            $action = 'stand';
+        }
+        $d = $round['data'];
+        while ($this->blackjackTotal($d['dealer_cards']) < 17 && $d['deck_cursor'] < count($d['deck'])) {
+            $d['dealer_cards'][] = $d['deck'][$d['deck_cursor']++];
+        }
+        $round['data'] = $d;
+        $player = $this->blackjackTotal($d['player_cards']); $dealer = $this->blackjackTotal($d['dealer_cards']);
+        $push = $player === $dealer; $won = $player <= 21 && ($dealer > 21 || $player > $dealer);
+        $multiplier = $push ? 1.0 : ($won ? 1.9 : 0.0);
+        $status = $push ? 'push' : ($won ? 'won' : 'lost');
+        return $this->settle($round, $this->payout($round['wager'], $multiplier, $d['rules']),
+            array_merge($this->blackjackViewData($d, true), ['status' => $status, 'deck' => $d['deck'], 'multiplier' => $multiplier]));
     }
     private function stepsView(array $round): array
     {
@@ -422,6 +561,35 @@ class CedarGameService
         }
         $this->saveRound($round);
         return array_merge($view, ['status' => 'diamond', 'tile' => $tile]);
+    }
+    private function pathView(array $round): array
+    {
+        $d = $round['data']; $level = $d['level']; $mult = $level ? $d['ladder'][$level - 1] : 1;
+        return ['status' => 'active', 'bet_id' => $round['id'], 'wager' => (float) $round['wager'], 'level' => $level,
+            'levels' => $d['levels'], 'choices' => $d['choices'], 'ladder' => $d['ladder'], 'multiplier' => $mult,
+            'current_win' => $level ? $this->payout($round['wager'], $mult, $d['rules']) : 0,
+            'balance' => $this->balance(), 'server_seed_hash' => hash('sha256', $d['server_seed'])];
+    }
+    private function pathAction(array $round, Request $request, string $action): array
+    {
+        $d = $round['data'];
+        if ($action === 'cashout') {
+            if (!$d['level']) throw new \DomainException('Complete one safe level before collecting.');
+            $view = $this->pathView($round);
+            return $this->settle($round, $view['current_win'], array_merge($view, ['status' => 'cashed_out', 'hazards' => $d['hazards']]));
+        }
+        if ($action === 'status') return $this->pathView($round);
+        $choice = $this->integer($request->input('choice'), 0, $d['choices'] - 1);
+        $level = $d['level'];
+        if ($choice === $d['hazards'][$level]) {
+            return $this->settle($round, 0, ['status' => 'bust', 'choice' => $choice, 'level' => $level + 1, 'hazards' => $d['hazards'], 'multiplier' => 0]);
+        }
+        $round['data']['level'] = ++$level; $view = $this->pathView($round);
+        if ($level === $d['levels']) {
+            return $this->settle($round, $view['current_win'], array_merge($view, ['status' => 'cleared', 'choice' => $choice, 'hazards' => $d['hazards']]));
+        }
+        $this->saveRound($round);
+        return array_merge($view, ['status' => 'safe', 'choice' => $choice]);
     }
     private function crashAction(array $round, string $action): array
     {

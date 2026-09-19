@@ -21,6 +21,15 @@ Options -Indexes
     RewriteRule ^casino/.*\.php(?:/|$) - [F,L,NC]
     RewriteRule ^(?:casino/)?(?:artisan|composer\.(?:json|lock)|package(?:-lock)?\.json|phpunit\.xml|server\.php)(?:/|$) - [F,L,NC]
 
+    # Existing games request the historical filename. Serve the compiled bridge
+    # without shipping the private mock-websocket source as a public file.
+    RewriteRule ^js/mock-websocket\.js$ js/ws-bridge.js [L,NC]
+
+    # Pragmatic loaders derive this path from their game URL. Keep their shared
+    # operator-logo metadata reachable when the game files are present locally.
+    RewriteCond %{DOCUMENT_ROOT}/games/$1/gs2c/common/games-html5/operator_logos/$2 -f
+    RewriteRule ^games/([^/]+)/operator_logos/(.*)$ games/$1/gs2c/common/games-html5/operator_logos/$2 [L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -30,9 +39,14 @@ Options -Indexes
     RewriteRule ^install$ install.php [L]
     RewriteRule ^simple-install$ SimpleInstall.php [L]
 
-    # Proxy all /games/* requests to Hosted Games CDN (Apache mod_proxy reverse proxy)
+    # Prefer an existing local game file for development/source builds. Customer
+    # prepacks omit the games library and therefore continue to use the CDN.
+    # Proxy all remaining /games/* requests to Hosted Games CDN.
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/[^/]+/(desktop|mobile)/(.*)$ https://clients.377.live/games/$1/gs2c/$2/$3 [P,L]
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/(desktop|mobile)/(.*)$ https://clients.377.live/games/$1/gs2c/$2/$3 [P,L]
+    RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^games/(.*)$ https://clients.377.live/games/$1 [P,L]
 
 
@@ -52,4 +66,7 @@ Options -Indexes
 
 <IfModule mod_headers.c>
     Header set Access-Control-Allow-Origin "*"
+    <FilesMatch "^(?:game-session\.js|promex-html-game\.js|cedar-client\.js|ws-bridge\.(?:js|wasm))$">
+        Header set Cache-Control "no-store, max-age=0"
+    </FilesMatch>
 </IfModule>

@@ -5,6 +5,7 @@ namespace VanguardLTE\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use VanguardLTE\Services\GameRuntimeSession;
 
 class InjectGameHomeButton
 {
@@ -19,8 +20,14 @@ class InjectGameHomeButton
 
         $content = $response->getContent();
         // Inject before any game scripts, including direct HTTP clients and legacy XHR engines.
-        $sessionScript = '<script src="/js/game-session.js?v=1" data-csrf="'
-            . htmlspecialchars($request->session()->token(), ENT_QUOTES, 'UTF-8') . '"></script>';
+        $game = (string)$request->route('game');
+        $runtime = GameRuntimeSession::issue($request, $game);
+        $sessionScript = '<script src="/js/game-session.js?v=3" data-csrf="'
+            . htmlspecialchars($request->session()->token(), ENT_QUOTES, 'UTF-8')
+            . '" data-runtime-key="' . htmlspecialchars($runtime['key'], ENT_QUOTES, 'UTF-8')
+            . '" data-runtime-expires="' . $runtime['expires']
+            . '" data-runtime-game="' . htmlspecialchars($game, ENT_QUOTES, 'UTF-8')
+            . '"></script>';
         if (strpos($content, '/js/game-session.js') === false) {
             $content = preg_replace('/<head\b[^>]*>/i', '$0' . $sessionScript, $content, 1);
         }

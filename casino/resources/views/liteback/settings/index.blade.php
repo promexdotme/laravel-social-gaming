@@ -257,7 +257,7 @@
                                     <div class="form-group col-md-3 mb-2">
                                         <label class="small font-weight-bold">House Edge %</label>
                                         <div class="input-group">
-                                            <input type="number" step="0.1" min="0.5" max="20" name="cedar_crash_house_edge" class="form-control" value="{{ settings('cedar_crash_house_edge', '3.0') }}">
+                                            <input type="number" step="0.1" min="5" max="20" name="cedar_crash_house_edge" class="form-control" value="{{ max(5, (float) settings('cedar_crash_house_edge', '5.0')) }}">
                                             <div class="input-group-append"><span class="input-group-text">%</span></div>
                                         </div>
                                     </div>
@@ -301,7 +301,7 @@
                                     <div class="form-group col-md-4 mb-2">
                                         <label class="small font-weight-bold">House Edge %</label>
                                         <div class="input-group">
-                                            <input type="number" step="0.1" min="0.5" max="20" name="cedar_mines_house_edge" class="form-control" value="{{ settings('cedar_mines_house_edge', '3.0') }}">
+                                            <input type="number" step="0.1" min="5" max="20" name="cedar_mines_house_edge" class="form-control" value="{{ max(5, (float) settings('cedar_mines_house_edge', '5.0')) }}">
                                             <div class="input-group-append"><span class="input-group-text">%</span></div>
                                         </div>
                                     </div>
@@ -323,7 +323,7 @@
                                     <div class="form-group col-md-4 mb-2">
                                         <label class="small font-weight-bold">House Edge %</label>
                                         <div class="input-group">
-                                            <input type="number" step="0.1" min="0.1" max="10" name="cedar_dice_house_edge" class="form-control" value="{{ settings('cedar_dice_house_edge', '1.0') }}">
+                                            <input type="number" step="0.1" min="5" max="20" name="cedar_dice_house_edge" class="form-control" value="{{ max(5, (float) settings('cedar_dice_house_edge', '5.0')) }}">
                                             <div class="input-group-append"><span class="input-group-text">%</span></div>
                                         </div>
                                     </div>

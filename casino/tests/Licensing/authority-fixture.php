@@ -7,6 +7,7 @@ function issueTestCertificate(array $license, string $domain, string $privatePem
         'version' => 1, 'product' => 'promex-gaming-suite', 'status' => 'active',
         'license_key_hash' => hash('sha256', $license['license_key']), 'domain' => $domain,
         'plan' => $license['plan'], 'features' => json_decode($license['features'], true),
+        'runtime_seed' => base64_encode(random_bytes(32)),
         'issued_at' => $now, 'refresh_after' => min($now + 3600, $expiry),
         'expires_at' => $expiry, 'grace_deadline' => min($now + 259200, $expiry),
     ];
