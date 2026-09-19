@@ -24,6 +24,10 @@ function verifyPrepack(string $archive, string $root): void
             if (preg_match('~(^|/)(\.env(?:\.[^/]*)?|\.git)(/|$)|^localscripts/|^tools/|^casino/tests/|\.(?:zip|bak|old|orig|save|swp)$|^js/mock-websocket\.js$|^casino/bootstrap/cache/.*\.php$|^casino/storage/framework/license\.cert(?:\.|$)|^casino/storage/framework/(cache|sessions|views)/(?!.*\.gitkeep$)|^casino/storage/app/updates/~', $name)) {
                 throw new RuntimeException('Forbidden development/runtime file in prepack: ' . $name);
             }
+            if (preg_match('~^casino/vendor/.+/(?:tests?|test_files|docs?)/|^casino/vendor/.+Test\.php$~i', $name)
+                || preg_match('~\.(?:key|p12|pfx|sqlite|db)$~i', $name)) {
+                throw new RuntimeException('Forbidden vendor fixture or sensitive file type in prepack: ' . $name);
+            }
         }
     } finally { $zip->close(); }
     echo "PASS: prepack required-file hashes and runtime/source exclusions\n";
