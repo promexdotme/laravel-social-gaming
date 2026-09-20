@@ -8,10 +8,12 @@ function verifyPrepack(string $archive, string $root): void
     try {
         $required = ['.htaccess', 'install.php', 'casino/app/Support/InstallerCleanup.php', 'js/game-session.js', 'js/promex-html-game.js', 'js/ws-bridge.js', 'js/ws-bridge.wasm',
             'casino/app/Services/LicenseService.php', 'casino/app/Services/SignedLicenseCertificate.php',
-            'casino/app/Services/GameRuntimeSession.php',
+            'casino/app/Services/GameRuntimeSession.php', 'casino/app/Services/GameLicenseBlockedResponse.php',
             'casino/app/Http/Middleware/ProtectGameRequests.php', 'casino/app/Http/Middleware/VerifyCsrfToken.php',
             'casino/app/Http/Middleware/InjectGameHomeButton.php', 'casino/config/licensing.php',
-            'casino/routes/web.php', 'casino/app/Http/Controllers/Web/Frontend/GamesController.php'];
+            'casino/routes/web.php', 'casino/app/Http/Controllers/Web/Frontend/GamesController.php',
+            'casino/app/Http/Controllers/Web/Frontend/ProviderCompatibilityController.php',
+            'casino/resources/views/frontend/license-blocked.blade.php', 'js/game-license-blocked.js'];
         foreach ($required as $name) {
             $bytes = $zip->getFromName($name);
             if ($bytes === false || !hash_equals(hash_file('sha256', $root . '/' . $name), hash('sha256', $bytes))) {

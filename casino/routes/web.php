@@ -144,9 +144,32 @@ Route::namespace ('Frontend')->middleware(['siteisclosed', 'checker'])->group(fu
 
     Route::get('setpage.json', ['as' => 'frontend.category.setpage', 'uses' => 'GamesController@setpage']);
 
+    // Legacy provider launchers request this once from the root domain before
+    // constructing a WebSocket. Generate a same-origin, licensed bridge target
+    // instead of exposing the retired external socket host/ports.
+    Route::get('socket_config.json', [
+        'as' => 'frontend.provider.socket_config',
+        'uses' => 'ProviderCompatibilityController@socketConfig',
+    ]);
+
     Route::get('game/{game}', ['as' => 'frontend.game.go', 'uses' => 'GamesController@go'])->middleware('game.homebutton');
     Route::post('game/{game}/runtime-session', ['as' => 'frontend.game.runtime', 'uses' => 'GamesController@runtimeSession']);
     Route::post('game/{game}/server', ['as' => 'frontend.game.server', 'uses' => 'GamesController@server'])->middleware(\VanguardLTE\Http\Middleware\ProtectGameRequests::class);
+
+    // Optional provider compatibility. Existing physical files bypass Laravel
+    // in the root .htaccess, so these routes answer only genuinely missing URLs.
+    Route::get('operator_logos/logo_info.js', [
+        'as' => 'frontend.provider.operator_logo_info',
+        'uses' => 'ProviderCompatibilityController@operatorLogoInfo',
+    ]);
+    Route::get('gs2c/announcements/unread', [
+        'as' => 'frontend.provider.unread_announcements',
+        'uses' => 'ProviderCompatibilityController@unreadAnnouncements',
+    ]);
+    Route::get('gs2c/promo/frb/available', [
+        'as' => 'frontend.provider.available_free_rounds',
+        'uses' => 'ProviderCompatibilityController@availableFreeRounds',
+    ]);
 
     Route::get('game/{game}/{prego}', ['as' => 'frontend.game.go.prego', 'uses' => 'GamesController@go'])->middleware('game.homebutton');
 

@@ -768,10 +768,7 @@ namespace VanguardLTE\Http\Controllers\Web\Frontend {
             }
 
             if (!\VanguardLTE\Services\LicenseService::canPlayGame((string)$game)) {
-                if (\Auth::user()->hasRole('admin')) {
-                    return redirect()->route('liteback.store.index')->with('error', 'Active Promex license required to launch casino games.');
-                }
-                abort(403, 'Gaming service is temporarily suspended. Please contact platform operator.');
+                return \VanguardLTE\Services\GameLicenseBlockedResponse::make($request, (string)$game);
             }
 
             // Demo URLs must never adopt or reset another user's account.

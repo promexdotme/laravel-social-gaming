@@ -41,6 +41,14 @@ Options -Indexes
 
     # Prefer an existing local game file for development/source builds. Customer
     # prepacks omit the games library and therefore continue to use the CDN.
+    # gs2c loaders sometimes derive a nested provider path even though the
+    # package stores the same bootstrap under gs2c/{desktop|mobile}. Remap only
+    # when that exact packaged file exists; otherwise preserve the CDN fallback.
+    RewriteCond %{DOCUMENT_ROOT}/games/$1/gs2c/$2/$3 -f
+    RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/[^/]+/(desktop|mobile)/(.*)$ games/$1/gs2c/$2/$3 [L]
+    RewriteCond %{DOCUMENT_ROOT}/games/$1/gs2c/$2/$3 -f
+    RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/(desktop|mobile)/(.*)$ games/$1/gs2c/$2/$3 [L]
+
     # Proxy all remaining /games/* requests to Hosted Games CDN.
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^games/([^/]+)/gs2c/common/games-html5/games/[^/]+/[^/]+/(desktop|mobile)/(.*)$ https://clients.377.live/games/$1/gs2c/$2/$3 [P,L]
